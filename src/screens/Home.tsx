@@ -182,14 +182,14 @@ export function Home() {
             All modes →
           </a>
         </div>
-        <div className="no-scrollbar -mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6">
+        <div className="no-scrollbar -mx-4 mt-3 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-4 pt-3 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-56px),transparent)] sm:-mx-6 sm:scroll-px-6 sm:px-6">
           {REGIONS.map((r, i) => {
             const bestStars = Math.max(0, ...Object.entries(p.best).filter(([k]) => k.startsWith(r.id + ':')).map(([, v]) => v.stars));
             return (
               <motion.a
                 key={r.id}
                 href={`#/play/${r.id}`}
-                className="card group w-[260px] shrink-0 snap-start p-5 transition-[background,transform] hover:-translate-y-1 hover:bg-surface-2"
+                className="card group w-[260px] shrink-0 snap-start p-5 transition-[background,transform] duration-300 hover:-translate-y-1 hover:bg-surface-2"
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ ...spring, delay: i * 0.04 }}

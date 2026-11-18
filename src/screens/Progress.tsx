@@ -73,7 +73,7 @@ export function ProgressScreen() {
               const s = p.mastery[e.number]?.s ?? 0;
               return (
                 <button onClick={() => openDetail(e.number)} className="relative block h-full w-full transition-transform hover:z-10 hover:scale-110" aria-label={`${e.name}: mastery ${s} of 5`}>
-                  <ElementTile element={e} size={rect.size} showName={false} color={s ? undefined : 'var(--ink-3)'} style={{ opacity: s ? 0.35 + s * 0.13 : 0.3 }} />
+                  <ElementTile element={e} size={rect.size} showName={false} color={s ? undefined : 'var(--ink-3)'} style={{ opacity: s ? 0.45 + s * 0.11 : 0.42 }} />
                   {s >= 4 && <span className="absolute right-[8%] top-[8%] h-1.5 w-1.5 rounded-full bg-accent-3 shadow-[0_0_8px_var(--accent-3)]" />}
                 </button>
               );
