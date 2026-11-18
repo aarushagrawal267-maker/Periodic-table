@@ -1,12 +1,14 @@
+import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 4180;
 const BASE_URL = `http://localhost:${PORT}/`;
 
 // The pinned @playwright/test may expect a different Chromium revision than the
-// one installed on the machine. Point at the pre-installed binary when present;
-// set PW_CHROMIUM_PATH="" to fall back to Playwright's own managed browser.
-const executablePath = process.env.PW_CHROMIUM_PATH ?? '/opt/pw-browsers/chromium';
+// one pre-installed on dev containers. Use that binary when it exists; elsewhere
+// (e.g. CI after `npx playwright install chromium`) use Playwright's own browser.
+const PREINSTALLED = '/opt/pw-browsers/chromium';
+const executablePath = process.env.PW_CHROMIUM_PATH || (existsSync(PREINSTALLED) ? PREINSTALLED : undefined);
 const launchOptions = executablePath ? { executablePath } : {};
 
 export default defineConfig({

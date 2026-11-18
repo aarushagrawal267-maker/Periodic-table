@@ -231,7 +231,7 @@ export function Lesson({ chapterId }: { chapterId: string }) {
               </motion.div>
             </AnimatePresence>
           </div>
-          <p className="mt-6 text-center text-xs text-ink-3">{card.kind === 'mnemonic' ? 'Say it out loud three times. Seriously, it works.' : 'Tap the card to flip it · swipe right if you knew it, left to see it again'}</p>
+          <p className="mt-6 text-balance text-center text-xs text-ink-3">{card.kind === 'mnemonic' ? 'Say it out loud three times. Seriously, it works.' : 'Tap to flip · swipe right if you knew it, left to see it again'}</p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <button onClick={() => answer(false)} className="btn-ghost flex h-14 items-center justify-center gap-2 rounded-2xl font-medium" disabled={card.kind === 'mnemonic'} style={card.kind === 'mnemonic' ? { opacity: 0.4 } : undefined}>
               <RotateCcw size={17} /> Still learning
@@ -294,7 +294,7 @@ function FlipCard({ e, flipped, onFlip }: { e: Element; flipped: boolean; onFlip
           <p className="relative mt-1.5 text-sm font-medium text-ink-2">
             Group {e.group ?? '—'} · Period {e.period}
           </p>
-          <p className="relative mt-auto flex items-center gap-1.5 pt-6 text-xs font-medium text-ink-3">
+          <p className="absolute inset-x-0 bottom-5 flex items-center justify-center gap-1.5 text-xs font-medium text-ink-3">
             <RotateCcw size={12} className="-scale-x-100" /> Tap to flip
           </p>
         </div>
@@ -337,7 +337,7 @@ function FlipCard({ e, flipped, onFlip }: { e: Element; flipped: boolean; onFlip
 
 function MnemonicCard({ chapter }: { chapter: Chapter }) {
   const words = chapter.mnemonic!;
-  // Long rhymes get tighter rows so all of them fit without scrolling.
+  // Long rhymes get tighter rows; the card also grows rather than clipping.
   const dense = words.length > 7;
   return (
     <div className={`solid relative flex min-h-[clamp(430px,calc(100dvh-300px),520px)] flex-col overflow-hidden rounded-[28px] border border-line p-5 sm:p-6`} style={{ boxShadow: 'var(--shadow-lg)' }}>
@@ -349,15 +349,15 @@ function MnemonicCard({ chapter }: { chapter: Chapter }) {
         Memory trick
       </div>
       <p className="relative mt-2 text-sm text-ink-2">The first letters spell the elements in order.</p>
-      <ol className={`relative mt-4 flex flex-1 flex-col justify-center ${dense ? 'gap-1' : 'gap-2'}`}>
+      <ol className={`relative mt-4 flex flex-1 flex-col justify-center ${dense ? 'gap-1.5' : 'gap-2.5'}`}>
         {words.map(([word, symbol], i) => {
           const e = byNumber(chapter.numbers[i]);
           return (
             <motion.li key={word + i} className="flex items-center gap-3" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.07 }}>
-              <span className={`cat-chip grid shrink-0 place-items-center rounded-lg font-bold ${dense ? 'h-7 w-10 text-[13px]' : 'h-8 w-11 text-sm'}`} style={{ '--c': catVar(e.category) } as CSSProperties}>
+              <span className={`cat-chip grid shrink-0 place-items-center rounded-lg font-bold h-8 w-11 text-sm`} style={{ '--c': catVar(e.category) } as CSSProperties}>
                 {symbol}
               </span>
-              <span className={`font-display font-semibold leading-tight ${dense ? 'text-lg' : 'text-xl'}`}>
+              <span className="font-display text-xl font-semibold leading-tight">
                 <Highlight word={word} symbol={symbol} />
               </span>
             </motion.li>

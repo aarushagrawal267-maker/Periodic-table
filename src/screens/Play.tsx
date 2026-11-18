@@ -20,6 +20,7 @@ const LIFE_ART: [string, string][] = [
   ['🦴', 'Ca'],
 ];
 const QUIZ_ART = ['Au', 'Ne', 'Fe'];
+const MATCH_ART = ['Fe', '?', 'Iron', '?'];
 
 export function PlayHub() {
   return (
@@ -34,25 +35,44 @@ export function PlayHub() {
       </div>
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {REGIONS.map((r, i) => (
-          <RegionCard key={r.id} region={r} index={i} />
+          <RegionCard key={r.id} region={r} index={i} wide={i === REGIONS.length - 1 && REGIONS.length % 3 === 1} />
         ))}
+      </div>
+
+      <div className="mt-16 flex items-end justify-between gap-4">
+        <div>
+          <h2 className="font-display text-2xl font-semibold sm:text-3xl">More ways to play</h2>
+          <p className="mt-1 text-ink-2">Quick rounds for when you have five minutes.</p>
+        </div>
+      </div>
+      <div className="mt-6 grid gap-4 md:grid-cols-3">
         <motion.a
           href="#/match"
-          className="card group flex flex-col justify-between overflow-hidden p-6 transition-colors hover:bg-surface-2"
+          className="card card-hover group relative flex flex-col overflow-hidden p-6"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: REGIONS.length * 0.04 }}
         >
-          <div className="flex gap-2" aria-hidden>
-            <span className="font-display grid h-12 w-10 place-items-center rounded-xl border border-line text-lg font-bold" style={{ background: 'color-mix(in oklab, var(--accent-2) 14%, transparent)' }}>
-              Fe
-            </span>
-            <span className="grid h-12 w-10 place-items-center rounded-xl border border-line text-lg font-bold text-ink-3">?</span>
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl transition-opacity group-hover:opacity-40" style={{ background: 'var(--accent-2)' }} />
+          <div className="relative grid aspect-[207/107] w-full grid-cols-4 items-center gap-2.5" aria-hidden>
+            {MATCH_ART.map((face, i) => {
+              const up = face !== '?';
+              const e = bySymbol.get('fe')!;
+              return (
+                <div
+                  key={i}
+                  className={`font-display grid aspect-[4/5] place-items-center rounded-2xl border text-center font-bold transition-transform duration-500 ${up ? 'tile' : 'border-line text-ink-3'} ${i % 2 ? 'group-hover:-translate-y-1' : 'group-hover:translate-y-1'}`}
+                  style={up ? ({ '--c': catVar(e.category) } as CSSProperties) : { background: 'repeating-linear-gradient(135deg, var(--surface-2) 0 6px, var(--surface) 6px 12px)' }}
+                >
+                  <span className={face.length > 2 ? 'text-xs sm:text-sm' : 'text-2xl'}>{face}</span>
+                </div>
+              );
+            })}
           </div>
-          <div className="mt-6">
+          <div className="relative mt-5 flex flex-1 flex-col">
             <h2 className="font-display text-xl font-semibold">Match Pairs</h2>
             <p className="mt-1 text-sm text-ink-2">A relaxed memory game: flip cards and pair each symbol with its name.</p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-accent-2">
+            <span className="mt-auto inline-flex items-center gap-1 border-t border-line pt-4 text-sm font-semibold text-accent-2">
               Play <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
             </span>
           </div>
@@ -120,7 +140,7 @@ export function PlayHub() {
   );
 }
 
-function RegionCard({ region: r, index }: { region: Region; index: number }) {
+function RegionCard({ region: r, index, wide = false }: { region: Region; index: number; wide?: boolean }) {
   const difficulty = useSettings((s) => s.difficulty);
   const best = useProgress((s) => s.best);
   const mastery = useProgress((s) => s.mastery);
@@ -132,17 +152,19 @@ function RegionCard({ region: r, index }: { region: Region; index: number }) {
   return (
     <motion.a
       href={`#/play/${r.id}`}
-      className="card card-hover group relative flex flex-col overflow-hidden p-6"
+      className={`card card-hover group relative flex flex-col overflow-hidden p-6 ${wide ? 'sm:col-span-2 lg:col-span-3 lg:flex-row lg:items-center lg:gap-10 lg:p-8' : ''}`}
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04 }}
     >
-      <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl transition-opacity group-hover:opacity-40" style={{ background: r.accent }} />
-      <MiniTable highlight={set} className="relative w-full" label={`${r.name} highlighted on the periodic table`} />
-      <div className="relative mt-5 flex flex-1 items-start justify-between gap-3">
+      <div className={`pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl transition-opacity group-hover:opacity-40 ${wide ? 'lg:h-80 lg:w-80' : ''}`} style={{ background: r.accent }} />
+      <MiniTable highlight={set} className={`relative w-full ${wide ? 'lg:w-[44%] lg:shrink-0' : ''}`} label={`${r.name} highlighted on the periodic table`} />
+      <div className={wide ? 'relative flex flex-1 flex-col lg:self-stretch lg:justify-center' : 'contents'}>
+      {wide && <p className="relative mt-5 text-xs font-semibold uppercase tracking-wider text-accent-2 lg:mt-0">The final boss</p>}
+      <div className={`relative flex flex-1 items-start justify-between gap-3 ${wide ? 'mt-2 lg:flex-none' : 'mt-5'}`}>
         <div>
-          <h2 className="font-display text-xl font-semibold">{r.name}</h2>
-          <p className="mt-1 text-sm text-ink-2">{r.tagline}</p>
+          <h2 className={`font-display font-semibold ${wide ? 'text-xl lg:text-3xl' : 'text-xl'}`}>{r.name}</h2>
+          <p className={`mt-1 text-ink-2 ${wide ? 'text-sm lg:text-base' : 'text-sm'}`}>{r.tagline}</p>
         </div>
         <span className="shrink-0 rounded-full border border-line px-2.5 py-1 text-xs font-medium tabular-nums text-ink-2">{r.numbers.length}</span>
       </div>
@@ -156,6 +178,7 @@ function RegionCard({ region: r, index }: { region: Region; index: number }) {
         <span className="text-xs text-ink-3">
           {known}/{r.numbers.length} mastered{cleared > 0 && ` · ${cleared}/3 cleared`}
         </span>
+      </div>
       </div>
     </motion.a>
   );
