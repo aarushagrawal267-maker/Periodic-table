@@ -120,7 +120,10 @@ export function Explore({ symbol }: { symbol?: string }) {
         ))}
       </div>
 
-      <div className="relative mt-6">
+      <p className="mt-5 flex items-center gap-1.5 text-xs font-medium text-ink-3 md:hidden" aria-hidden>
+        Swipe sideways to see the whole table <span className="animate-pulse">→</span>
+      </p>
+      <div className="relative mt-2 md:mt-6">
         <PeriodicGrid
           minCell={38}
           maxCell={74}

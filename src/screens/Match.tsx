@@ -142,7 +142,7 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
               <motion.button
                 key={card.id}
                 onClick={() => flip(card.id)}
-                className="relative aspect-[4/5] w-full"
+                className="group relative aspect-[4/5] w-full rounded-2xl"
                 style={{ perspective: 800 } as CSSProperties}
                 initial={{ opacity: 0, y: 20, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -151,8 +151,10 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
                 disabled={isFound}
               >
                 <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{ rotateY: faceUp ? 180 : 0 }} transition={{ type: 'spring', damping: 18, stiffness: 220 }}>
-                  <div className="absolute inset-0 grid place-items-center rounded-2xl border border-line [backface-visibility:hidden]" style={{ background: 'linear-gradient(145deg, color-mix(in oklab, var(--accent) 22%, var(--surface-solid)), color-mix(in oklab, var(--accent-2) 14%, var(--surface-solid)))' }}>
-                    <span className="font-display text-grad text-2xl font-bold opacity-80">?</span>
+                  <div className="absolute inset-0 grid place-items-center overflow-hidden rounded-2xl border border-line shadow-[inset_0_1px_0_rgb(255_255_255/0.08)] transition-[border-color,filter] duration-200 [backface-visibility:hidden] group-hover:border-line-strong group-hover:brightness-110" style={{ background: 'linear-gradient(145deg, color-mix(in oklab, var(--accent) 22%, var(--surface-solid)), color-mix(in oklab, var(--accent-2) 14%, var(--surface-solid)))' }}>
+                    <div aria-hidden className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(color-mix(in oklab, var(--ink) 22%, transparent) 1px, transparent 1.5px)', backgroundSize: '12px 12px', maskImage: 'radial-gradient(circle at 50% 50%, transparent 28%, black 75%)' }} />
+                    <div aria-hidden className="absolute inset-2 rounded-xl border border-dashed border-line-strong" />
+                    <span className="font-display text-grad relative grid h-11 w-11 place-items-center rounded-full border border-line-strong bg-bg/40 text-xl font-bold transition-transform duration-300 group-hover:scale-110">?</span>
                   </div>
                   <div
                     className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border p-2 text-center [backface-visibility:hidden] [transform:rotateY(180deg)]"
@@ -167,7 +169,7 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
                         <ElementTile element={e} size={72} showName={false} showNumber={difficulty === 'learner'} color={isFound || difficulty === 'learner' ? undefined : 'var(--accent-2)'} />
                       </div>
                     ) : (
-                      <span className="font-display text-base font-semibold leading-tight sm:text-lg" style={{ color: isFound ? c : undefined }}>
+                      <span className={`font-display text-base font-semibold leading-tight sm:text-lg ${isFound ? 'cat-ink' : ''}`} style={{ '--c': c } as CSSProperties}>
                         {e.name}
                       </span>
                     )}

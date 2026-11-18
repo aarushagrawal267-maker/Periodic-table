@@ -103,7 +103,7 @@ function ChapterNode({ chapter: c, index, stars, current }: { chapter: Chapter; 
           })}
           {c.numbers.length > 10 && <span className="px-1 text-[11px] text-ink-3">+{c.numbers.length - 10}</span>}
         </div>
-        <div className="mt-4 flex items-center gap-3 border-t border-line pt-3 text-xs text-ink-3">
+        <div className="mt-4 flex items-center gap-3 whitespace-nowrap border-t border-line pt-3 text-xs text-ink-3">
           <span className="flex items-center gap-1">
             <Clock size={12} /> ~{Math.max(2, Math.round(c.numbers.length / 4))} min
           </span>

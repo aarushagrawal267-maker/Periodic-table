@@ -216,13 +216,14 @@ export function Home() {
 
       {/* Real life + quiz */}
       <section className="mx-auto mt-14 grid max-w-7xl gap-4 px-4 sm:px-6 lg:grid-cols-2">
-        <motion.a href="#/life" className="card group relative overflow-hidden p-6 transition-colors hover:bg-surface-2 sm:p-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
+        <motion.a href="#/life" className="card card-hover group relative flex flex-col overflow-hidden p-6 sm:p-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
           <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full opacity-25 blur-3xl" style={{ background: 'var(--accent-3)' }} />
-          <div className="relative flex gap-2 text-4xl" aria-hidden>
-            <span>📱</span>
-            <span>🎆</span>
-            <span>🍌</span>
-            <span>🦴</span>
+          <div className="relative flex gap-2" aria-hidden>
+            {['📱', '🎆', '🍌', '🦴'].map((emoji, i) => (
+              <span key={emoji} className="grid h-14 w-14 place-items-center rounded-2xl border border-line text-3xl transition-transform duration-500 group-hover:-translate-y-1" style={{ background: 'radial-gradient(circle at 30% 20%, var(--surface-2), var(--surface))', transitionDelay: `${i * 50}ms` }}>
+                {emoji}
+              </span>
+            ))}
           </div>
           <h2 className="font-display relative mt-6 text-3xl font-semibold">In Real Life</h2>
           <p className="relative mt-2 text-ink-2">What's inside your phone? Why are fireworks red? Spot the elements hiding in everyday things.</p>
@@ -230,12 +231,12 @@ export function Home() {
             Spot the elements <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
           </span>
         </motion.a>
-        <motion.a href="#/quiz" className="card group relative flex flex-col justify-between overflow-hidden p-6 transition-colors hover:bg-surface-2 sm:p-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
+        <motion.a href="#/quiz" className="card card-hover group relative flex flex-col overflow-hidden p-6 sm:p-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
           <div className="pointer-events-none absolute -bottom-16 -right-10 h-56 w-56 rounded-full opacity-25 blur-3xl" style={{ background: 'var(--accent)' }} />
-          <div className="grid h-14 w-14 place-items-center rounded-2xl" style={{ background: 'color-mix(in oklab, var(--accent) 18%, transparent)', color: 'var(--accent)' }}>
+          <div className="relative grid h-14 w-14 place-items-center rounded-2xl transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-105" style={{ background: 'color-mix(in oklab, var(--accent) 18%, transparent)', color: 'var(--accent)' }}>
             <BrainCircuit size={28} />
           </div>
-          <div className="relative mt-8">
+          <div className="relative mt-6">
             <h2 className="font-display text-3xl font-semibold">Quick Quiz</h2>
             <p className="mt-2 text-ink-2">Ten fast questions — symbols, numbers, families and facts — weighted towards the elements you haven't nailed yet.</p>
             <span className="mt-5 inline-flex items-center gap-1.5 font-semibold text-accent">
