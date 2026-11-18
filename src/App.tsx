@@ -10,6 +10,7 @@ import { Explore } from './screens/Explore';
 import { Home } from './screens/Home';
 import { LearnPath, Lesson } from './screens/Learn';
 import { Life } from './screens/Life';
+import { Match } from './screens/Match';
 import { PlayHub, RegionGame } from './screens/Play';
 import { ProgressScreen } from './screens/Progress';
 import { Quiz } from './screens/Quiz';
@@ -29,7 +30,7 @@ export function App() {
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f5f5fa' : '#07070d');
   }, [theme, systemLight, colorblind, reduceMotion]);
 
-  const immersive = route.name === 'game' || route.name === 'daily' || route.name === 'quiz' || route.name === 'life' || (route.name === 'learn' && !!route.chapter);
+  const immersive = route.name === 'game' || route.name === 'daily' || route.name === 'quiz' || route.name === 'life' || route.name === 'match' || (route.name === 'learn' && !!route.chapter);
   const key = route.name === 'game' ? `game-${route.region}` : route.name === 'learn' ? `learn-${route.chapter ?? ''}` : route.name;
 
   let screen;
@@ -60,6 +61,9 @@ export function App() {
       break;
     case 'life':
       screen = <Life />;
+      break;
+    case 'match':
+      screen = <Match />;
       break;
   }
 

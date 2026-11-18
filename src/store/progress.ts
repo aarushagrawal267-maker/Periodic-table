@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ACHIEVEMENTS } from '../lib/achievements';
-import { previousKey } from '../lib/daily';
+import { previousKey, todayKey } from '../lib/daily';
 import { ELEMENTS } from '../lib/elements';
+export { DAILY_GOAL_XP } from '../lib/scoring';
 import type { Difficulty } from './settings';
 
 export interface Mastery {
@@ -14,7 +15,7 @@ export interface Mastery {
 }
 
 export interface RoundSummary {
-  kind: 'place' | 'quiz' | 'daily' | 'lesson' | 'life';
+  kind: 'place' | 'quiz' | 'daily' | 'lesson' | 'life' | 'match';
   regionId?: string;
   dailyKey?: string;
   difficulty: Difficulty;
@@ -45,11 +46,13 @@ export interface ProgressData {
   mastery: Record<number, Mastery>;
   best: Record<string, { score: number; stars: number; timeMs: number }>;
   stats: { rounds: number; placements: number; mistakes: number; quizzes: number; bestCombo: number; playMs: number };
-  daily: { results: Record<string, DailyResult>; streak: number; bestStreak: number; lastKey: string | null };
+  daily: { results: Record<string, DailyResult>; streak: number; bestStreak: number; lastKey: string | null; started?: string };
   achievements: Record<string, number>;
   explored: number[];
   /** Best stars per learning-path chapter. */
   chapters: Record<string, number>;
+  /** XP earned on the current local day, for the daily goal. */
+  today: { key: string; xp: number };
 }
 
 export interface RoundOutcome {
@@ -63,6 +66,8 @@ export interface RoundOutcome {
 interface ProgressState extends ProgressData {
   recordRound: (r: RoundSummary) => RoundOutcome;
   markExplored: (n: number) => string[];
+  /** Marks today's daily as attempted, so quitting and retrying can't be used to practise it. */
+  startDaily: (key: string) => void;
   reset: () => void;
 }
 
@@ -75,6 +80,7 @@ const initial: ProgressData = {
   achievements: {},
   explored: [],
   chapters: {},
+  today: { key: '', xp: 0 },
 };
 
 function unlockNew(p: ProgressData, r?: RoundSummary) {
@@ -127,9 +133,11 @@ export const useProgress = create<ProgressState>()(
         }
 
         const xpGained = Math.round(r.score / 10) + r.stars * 25 + masteryUp.length * 10;
+        const dayKey = todayKey();
         const next: ProgressData = {
           ...p,
           xp: p.xp + xpGained,
+          today: { key: dayKey, xp: (p.today.key === dayKey ? p.today.xp : 0) + xpGained },
           mastery,
           best,
           daily,
@@ -155,11 +163,14 @@ export const useProgress = create<ProgressState>()(
         set({ explored: next.explored, achievements });
         return unlocked;
       },
+      startDaily: (key) => set({ daily: { ...get().daily, started: key } }),
       reset: () => set({ ...initial }),
     }),
     { name: 'periodica-progress', version: 2, migrate: (old) => ({ ...initial, ...(old as object) }) as ProgressState },
   ),
 );
+
+export const xpToday = (t: ProgressData['today'], key = todayKey()) => (t.key === key ? t.xp : 0);
 
 export const masteredCount = (m: Record<number, Mastery>) => Object.values(m).filter((x) => x.s >= 4).length;
 export const masteryPercent = (m: Record<number, Mastery>) =>

@@ -58,6 +58,7 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
   const [maxCombo, setMaxCombo] = useState(0);
   const [result, setResult] = useState<{ summary: RoundSummary; outcome: RoundOutcome } | null>(null);
   const startedAt = useRef(Date.now());
+  const recorded = useRef(false);
   const askedAt = useRef(Date.now());
   const [remaining, setRemaining] = useState(QUESTION_MS);
 
@@ -88,6 +89,7 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
   );
 
   const next = useCallback(() => {
+    if (recorded.current) return;
     if (index + 1 < questions.length) {
       setIndex((i) => i + 1);
       askedAt.current = Date.now();
@@ -111,6 +113,7 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
       results,
       trail: answers.map((a) => (a.ok ? 'hit' : 'miss')),
     };
+    recorded.current = true;
     const outcome = recordRound(summary);
     if (summary.stars === 3) sfx.win();
     announceAchievements(outcome.unlocked);
@@ -130,13 +133,14 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
 
   // Auto-advance after a correct answer.
   useEffect(() => {
-    if (!answered || !current?.ok) return;
+    if (!answered || !current?.ok || result) return;
     const t = setTimeout(next, 1100);
     return () => clearTimeout(t);
   }, [answered, current, next]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (result) return;
       const i = Number(e.key) - 1;
       if (!answered && i >= 0 && i < 4) answer(i);
       else if (answered && (e.key === 'Enter' || e.key === ' ')) {
@@ -146,7 +150,7 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [answered, answer, next]);
+  }, [answered, answer, next, result]);
 
   const e = byNumber(q.element);
   const heroEl = q.hero ? byNumber(q.element) : null;

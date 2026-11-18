@@ -22,6 +22,14 @@ export function Daily() {
   const order = useMemo(() => shuffle(targets, seeded(hashString('order:' + key))), [targets, key]);
   const n = dailyNumber(key);
   const streak = liveStreak(daily, key);
+  const startDaily = useProgress((s) => s.startDaily);
+  const recordRound = useProgress((s) => s.recordRound);
+
+  // A daily that was started but never finished (left mid-round, tab closed) counts as the attempt.
+  useEffect(() => {
+    if (playing || result || daily.started !== key) return;
+    recordRound({ kind: 'daily', dailyKey: key, difficulty: 'standard', score: 0, correct: 0, mistakes: 0, hints: 0, timeMs: 0, maxCombo: 0, stars: 0, completed: false, results: {}, trail: [] });
+  }, [playing, result, daily.started, key, recordRound]);
 
   if (playing)
     return (
@@ -64,7 +72,7 @@ export function Daily() {
         <div className="mx-auto mt-8 max-w-xl">
           {summary ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
-              <p className="text-sm font-medium text-good">Completed today</p>
+              <p className={`text-sm font-medium ${summary.stars ? 'text-good' : 'text-ink-3'}`}>{summary.stars ? 'Completed today' : 'Attempt used today. A fresh one arrives at midnight.'}</p>
               <div className="font-display mt-1 text-4xl font-semibold tabular-nums">{summary.score.toLocaleString('en-US')} pts</div>
               <p className="mt-1 text-sm text-ink-2">
                 {formatTime(summary.timeMs)} · {summary.mistakes} mistake{summary.mistakes === 1 ? '' : 's'}
@@ -82,7 +90,12 @@ export function Daily() {
               </a>
             </motion.div>
           ) : (
-            <button onClick={() => setPlaying(true)} className="btn-primary shine flex h-16 w-full items-center justify-center gap-2 rounded-2xl text-lg">
+            <button
+              onClick={() => {
+                startDaily(key);
+                setPlaying(true);
+              }}
+              className="btn-primary shine flex h-16 w-full items-center justify-center gap-2 rounded-2xl text-lg">
               <Play size={20} className="fill-current" /> Start today's challenge
             </button>
           )}

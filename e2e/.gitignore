@@ -1,0 +1,4 @@
+# Playwright build output, failure artifacts and HTML report
+/.dist/
+/.results/
+/.report/

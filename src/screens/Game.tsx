@@ -262,7 +262,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
         onKeyDown={onSlotKey}
         onClick={() => state.selected && placeAt(state.selected, e.row, e.col)}
         aria-label={`Period ${e.period}, ${e.group ? `group ${e.group}` : 'f-block'}, empty${state.selected ? `. Place ${byNumber(state.selected).name} here` : ''}`}
-        className={`slot relative h-full w-full transition-[transform,background,border-color] duration-150 ${missed ? 'flash-bad' : ''} ${isHint ? 'pulse-ring' : ''}`}
+        className={`slot relative h-full w-full transition-[transform,background,border-color] duration-150 ${state.selected ? 'slot-armed' : ''} ${missed ? 'flash-bad' : ''} ${isHint ? 'pulse-ring' : ''}`}
         style={{
           borderRadius: Math.max(5, rect.size * 0.14),
           background: isOver ? 'color-mix(in oklab, var(--accent-2) 22%, transparent)' : isHint ? 'color-mix(in oklab, var(--accent-2) 14%, transparent)' : tint,
@@ -328,7 +328,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
       </header>
 
       {/* Board */}
-      <main className="relative z-10 flex flex-1 flex-col justify-center px-2 py-4 sm:px-6">
+      <main className="relative z-10 flex flex-1 flex-col justify-center px-1 py-4 sm:px-6">
         <div className="relative mx-auto w-full max-w-7xl">
           <ComboBadge combo={state.combo} mult={mult} />
           <PeriodicGrid
@@ -344,8 +344,8 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
 
       {/* Tray */}
       <footer className="glass safe-bottom sticky bottom-0 z-30 border-x-0 border-b-0">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-3 pt-3 sm:px-6">
-          <div className="flex flex-1 items-center justify-center gap-2 sm:gap-3" role="listbox" aria-label="Elements to place">
+        <div className="mx-auto flex max-w-3xl items-center gap-2 px-2 pt-3 sm:gap-3 sm:px-6">
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 sm:gap-3" role="listbox" aria-label="Elements to place">
             <AnimatePresence mode="popLayout" initial={false}>
               {tiles.map((n, i) => {
                 const e = byNumber(n);
@@ -373,11 +373,11 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
                         sfx.pick();
                       }
                     }}
-                    className={`relative h-[68px] w-[60px] shrink-0 cursor-grab touch-none rounded-2xl sm:h-[84px] sm:w-[74px] ${miss ? 'animate-shake' : ''}`}
-                    style={{ filter: sel ? `drop-shadow(0 10px 22px color-mix(in oklab, ${catVar(e.category)} 55%, transparent))` : undefined }}
+                    className={`relative h-[66px] w-[57px] shrink-0 cursor-grab touch-none rounded-2xl transition-[filter] sm:h-[84px] sm:w-[74px] ${miss ? 'animate-shake' : ''}`}
+                    style={{ filter: sel ? `drop-shadow(0 10px 22px color-mix(in oklab, ${learner ? catVar(e.category) : 'var(--accent-2)'} 55%, transparent))` : undefined }}
                   >
                     <TrayTile e={e} difficulty={config.difficulty} selected={sel} />
-                    <kbd className="absolute -bottom-1.5 left-1/2 hidden -translate-x-1/2 rounded bg-surface-2 px-1 text-[9px] font-semibold text-ink-3 sm:block">{i + 1}</kbd>
+                    <kbd className="solid absolute -bottom-2 left-1/2 hidden -translate-x-1/2 rounded-md border border-line px-1.5 text-[10px] font-semibold leading-4 text-ink-3 sm:block">{i + 1}</kbd>
                   </motion.button>
                 );
               })}
@@ -387,7 +387,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
             <button
               onClick={() => dispatch({ type: 'hint' })}
               disabled={state.phase !== 'playing'}
-              className="btn-ghost grid h-12 w-12 place-items-center rounded-2xl disabled:opacity-40"
+              className="btn-ghost grid h-11 w-11 place-items-center rounded-2xl disabled:opacity-40 sm:h-12 sm:w-12"
               aria-label="Hint: show where the selected element goes (H)"
               title="Hint (H)"
             >
@@ -396,7 +396,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
             <span className="text-[10px] tabular-nums text-ink-3">{state.queue.length} left</span>
           </div>
         </div>
-        <p className="mx-auto mt-2 max-w-3xl px-4 text-center text-[11px] text-ink-3">
+        <p className="mx-auto mt-2.5 max-w-3xl px-4 text-center text-xs text-ink-3">
           {state.selected ? (
             <>
               Tap where <b className="text-ink-2">{byNumber(state.selected).name}</b> belongs

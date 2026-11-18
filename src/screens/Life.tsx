@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ElementTile } from '../components/ElementTile';
 import { Results } from '../components/Results';
 import { AnimatedNumber } from '../components/Stats';
@@ -31,6 +31,7 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
   const [results, setResults] = useState<Record<number, boolean>>({});
   const [result, setResult] = useState<{ summary: RoundSummary; outcome: RoundOutcome } | null>(null);
   const startedAt = useRef(Date.now());
+  const recorded = useRef(false);
 
   const q = questions[index];
   const need = q.answer.size;
@@ -67,6 +68,7 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
   };
 
   const next = () => {
+    if (recorded.current) return;
     if (index + 1 < questions.length) {
       setIndex((i) => i + 1);
       setPicked(new Set());
@@ -88,6 +90,7 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
       results,
       trail: perfect.map((p) => (p ? 'hit' : 'miss')),
     };
+    recorded.current = true;
     const outcome = recordRound(summary);
     if (summary.stars === 3) sfx.win();
     announceAchievements(outcome.unlocked);
@@ -113,7 +116,7 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
       <AnimatePresence mode="wait">
         <motion.main key={index} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} className="flex flex-1 flex-col justify-center py-6">
           <p className="text-center text-xs font-semibold uppercase tracking-wider text-accent-2">In real life</p>
-          <motion.div className="mx-auto mt-4 grid h-32 w-32 place-items-center rounded-[36px] text-7xl" style={{ background: 'radial-gradient(circle at 30% 20%, var(--surface-2), var(--surface))', border: '1px solid var(--line)' }} initial={{ scale: 0.6, rotate: -8 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', damping: 10, stiffness: 180 }} aria-hidden>
+          <motion.div className="mx-auto mt-4 grid h-32 w-32 place-items-center rounded-[36px] text-7xl" style={{ background: 'radial-gradient(circle at 30% 20%, var(--surface-2), var(--surface))', border: '1px solid var(--line)', boxShadow: 'var(--shadow-md), inset 0 1px 0 rgb(255 255 255 / 0.06)' }} initial={{ scale: 0.6, rotate: -8 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', damping: 10, stiffness: 180 }} aria-hidden>
             {q.thing.emoji}
           </motion.div>
           <h1 className="font-display mt-5 text-center text-3xl font-semibold">{q.thing.name}</h1>
@@ -161,7 +164,7 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
                     const e = el(s);
                     return (
                       <li key={s} className="flex items-start gap-3 text-sm">
-                        <button onClick={() => openDetail(e.number)} className="shrink-0 rounded-md px-1.5 py-0.5 text-xs font-bold" style={{ background: `color-mix(in oklab, ${catVar(e.category)} 18%, transparent)`, color: catVar(e.category) }} aria-label={`Open ${e.name}`}>
+                        <button onClick={() => openDetail(e.number)} className="cat-chip shrink-0 rounded-md px-1.5 py-0.5 text-xs font-bold transition-transform hover:scale-110" style={{ '--c': catVar(e.category) } as CSSProperties} aria-label={`Open ${e.name}`}>
                           {e.symbol}
                         </button>
                         <span className="text-ink-2">

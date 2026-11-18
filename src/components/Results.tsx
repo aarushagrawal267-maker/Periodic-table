@@ -76,7 +76,7 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
           </div>
           <dl className="grid grid-cols-2 gap-px border-t border-line bg-line sm:grid-cols-4">
             {[
-              [s.kind === 'quiz' || s.kind === 'life' ? 'Correct' : 'Placed', `${s.correct}/${total}`],
+              [s.kind === 'match' ? 'Pairs' : s.kind === 'quiz' || s.kind === 'life' ? 'Correct' : 'Placed', `${s.correct}/${total}`],
               ['Accuracy', `${acc}%`],
               ['Time', formatTime(s.timeMs)],
               ['Best combo', `${s.maxCombo}`],

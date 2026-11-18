@@ -54,9 +54,9 @@ function ChapterNode({ chapter: c, index, stars, current }: { chapter: Chapter; 
         href={`#/learn/${c.id}`}
         className={`group relative z-10 grid h-[78px] w-[78px] shrink-0 place-items-center rounded-full text-3xl transition-transform hover:scale-105 sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:hover:scale-105 ${current ? 'pulse-ring' : ''}`}
         style={{
-          background: done ? 'var(--grad)' : current ? 'var(--surface-2)' : 'var(--surface)',
+          background: done ? 'var(--grad)' : current ? 'radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--accent-2) 22%, var(--surface-solid)), var(--surface-solid))' : 'radial-gradient(circle at 30% 25%, var(--surface-2), var(--surface-solid))',
           border: done ? 'none' : `2px solid ${current ? 'var(--accent-2)' : 'var(--line-strong)'}`,
-          boxShadow: done ? '0 12px 30px -10px color-mix(in oklab, var(--accent-2) 70%, transparent)' : undefined,
+          boxShadow: done ? '0 12px 30px -10px color-mix(in oklab, var(--accent-2) 70%, transparent)' : current ? '0 0 0 6px color-mix(in oklab, var(--accent-2) 12%, transparent), 0 14px 34px -12px color-mix(in oklab, var(--accent-2) 60%, transparent)' : 'var(--shadow-md)',
         }}
         aria-label={`Chapter ${index + 1}: ${c.title}${done ? `, completed with ${stars} stars` : current ? ', up next' : ''}`}
       >
@@ -71,9 +71,11 @@ function ChapterNode({ chapter: c, index, stars, current }: { chapter: Chapter; 
       </a>
       <a
         href={`#/learn/${c.id}`}
-        className={`card group block flex-1 p-5 transition-colors hover:bg-surface-2 sm:w-[calc(50%-64px)] sm:flex-none ${right ? 'sm:mr-auto' : 'sm:ml-auto'} ${current ? 'border-accent-2/50' : ''}`}
+        className={`card card-hover group relative block flex-1 overflow-hidden p-5 sm:w-[calc(50%-64px)] sm:flex-none ${right ? 'sm:mr-auto' : 'sm:ml-auto'} ${current ? '!border-accent-2/50' : ''}`}
+        style={current ? { boxShadow: '0 18px 50px -24px color-mix(in oklab, var(--accent-2) 70%, transparent)' } : undefined}
         tabIndex={-1}
       >
+        {current && <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: 'var(--grad)' }} />}
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-semibold uppercase tracking-wider text-ink-3">Chapter {index + 1}</span>
           {done ? (
@@ -88,20 +90,20 @@ function ChapterNode({ chapter: c, index, stars, current }: { chapter: Chapter; 
             </span>
           ) : null}
         </div>
-        <h2 className="font-display mt-1 text-xl font-semibold">{c.title}</h2>
+        <h2 className="font-display mt-1.5 text-xl font-semibold transition-colors group-hover:text-ink">{c.title}</h2>
         <p className="mt-1 text-sm text-ink-2">{c.blurb}</p>
         <div className="mt-3 flex flex-wrap gap-1">
           {c.numbers.slice(0, 10).map((n) => {
             const e = byNumber(n);
             return (
-              <span key={n} className="rounded-md px-1.5 py-0.5 text-[11px] font-semibold" style={{ background: `color-mix(in oklab, ${catVar(e.category)} 15%, transparent)`, color: catVar(e.category) }}>
+              <span key={n} className="cat-chip rounded-md px-1.5 py-0.5 text-[11px] font-semibold" style={{ '--c': catVar(e.category) } as CSSProperties}>
                 {e.symbol}
               </span>
             );
           })}
           {c.numbers.length > 10 && <span className="px-1 text-[11px] text-ink-3">+{c.numbers.length - 10}</span>}
         </div>
-        <div className="mt-3 flex items-center gap-3 text-xs text-ink-3">
+        <div className="mt-4 flex items-center gap-3 border-t border-line pt-3 text-xs text-ink-3">
           <span className="flex items-center gap-1">
             <Clock size={12} /> ~{Math.max(2, Math.round(c.numbers.length / 4))} min
           </span>
@@ -110,6 +112,9 @@ function ChapterNode({ chapter: c, index, stars, current }: { chapter: Chapter; 
               <Sparkles size={12} /> Memory trick
             </span>
           )}
+          <span className="ml-auto flex items-center gap-1 font-semibold text-ink-2 transition-colors group-hover:text-accent-2">
+            {done ? 'Replay' : current ? 'Start' : 'Open'} <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+          </span>
         </div>
       </a>
     </motion.li>
@@ -147,6 +152,8 @@ export function Lesson({ chapterId }: { chapterId: string }) {
   useEffect(() => {
     if (phase !== 'cards') return;
     const onKey = (e: KeyboardEvent) => {
+      // Let real buttons (Got it, Skip, Back) handle their own Enter/Space.
+      if ((e.target as HTMLElement).closest('button, a, input')) return;
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         setFlipped((f) => !f);
@@ -267,41 +274,60 @@ export function Lesson({ chapterId }: { chapterId: string }) {
   );
 }
 
+/** Shared card height: grows with the viewport, never smaller than a comfortable read. */
+const CARD_H = 'h-[clamp(430px,calc(100dvh-300px),520px)]';
+
 function FlipCard({ e, flipped, onFlip }: { e: Element; flipped: boolean; onFlip: () => void }) {
   const c = catVar(e.category);
-  const face = 'absolute inset-0 flex flex-col rounded-[28px] border p-6 [backface-visibility:hidden]';
+  const face = 'absolute inset-0 flex flex-col overflow-hidden rounded-[28px] border [backface-visibility:hidden]';
   return (
-    <button onClick={onFlip} className="relative block h-[440px] w-full text-left" aria-label={flipped ? `${e.name} details. Tap to flip back.` : `${e.name}. Tap to flip for facts.`} style={{ '--c': c } as CSSProperties}>
+    <button onClick={onFlip} className={`relative block ${CARD_H} w-full text-left`} aria-label={flipped ? `${e.name} details. Tap to flip back.` : `${e.name}. Tap to flip for facts.`} style={{ '--c': c } as CSSProperties}>
       <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ type: 'spring', damping: 20, stiffness: 180 }}>
-        <div className={`${face} solid items-center justify-center text-center`} style={{ borderColor: `color-mix(in oklab, ${c} 35%, transparent)`, boxShadow: `0 30px 60px -30px color-mix(in oklab, ${c} 60%, transparent)` }}>
+        <div className={`${face} solid items-center justify-center p-6 text-center`} style={{ borderColor: `color-mix(in oklab, ${c} 35%, transparent)`, boxShadow: `0 30px 60px -30px color-mix(in oklab, ${c} 60%, transparent)` }}>
           <div className="pointer-events-none absolute inset-0 rounded-[28px] opacity-30" style={{ background: `radial-gradient(80% 60% at 50% 0%, ${c}, transparent 70%)` }} />
-          <div className="relative h-40 w-40">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 opacity-10" style={{ background: `radial-gradient(60% 80% at 50% 100%, ${c}, transparent 70%)` }} />
+          <span className="cat-chip relative mb-5 rounded-full px-3 py-1 text-xs font-semibold">{categoryLabel(e.category)}</span>
+          <div className="relative h-40 w-40 drop-shadow-[0_18px_30px_rgb(0_0_0/0.35)]">
             <ElementTile element={e} size={160} />
           </div>
           <h2 className="font-display relative mt-6 text-4xl font-semibold">{e.name}</h2>
-          <p className="relative mt-1 text-sm font-medium" style={{ color: c }}>
-            {categoryLabel(e.category)} · Group {e.group ?? '—'} · Period {e.period}
+          <p className="relative mt-1.5 text-sm font-medium text-ink-2">
+            Group {e.group ?? '—'} · Period {e.period}
           </p>
-          <p className="relative mt-8 text-xs text-ink-3">Tap to flip</p>
+          <p className="relative mt-auto flex items-center gap-1.5 pt-6 text-xs font-medium text-ink-3">
+            <RotateCcw size={12} className="-scale-x-100" /> Tap to flip
+          </p>
         </div>
-        <div className={`${face} solid gap-4 overflow-y-auto [transform:rotateY(180deg)]`} style={{ borderColor: `color-mix(in oklab, ${c} 35%, transparent)` }}>
-          <div className="flex items-center gap-3">
+        <div className={`${face} solid [transform:rotateY(180deg)]`} style={{ borderColor: `color-mix(in oklab, ${c} 35%, transparent)` }}>
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-32 opacity-20" style={{ background: `radial-gradient(80% 100% at 50% 0%, ${c}, transparent 70%)` }} />
+          <div className="relative flex items-center gap-3 px-6 pb-4 pt-6">
             <div className="h-12 w-12 shrink-0">
               <ElementTile element={e} size={48} showName={false} />
             </div>
-            <div className="font-display text-2xl font-semibold">{e.name}</div>
+            <div className="min-w-0">
+              <div className="font-display truncate text-2xl font-semibold leading-tight">{e.name}</div>
+              <div className="cat-ink text-xs font-semibold">{categoryLabel(e.category)}</div>
+            </div>
           </div>
-          <p className="text-[15px] leading-relaxed">{e.summary}</p>
-          <div className="rounded-2xl p-3.5 text-[15px] leading-relaxed" style={{ background: `color-mix(in oklab, ${c} 10%, transparent)` }}>
-            <span className="mr-1">💡</span>
-            {e.fact}
-          </div>
-          <div className="mt-auto flex flex-wrap gap-1.5">
-            {e.uses.map((u) => (
-              <span key={u} className="rounded-full border border-line px-2.5 py-1 text-xs text-ink-2">
-                {u}
-              </span>
-            ))}
+          {/* The facts scroll if they are long; the fade tells you there is more. */}
+          <div className="thin-scroll relative flex-1 overflow-y-auto px-6 pb-6 [mask-image:linear-gradient(to_bottom,black_calc(100%-36px),transparent)]">
+            {e.uses.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {e.uses.map((u) => (
+                  <span key={u} className="cat-chip rounded-full px-2.5 py-1 text-xs font-medium">
+                    {u}
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="mt-4 text-[15px] leading-relaxed text-ink">{e.summary}</p>
+            <div className="mt-4 rounded-2xl border p-3.5 text-[15px] leading-relaxed" style={{ background: `color-mix(in oklab, ${c} 9%, transparent)`, borderColor: `color-mix(in oklab, ${c} 22%, transparent)` }}>
+              <div className="cat-ink mb-1 text-xs font-bold uppercase tracking-wider">
+                <span aria-hidden>💡 </span>Fun fact
+              </div>
+              {e.fact}
+            </div>
+            <div className="h-4" aria-hidden />
           </div>
         </div>
       </motion.div>
@@ -310,22 +336,28 @@ function FlipCard({ e, flipped, onFlip }: { e: Element; flipped: boolean; onFlip
 }
 
 function MnemonicCard({ chapter }: { chapter: Chapter }) {
+  const words = chapter.mnemonic!;
+  // Long rhymes get tighter rows so all of them fit without scrolling.
+  const dense = words.length > 7;
   return (
-    <div className="solid relative flex h-[440px] flex-col overflow-hidden rounded-[28px] border border-line p-6" style={{ boxShadow: 'var(--shadow-lg)' }}>
+    <div className={`solid relative flex min-h-[clamp(430px,calc(100dvh-300px),520px)] flex-col overflow-hidden rounded-[28px] border border-line p-5 sm:p-6`} style={{ boxShadow: 'var(--shadow-lg)' }}>
       <div className="pointer-events-none absolute inset-0 opacity-25" style={{ background: 'radial-gradient(80% 50% at 50% 0%, var(--accent), transparent 70%)' }} />
       <div className="relative flex items-center gap-2 text-sm font-semibold text-accent-2">
-        <Sparkles size={16} /> Memory trick
+        <span className="grid h-7 w-7 place-items-center rounded-lg bg-accent-2/15">
+          <Sparkles size={15} />
+        </span>
+        Memory trick
       </div>
-      <p className="relative mt-1 text-sm text-ink-2">The first letters spell the elements in order.</p>
-      <ol className="relative mt-5 flex flex-1 flex-col justify-center gap-1.5">
-        {chapter.mnemonic!.map(([word, symbol], i) => {
+      <p className="relative mt-2 text-sm text-ink-2">The first letters spell the elements in order.</p>
+      <ol className={`relative mt-4 flex flex-1 flex-col justify-center ${dense ? 'gap-1' : 'gap-2'}`}>
+        {words.map(([word, symbol], i) => {
           const e = byNumber(chapter.numbers[i]);
           return (
             <motion.li key={word + i} className="flex items-center gap-3" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.07 }}>
-              <span className="grid h-8 w-10 shrink-0 place-items-center rounded-lg text-sm font-bold" style={{ background: `color-mix(in oklab, ${catVar(e.category)} 18%, transparent)`, color: catVar(e.category) }}>
+              <span className={`cat-chip grid shrink-0 place-items-center rounded-lg font-bold ${dense ? 'h-7 w-10 text-[13px]' : 'h-8 w-11 text-sm'}`} style={{ '--c': catVar(e.category) } as CSSProperties}>
                 {symbol}
               </span>
-              <span className="font-display text-xl font-semibold">
+              <span className={`font-display font-semibold leading-tight ${dense ? 'text-lg' : 'text-xl'}`}>
                 <Highlight word={word} symbol={symbol} />
               </span>
             </motion.li>

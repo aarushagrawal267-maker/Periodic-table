@@ -69,7 +69,7 @@ function build(kind: Question['kind'], e: Element, all: Element[]): Question | n
     case 'number': {
       const near = all.filter((x) => x.number !== e.number && Math.abs(x.number - e.number) <= 3);
       const wrong = sample(near, 3);
-      if (wrong.length < 3) wrong.push(...distractors(e, all, 3 - wrong.length));
+      if (wrong.length < 3) wrong.push(...distractors(e, all.filter((x) => !wrong.includes(x)), 3 - wrong.length));
       return { id, kind, element: e.number, hero: String(e.number), prompt: 'Which element has this atomic number?', ...opts(e.name, wrong.map((x) => x.name)) };
     }
     case 'category': {
@@ -86,8 +86,9 @@ function build(kind: Question['kind'], e: Element, all: Element[]): Question | n
     }
     case 'fact': {
       if (!e.fact) return null;
-      const re = new RegExp(`\\b(${e.name}|${e.symbol})\\b`, 'gi');
-      const clue = e.fact.replace(re, '▢▢▢');
+      // Mask the name and words built on it (sulfide, zirconia, actinides), and the symbol only in its exact case.
+      const stem = e.name.length >= 6 ? `${e.name.slice(0, Math.max(4, e.name.length - 3))}\\w*` : `${e.name}\\b`;
+      const clue = e.fact.replace(new RegExp(`\\b${stem}`, 'gi'), '▢▢▢').replace(new RegExp(`\\b${e.symbol}\\b`, 'g'), '▢▢▢');
       return { id, kind, element: e.number, prompt: clue, ...opts(e.name, distractors(e, all).map((x) => x.name)) };
     }
   }

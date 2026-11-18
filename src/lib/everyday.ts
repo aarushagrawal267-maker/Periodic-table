@@ -36,11 +36,25 @@ export const THINGS: Thing[] = [
   { id: 'steel', name: 'Stainless steel spoon', emoji: '🥄', contains: [['Fe', 'Steel is mostly iron.'], ['Cr', 'Chromium makes it stainless.'], ['Ni', 'Nickel adds shine and toughness.']] },
   { id: 'milk', name: 'Milk', emoji: '🥛', contains: [['Ca', 'Milk is a top source of calcium for bones and teeth.']] },
   { id: 'magnet', name: 'Super-strong fridge magnet', emoji: '🧲', contains: [['Nd', 'Neodymium magnets are the strongest permanent magnets.'], ['Fe', 'They are neodymium-iron-boron alloys…'], ['B', '…with a little boron.']] },
+  { id: 'catalytic', name: "Car's catalytic converter", emoji: '🚗', contains: [['Pt', 'Platinum helps turn toxic exhaust gases into safer ones…'], ['Pd', '…palladium does the same job…'], ['Rh', '…and rhodium breaks down harmful nitrogen oxides.']] },
+  { id: 'sunscreen', name: 'Mineral sunscreen', emoji: '🧴', contains: [['Zn', 'Zinc oxide sits on your skin and blocks UV light.'], ['Ti', 'Titanium dioxide does the same and keeps it white.']] },
+  { id: 'chalk', name: 'Blackboard chalk', emoji: '🖍️', contains: [['Ca', 'Chalk is a calcium compound, usually calcium carbonate or calcium sulfate.']] },
+  { id: 'bleach', name: 'Household bleach', emoji: '🫧', contains: [['Cl', 'The active ingredient is sodium hypochlorite: chlorine does the cleaning…'], ['Na', '…with sodium as its partner.']] },
+  { id: 'matches', name: 'Safety matches', emoji: '🔥', contains: [['P', 'Red phosphorus on the striking strip sparks the reaction.'], ['K', 'Potassium chlorate in the head supplies oxygen…'], ['S', '…and sulfur helps it catch fire.']] },
+  { id: 'liberty', name: 'Statue of Liberty', emoji: '🗽', contains: [['Cu', 'Her skin is copper. The green colour is a coating that formed as copper reacted with air and rain.']] },
+  { id: 'nuclear', name: 'Nuclear power station', emoji: '⚛️', contains: [['U', 'Uranium atoms split apart, releasing heat that boils water to drive turbines.']] },
+  { id: 'plane', name: 'Aeroplane', emoji: '✈️', contains: [['Al', 'Light aluminum alloys make up much of the body…'], ['Ti', '…and strong, heat-resistant titanium is used in engines and frames.']] },
+  { id: 'leaf', name: 'A green leaf', emoji: '🌿', contains: [['Mg', 'A magnesium atom sits at the centre of every chlorophyll molecule, the green pigment that captures sunlight.']] },
+  { id: 'medal', name: 'Olympic "gold" medal', emoji: '🥇', contains: [['Ag', "Surprise: it's mostly silver…"], ['Au', '…with a thin plating of real gold on the outside.']] },
+  { id: 'xray', name: 'Barium meal X-ray', emoji: '🩻', contains: [['Ba', 'Patients drink barium sulfate, which shows up white on X-rays and outlines the gut.']] },
+  { id: 'rust', name: 'Rust on a bike', emoji: '🚲', contains: [['Fe', 'Rust forms when iron…'], ['O', '…reacts with oxygen and water.']] },
+  { id: 'hot-spring', name: 'Rotten-egg smell at a hot spring', emoji: '♨️', contains: [['S', 'The smell is hydrogen sulfide, made of sulfur…'], ['H', '…and hydrogen.']] },
+  { id: 'soda', name: 'Can of fizzy drink', emoji: '🥤', contains: [['Al', 'The can is aluminum.'], ['C', 'The bubbles are carbon dioxide: carbon…'], ['O', '…and oxygen.']] },
   { id: 'thermometer', name: 'Old glass thermometer', emoji: '🌡️', contains: [['Hg', 'The silvery liquid is mercury, which expands evenly as it warms.']] },
 ];
 
 /** Plausible wrong answers, so options are never obviously silly. */
-const DECOYS = ['H', 'He', 'C', 'N', 'O', 'Na', 'Mg', 'Al', 'Si', 'S', 'Cl', 'K', 'Ca', 'Fe', 'Cu', 'Zn', 'Ag', 'Au', 'Pb', 'Ne', 'Ar', 'Li', 'Ti', 'Ni', 'Sn', 'U', 'I', 'P', 'Hg', 'Pt'];
+const DECOYS = ['H', 'Pd', 'Ba', 'Mn', 'Cr', 'W', 'He', 'C', 'N', 'O', 'Na', 'Mg', 'Al', 'Si', 'S', 'Cl', 'K', 'Ca', 'Fe', 'Cu', 'Zn', 'Ag', 'Au', 'Pb', 'Ne', 'Ar', 'Li', 'Ti', 'Ni', 'Sn', 'U', 'I', 'P', 'Hg', 'Pt'];
 
 export const el = (s: string): Element => bySymbol.get(s.toLowerCase())!;
 
@@ -56,8 +70,9 @@ export const LIFE_OPTIONS = 8;
 export function buildLifeRound(): LifeQuestion[] {
   return sample(THINGS, LIFE_LENGTH).map((thing) => {
     const right = thing.contains.map(([s]) => el(s));
+    const text = thing.contains.map(([, why]) => why.toLowerCase()).join(' ');
     const wrong = sample(
-      DECOYS.filter((d) => !thing.contains.some(([s]) => s === d)),
+      DECOYS.filter((d) => !thing.contains.some(([s]) => s === d) && !text.includes(el(d).name.toLowerCase())),
       LIFE_OPTIONS - right.length,
     ).map(el);
     return { thing, options: shuffle([...right, ...wrong]), answer: new Set(right.map((e) => e.number)) };

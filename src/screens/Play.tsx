@@ -1,14 +1,25 @@
 import { motion } from 'motion/react';
 import { ArrowRight, BrainCircuit, Star } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { DifficultyPicker } from '../components/DifficultyPicker';
+import { ElementTile } from '../components/ElementTile';
 import { MiniTable } from '../components/MiniTable';
+import { bySymbol, catVar } from '../lib/elements';
 import { REGIONS, regionById, type Region } from '../lib/regions';
 import { go } from '../lib/router';
 import { useProgress } from '../store/progress';
 import { DIFFICULTIES, useSettings } from '../store/settings';
 import { Game } from './Game';
 import { Home } from './Home';
+
+/** Decorative art for the mode cards: real objects with the element that makes them work. */
+const LIFE_ART: [string, string][] = [
+  ['📱', 'Li'],
+  ['🎆', 'Sr'],
+  ['🍌', 'K'],
+  ['🦴', 'Ca'],
+];
+const QUIZ_ART = ['Au', 'Ne', 'Fe'];
 
 export function PlayHub() {
   return (
@@ -26,39 +37,80 @@ export function PlayHub() {
           <RegionCard key={r.id} region={r} index={i} />
         ))}
         <motion.a
-          href="#/life"
+          href="#/match"
           className="card group flex flex-col justify-between overflow-hidden p-6 transition-colors hover:bg-surface-2"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: REGIONS.length * 0.04 }}
         >
-          <div className="flex gap-1.5 text-3xl" aria-hidden>
-            <span>📱</span>
-            <span>🎆</span>
-            <span>🦴</span>
+          <div className="flex gap-2" aria-hidden>
+            <span className="font-display grid h-12 w-10 place-items-center rounded-xl border border-line text-lg font-bold" style={{ background: 'color-mix(in oklab, var(--accent-2) 14%, transparent)' }}>
+              Fe
+            </span>
+            <span className="grid h-12 w-10 place-items-center rounded-xl border border-line text-lg font-bold text-ink-3">?</span>
           </div>
           <div className="mt-6">
+            <h2 className="font-display text-xl font-semibold">Match Pairs</h2>
+            <p className="mt-1 text-sm text-ink-2">A relaxed memory game: flip cards and pair each symbol with its name.</p>
+            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-accent-2">
+              Play <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+            </span>
+          </div>
+        </motion.a>
+        <motion.a
+          href="#/life"
+          className="card card-hover group relative flex flex-col overflow-hidden p-6"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: REGIONS.length * 0.04 }}
+        >
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl transition-opacity group-hover:opacity-40" style={{ background: 'var(--accent-3)' }} />
+          <div className="relative grid aspect-[207/107] w-full grid-cols-4 items-center gap-3" aria-hidden>
+            {LIFE_ART.map(([emoji, sym], i) => {
+              const e = bySymbol.get(sym.toLowerCase())!;
+              return (
+                <div key={sym} className="relative grid aspect-square place-items-center rounded-2xl border border-line text-3xl transition-transform duration-500 group-hover:-translate-y-1 sm:text-4xl" style={{ background: 'radial-gradient(circle at 30% 20%, var(--surface-2), var(--surface))', rotate: `${(i - 1.5) * 4}deg`, transitionDelay: `${i * 40}ms` }}>
+                  {emoji}
+                  <span className="cat-chip absolute -bottom-2 -right-1.5 rounded-md px-1.5 py-0.5 text-[11px] font-bold shadow-sm" style={{ '--c': catVar(e.category) } as CSSProperties}>
+                    {e.symbol}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="relative mt-5 flex flex-1 flex-col">
             <h2 className="font-display text-xl font-semibold">In Real Life</h2>
             <p className="mt-1 text-sm text-ink-2">Spot the elements inside phones, fireworks, bananas and your own bones.</p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-accent-3">
+            <span className="mt-auto inline-flex items-center gap-1 border-t border-line pt-4 text-sm font-semibold text-accent-3">
               Play <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
             </span>
           </div>
         </motion.a>
         <motion.a
           href="#/quiz"
-          className="card group flex flex-col justify-between overflow-hidden p-6 transition-colors hover:bg-surface-2"
+          className="card card-hover group relative flex flex-col overflow-hidden p-6"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: REGIONS.length * 0.04 }}
         >
-          <div className="grid h-12 w-12 place-items-center rounded-2xl" style={{ background: 'color-mix(in oklab, var(--accent) 18%, transparent)', color: 'var(--accent)' }}>
-            <BrainCircuit size={24} />
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl transition-opacity group-hover:opacity-40" style={{ background: 'var(--accent)' }} />
+          <div className="relative flex aspect-[207/107] w-full items-center justify-center" aria-hidden>
+            {QUIZ_ART.map((sym, i) => (
+              <div key={sym} className="-mx-2 h-[72px] w-[72px] transition-transform duration-500 sm:h-20 sm:w-20" style={{ transform: `rotate(${(i - 1) * 10}deg) translateY(${i === 1 ? -6 : 4}px)`, zIndex: i === 1 ? 0 : 1 }}>
+                <ElementTile element={bySymbol.get(sym.toLowerCase())!} size={80} showName={false} />
+              </div>
+            ))}
+            <div className="tile font-display absolute grid h-[76px] w-[76px] place-items-center rounded-[18px] text-4xl font-bold shadow-xl transition-transform duration-500 group-hover:-translate-y-1 group-hover:rotate-6 sm:h-[84px] sm:w-[84px]" style={{ '--c': 'var(--accent)', zIndex: 2 } as CSSProperties}>
+              ?
+            </div>
           </div>
-          <div className="mt-6">
-            <h2 className="font-display text-xl font-semibold">Quick Quiz</h2>
+          <div className="relative mt-5 flex flex-1 flex-col">
+            <div className="flex items-center gap-2">
+              <BrainCircuit size={18} className="text-accent" />
+              <h2 className="font-display text-xl font-semibold">Quick Quiz</h2>
+            </div>
             <p className="mt-1 text-sm text-ink-2">Ten rapid questions, tuned to the elements you find hardest.</p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-accent">
+            <span className="mt-auto inline-flex items-center gap-1 border-t border-line pt-4 text-sm font-semibold text-accent">
               Start quiz <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
             </span>
           </div>
@@ -80,14 +132,14 @@ function RegionCard({ region: r, index }: { region: Region; index: number }) {
   return (
     <motion.a
       href={`#/play/${r.id}`}
-      className="card group relative flex flex-col overflow-hidden p-6 transition-[background,transform] duration-300 hover:-translate-y-0.5 hover:bg-surface-2"
+      className="card card-hover group relative flex flex-col overflow-hidden p-6"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04 }}
     >
       <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl transition-opacity group-hover:opacity-40" style={{ background: r.accent }} />
       <MiniTable highlight={set} className="relative w-full" label={`${r.name} highlighted on the periodic table`} />
-      <div className="relative mt-5 flex items-start justify-between gap-3">
+      <div className="relative mt-5 flex flex-1 items-start justify-between gap-3">
         <div>
           <h2 className="font-display text-xl font-semibold">{r.name}</h2>
           <p className="mt-1 text-sm text-ink-2">{r.tagline}</p>

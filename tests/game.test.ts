@@ -117,7 +117,7 @@ describe('layout', () => {
 
 describe('quiz', () => {
   test('builds ten valid questions with four unique options', () => {
-    for (const d of ['learner', 'standard', 'expert'] as const) {
+    for (let i = 0; i < 300; i++) for (const d of ['learner', 'standard', 'expert'] as const) {
       const qs = buildQuiz(d, {});
       expect(qs).toHaveLength(QUIZ_LENGTH);
       for (const q of qs) {

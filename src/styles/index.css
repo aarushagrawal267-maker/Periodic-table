@@ -35,7 +35,8 @@
   --line-strong: rgb(255 255 255 / 0.16);
   --ink: #f4f4fa;
   --ink-2: #a9a9c2;
-  --ink-3: #6c6c88;
+  /* ink-3 is used for small captions: keep it at 4.5:1 or better on --bg and cards. */
+  --ink-3: #7f7f9c;
   --accent: #8b7cff;
   --accent-2: #4fd1ff;
   --accent-3: #5cf2b0;
@@ -44,6 +45,9 @@
   --gold: #ffc94a;
   --cell-empty: rgb(255 255 255 / 0.035);
   --cell-ink-mix: 72%;
+  --on-grad: #07070d;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 12px 32px -14px rgb(0 0 0 / 0.75);
   --shadow-lg: 0 30px 80px -20px rgb(0 0 0 / 0.7), 0 0 0 1px var(--line);
   --grad: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 55%, var(--accent-3) 100%);
 
@@ -70,15 +74,19 @@
   --line-strong: rgb(20 20 50 / 0.18);
   --ink: #0d0d1c;
   --ink-2: #4b4b66;
-  --ink-3: #85859d;
+  --ink-3: #6b6b85;
+  /* Darker than the dark-theme accents so accent text and white-on-gradient both pass 4.5:1. */
   --accent: #6a56ff;
-  --accent-2: #0a9bd6;
-  --accent-3: #0fa874;
-  --good: #11a862;
-  --bad: #e5334f;
+  --accent-2: #0a74b8;
+  --accent-3: #08805a;
+  --good: #087a45;
+  --bad: #d42a45;
   --gold: #d99a00;
   --cell-empty: rgb(20 20 50 / 0.045);
-  --cell-ink-mix: 100%;
+  --cell-ink-mix: 62%;
+  --on-grad: #ffffff;
+  --shadow-sm: 0 1px 2px rgb(30 30 80 / 0.08);
+  --shadow-md: 0 14px 34px -18px rgb(30 30 80 / 0.28);
   --shadow-lg: 0 30px 70px -25px rgb(30 30 80 / 0.35), 0 0 0 1px var(--line);
 
   --cat-alkali-metal: #e5334f;
@@ -158,6 +166,9 @@ body {
   border: 1px solid var(--line);
   border-radius: 24px;
 }
+[data-theme='light'] .card {
+  box-shadow: var(--shadow-sm), 0 8px 24px -16px rgb(30 30 80 / 0.18);
+}
 
 .solid {
   background: var(--surface-solid);
@@ -232,24 +243,49 @@ body {
 }
 
 .slot {
-  background: var(--cell-empty);
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgb(255 255 255 / 0.035), transparent 70%),
+    var(--cell-empty);
   border: 1px dashed var(--line-strong);
+  box-shadow: inset 0 1px 6px rgb(0 0 0 / 0.25);
+}
+[data-theme='light'] .slot {
+  box-shadow: inset 0 1px 4px rgb(30 30 80 / 0.06);
+}
+/* A tile is selected: every empty slot invites a tap. */
+.slot-armed:hover {
+  border-style: solid;
+  border-color: color-mix(in oklab, var(--accent-2) 70%, transparent);
+  background: color-mix(in oklab, var(--accent-2) 12%, var(--cell-empty));
 }
 
 .btn-primary {
   position: relative;
   background: var(--grad);
-  color: #07070d;
+  color: var(--on-grad);
   font-weight: 650;
-  box-shadow: 0 10px 30px -10px color-mix(in oklab, var(--accent-2) 70%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.4);
-  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s;
+  box-shadow: 0 10px 30px -10px color-mix(in oklab, var(--accent-2) 70%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.4), inset 0 -2px 0 rgb(0 0 0 / 0.12);
+  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s, filter 0.2s;
 }
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 16px 40px -12px color-mix(in oklab, var(--accent-2) 80%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.4);
+  filter: saturate(1.1) brightness(1.04);
+  box-shadow: 0 16px 40px -12px color-mix(in oklab, var(--accent-2) 80%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.4), inset 0 -2px 0 rgb(0 0 0 / 0.12);
 }
-.btn-primary:active {
+.btn-primary:active:not(:disabled) {
   transform: translateY(1px) scale(0.98);
+  box-shadow: 0 6px 18px -10px color-mix(in oklab, var(--accent-2) 70%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.3);
+}
+/* Disabled: a calm neutral slab instead of a washed-out gradient. */
+.btn-primary:disabled {
+  opacity: 1;
+  background: var(--surface-2);
+  color: var(--ink-3);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  cursor: not-allowed;
+}
+.btn-primary:disabled::after {
+  display: none;
 }
 
 .btn-ghost {
@@ -258,12 +294,38 @@ body {
   color: var(--ink);
   transition: background 0.2s, border-color 0.2s, transform 0.2s var(--ease-spring);
 }
-.btn-ghost:hover {
+.btn-ghost:hover:not(:disabled) {
   background: var(--surface-2);
   border-color: var(--line-strong);
 }
-.btn-ghost:active {
+.btn-ghost:active:not(:disabled) {
   transform: scale(0.97);
+}
+[data-theme='light'] .btn-ghost {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Interactive card: lifts a little and catches light on hover. */
+.card-hover {
+  transition: transform 0.35s var(--ease-out-expo), background 0.25s, border-color 0.25s, box-shadow 0.35s var(--ease-out-expo);
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  background: var(--surface-2);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-md);
+}
+.card-hover:active {
+  transform: translateY(-1px) scale(0.995);
+}
+
+/* Category-tinted text that stays readable in both themes. Set --c on the element. */
+.cat-ink {
+  color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+}
+.cat-chip {
+  background: color-mix(in oklab, var(--c) 16%, transparent);
+  color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
 }
 
 .shine {
@@ -368,9 +430,17 @@ body {
   transition-duration: 0.001ms !important;
 }
 
+.reduce-motion .card-hover:hover,
+.reduce-motion .card-hover:active,
+.reduce-motion .btn-primary:hover,
+.reduce-motion .btn-primary:active {
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .aurora,
-  .shine::after {
+  .shine::after,
+  .pulse-ring {
     animation: none;
   }
 }

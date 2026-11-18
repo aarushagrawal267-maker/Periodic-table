@@ -1,5 +1,8 @@
 export const BASE_POINTS = 100;
 
+/** XP for the small daily goal: roughly two short activities. */
+export const DAILY_GOAL_XP = 150;
+
 /** Combo multiplier tiers: x1, x1.5 from 3 in a row, x2 from 6, x3 from 10. */
 export function multiplier(combo: number) {
   if (combo >= 10) return 3;

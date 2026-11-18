@@ -1,4 +1,5 @@
 import type { ProgressData, RoundSummary } from '../store/progress';
+import { DAILY_GOAL_XP } from './scoring';
 import { REGIONS } from './regions';
 import { ELEMENTS } from './elements';
 import { CHAPTERS } from './chapters';
@@ -29,6 +30,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'chapter-1', name: 'First Lesson', desc: 'Finish a chapter of the learning path.', icon: 'GraduationCap', tier: 'bronze', check: (p) => Object.keys(p.chapters).length >= 1 },
   { id: 'chapter-all', name: 'Graduate', desc: 'Finish every chapter of the learning path.', icon: 'GraduationCap', tier: 'gold', check: (p) => Object.keys(p.chapters).length >= CHAPTERS.length },
   { id: 'real-world', name: 'Everyday Chemist', desc: 'Get every answer right in an In Real Life round.', icon: 'House', tier: 'silver', check: (_p, r) => !!r && r.kind === 'life' && r.mistakes === 0 },
+  { id: 'goal', name: 'Little and Often', desc: 'Reach your daily goal.', icon: 'Target', tier: 'bronze', check: (p) => p.today.xp >= DAILY_GOAL_XP },
   { id: 'explorer', name: 'Field Notes', desc: 'Open 25 different element cards.', icon: 'Telescope', tier: 'bronze', check: (p) => p.explored.length >= 25 },
   { id: 'encyclopedia', name: 'Encyclopedia', desc: 'Open every element card.', icon: 'Library', tier: 'gold', check: (p) => p.explored.length >= ELEMENTS.length },
   { id: 'master-25', name: 'Rising Chemist', desc: 'Master 25 elements.', icon: 'Sparkles', tier: 'bronze', check: (p) => mastered(p) >= 25 },
