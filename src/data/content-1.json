@@ -1,0 +1,533 @@
+{
+  "1": {
+    "summary": "Hydrogen is the lightest element and by far the most common one in the universe, where it is the fuel that powers stars. On Earth it is mostly locked up in water and in the molecules of living things.",
+    "uses": [
+      "Rocket fuel",
+      "Ammonia fertilizer production",
+      "Hydrogen fuel cells"
+    ],
+    "fact": "About three quarters of the ordinary matter in the universe, measured by mass, is hydrogen, almost all of it formed shortly after the Big Bang."
+  },
+  "2": {
+    "summary": "Helium is a colorless, very light gas that does not react with other elements. It matters because liquid helium is cold enough to chill the powerful magnets inside hospital MRI scanners, and the gas lifts balloons and airships.",
+    "uses": [
+      "MRI scanner cooling",
+      "Weather and party balloons",
+      "Deep-sea diving gas"
+    ],
+    "fact": "Helium was first detected in sunlight during an 1868 solar eclipse, well before chemists managed to collect any of it on Earth."
+  },
+  "3": {
+    "summary": "Lithium is a soft, silvery metal so light that it floats on water, fizzing as it reacts. It matters because lithium-based batteries store the energy that runs phones, laptops, and electric cars.",
+    "uses": [
+      "Rechargeable batteries",
+      "Mood-stabilizing medicines",
+      "Heat-resistant glass and ceramics"
+    ],
+    "fact": "Along with hydrogen and helium, a tiny amount of lithium was made in the first minutes after the Big Bang, long before any stars existed."
+  },
+  "4": {
+    "summary": "Beryllium is a hard, gray metal that is unusually light and stiff. It matters in aerospace and science, where it is used for precision parts, although its dust is toxic and must be handled with great care.",
+    "uses": [
+      "Space telescope mirrors",
+      "X-ray tube windows",
+      "Non-sparking tools"
+    ],
+    "fact": "Emeralds and aquamarines are both varieties of beryl, a mineral containing beryllium, with traces of other elements giving each gemstone its color."
+  },
+  "5": {
+    "summary": "Boron is a hard, dark element whose behavior sits between that of metals and nonmetals. It matters because its compounds make glass that survives sudden temperature changes, and plants need small amounts of it to grow.",
+    "uses": [
+      "Heat-resistant borosilicate glass",
+      "Laundry and cleaning products",
+      "Nuclear reactor control rods"
+    ],
+    "fact": "Boron carbide, a compound of boron and carbon, is one of the hardest materials known and is used in body armor."
+  },
+  "6": {
+    "summary": "Carbon is the element at the heart of all known life, because its atoms can link into long chains and rings. It also forms coal, graphite, and diamond, and the carbon dioxide that affects Earth's climate.",
+    "uses": [
+      "Activated charcoal filters",
+      "Carbon fiber composites",
+      "Diamond cutting tools"
+    ],
+    "fact": "Sparkling diamond and the soft graphite in a pencil are both pure carbon, differing only in the way their atoms are arranged."
+  },
+  "7": {
+    "summary": "Nitrogen is a colorless gas that makes up most of the air you breathe. It matters because every protein and every strand of DNA contains it, so all living things need it to grow.",
+    "uses": [
+      "Fertilizer production",
+      "Food packaging gas",
+      "Liquid nitrogen freezing"
+    ],
+    "fact": "Although nitrogen makes up about 78 percent of the air, most living things cannot use it until bacteria or lightning turn it into other compounds."
+  },
+  "8": {
+    "summary": "Oxygen is the gas that most living things need to release energy from food, and it makes up about a fifth of the air. It also combines with most other elements, which is what happens in burning and rusting.",
+    "uses": [
+      "Medical breathing support",
+      "Steel making",
+      "Rocket fuel oxidizer"
+    ],
+    "fact": "Liquid oxygen is pale blue and magnetic enough to be held between the poles of a strong magnet."
+  },
+  "9": {
+    "summary": "Fluorine is a pale yellow, poisonous gas that reacts with almost everything it touches. It matters because its compounds, called fluorides, strengthen tooth enamel, and others are used to make nonstick coatings for cookware.",
+    "uses": [
+      "Fluoride toothpaste",
+      "Nonstick pan coatings",
+      "Uranium fuel processing"
+    ],
+    "fact": "Fluorine is so dangerous to handle that several chemists were injured or killed trying to isolate it before Henri Moissan succeeded in 1886."
+  },
+  "10": {
+    "summary": "Neon is a colorless gas that does not react with other elements. It matters because it glows a brilliant reddish orange when electricity passes through it, which made bright advertising signs possible.",
+    "uses": [
+      "Glowing advertising signs",
+      "Helium-neon lasers",
+      "High-voltage indicators"
+    ],
+    "fact": "Pure neon glows only reddish orange, so many so-called neon signs in other colors actually use different gases or coated glass tubes."
+  },
+  "11": {
+    "summary": "Sodium is a soft, silvery metal that reacts violently with water. It matters because, joined with chlorine, it forms table salt, and your nerves and muscles need sodium to send their signals.",
+    "uses": [
+      "Table salt",
+      "Yellow street lamps",
+      "Baking soda"
+    ],
+    "fact": "Sodium metal is soft enough to slice with a butter knife and is stored under oil to keep it away from air and moisture."
+  },
+  "12": {
+    "summary": "Magnesium is a light, silvery metal that burns with a dazzling white flame. It matters because it makes strong, lightweight alloys for cars and aircraft, and your body needs it for healthy muscles and bones.",
+    "uses": [
+      "Lightweight alloys",
+      "Fireworks and flares",
+      "Antacid medicines"
+    ],
+    "fact": "Every molecule of chlorophyll, the green pigment plants use to capture sunlight, has a single magnesium atom at its center."
+  },
+  "13": {
+    "summary": "Aluminum is a light, silvery metal that resists corrosion because a thin oxide layer protects its surface. It matters because it is strong for its weight, which makes it ideal for aircraft, drink cans, and foil.",
+    "uses": [
+      "Drink cans",
+      "Aircraft bodies",
+      "Kitchen foil"
+    ],
+    "fact": "Before cheap electricity, aluminum was so hard to extract that it was treated as a precious metal, even though it is the most abundant metal in Earth's crust."
+  },
+  "14": {
+    "summary": "Silicon is a hard, gray, shiny element that behaves partly like a metal and partly like a nonmetal. It matters because computer chips and most solar cells are built on thin slices of very pure silicon.",
+    "uses": [
+      "Computer chips",
+      "Solar panels",
+      "Glass making"
+    ],
+    "fact": "Silicon is the second most abundant element in Earth's crust after oxygen, and together the two make up sand and most common rocks."
+  },
+  "15": {
+    "summary": "Phosphorus is a reactive nonmetal that comes in several forms, including white and red. It matters because it is part of DNA, bones, and teeth, and farmers rely on phosphate fertilizers to grow crops.",
+    "uses": [
+      "Phosphate fertilizers",
+      "Safety match strikers",
+      "Animal feed supplements"
+    ],
+    "fact": "Phosphorus was discovered in 1669 by Hennig Brand, an alchemist who boiled down large amounts of urine while searching for a way to make gold."
+  },
+  "16": {
+    "summary": "Sulfur is a bright yellow, brittle nonmetal often found near volcanoes and hot springs. It matters because it is made into sulfuric acid, one of the most widely produced industrial chemicals in the world.",
+    "uses": [
+      "Sulfuric acid production",
+      "Rubber vulcanization",
+      "Fertilizers and fungicides"
+    ],
+    "fact": "Pure sulfur has no smell, and the rotten-egg stink people blame on it actually comes from hydrogen sulfide, a compound of sulfur and hydrogen."
+  },
+  "17": {
+    "summary": "Chlorine is a yellow-green, poisonous gas with a sharp, choking smell. It matters because small amounts kill germs in drinking water and swimming pools, and it is one of the two elements in table salt.",
+    "uses": [
+      "Drinking water disinfection",
+      "Household bleach",
+      "PVC plastic pipes"
+    ],
+    "fact": "Chlorine gas was used as a weapon in the First World War, yet adding chlorine to drinking water has saved enormous numbers of lives."
+  },
+  "18": {
+    "summary": "Argon is a colorless, odorless gas that almost never reacts with anything. It matters because this unreactive nature makes it an ideal protective blanket for welding metals and for filling light bulbs.",
+    "uses": [
+      "Welding shield gas",
+      "Incandescent light bulbs",
+      "Double-glazed window filling"
+    ],
+    "fact": "Argon is the third most common gas in dry air, making up nearly one percent of every breath you take."
+  },
+  "19": {
+    "summary": "Potassium is a soft, silvery metal that reacts so fiercely with water that it catches fire. It matters because your nerves and muscles, including your heart, need potassium to work, and plants need it to grow.",
+    "uses": [
+      "Potash fertilizers",
+      "Soap making",
+      "Low-sodium salt substitutes"
+    ],
+    "fact": "A tiny fraction of all potassium is naturally radioactive, so bananas and even your own body give off a very small, harmless amount of radiation."
+  },
+  "20": {
+    "summary": "Calcium is a silvery metal that is never found pure in nature because it reacts with air and water. It matters because its compounds build strong bones and teeth and are a main ingredient of cement.",
+    "uses": [
+      "Cement and concrete",
+      "Plaster and drywall",
+      "Dietary supplements"
+    ],
+    "fact": "Marble, limestone, eggshells, seashells, and pearls are all made mainly of the same compound, calcium carbonate."
+  },
+  "21": {
+    "summary": "Scandium is a soft, silvery metal that is spread thinly through Earth's crust and is costly to extract. It matters because adding a little to aluminum makes alloys that are both strong and light.",
+    "uses": [
+      "Aluminum-scandium alloys",
+      "Stadium floodlights",
+      "Lightweight sports equipment"
+    ],
+    "fact": "Dmitri Mendeleev predicted this element and its properties, calling it eka-boron, several years before it was discovered in Sweden in 1879."
+  },
+  "22": {
+    "summary": "Titanium is a silvery metal that is about as strong as steel but much lighter, and it resists corrosion very well. It matters for aircraft, spacecraft, and medical implants, because the human body accepts it readily.",
+    "uses": [
+      "Jet engine parts",
+      "Hip and dental implants",
+      "White paint pigment"
+    ],
+    "fact": "Most titanium is not used as a metal at all but as titanium dioxide, the brilliant white pigment in paint, sunscreen, and toothpaste."
+  },
+  "23": {
+    "summary": "Vanadium is a hard, silvery-gray metal that is mostly used in small amounts mixed into steel. It matters because even a little makes steel much tougher and more resistant to shock and wear.",
+    "uses": [
+      "Tool and spring steel",
+      "Sulfuric acid catalyst",
+      "Large-scale flow batteries"
+    ],
+    "fact": "Vanadium was named after Vanadis, another name for the Norse goddess Freyja, because its compounds come in so many beautiful colors."
+  },
+  "24": {
+    "summary": "Chromium is a hard, silvery metal that can be polished to a mirror-like shine. It matters because adding it to steel creates stainless steel, which resists rust and stains in kitchens, hospitals, and factories.",
+    "uses": [
+      "Stainless steel",
+      "Chrome plating",
+      "Paint pigments"
+    ],
+    "fact": "Tiny traces of chromium are what give rubies their deep red color and emeralds their rich green color."
+  },
+  "25": {
+    "summary": "Manganese is a hard, brittle, grayish metal that is rarely used on its own. It matters because nearly all steel contains some manganese, which makes the steel stronger and easier to shape.",
+    "uses": [
+      "Steel production",
+      "Alkaline batteries",
+      "Aluminum drink cans"
+    ],
+    "fact": "Potato-sized lumps rich in manganese, called nodules, lie scattered across large areas of the deep ocean floor, having grown extremely slowly over millions of years."
+  },
+  "26": {
+    "summary": "Iron is a strong, grayish metal and the main ingredient of steel, which is used in buildings, bridges, cars, and tools. It also matters inside your body, where iron in your blood helps carry oxygen.",
+    "uses": [
+      "Structural steel",
+      "Cast iron cookware",
+      "Magnets and electromagnets"
+    ],
+    "fact": "Earth's core is made mostly of iron, and the swirling motion of its liquid outer layer generates the planet's magnetic field."
+  },
+  "27": {
+    "summary": "Cobalt is a hard, bluish-gray metal that can be magnetized. It matters because it is used in many rechargeable batteries and in tough alloys that survive the heat inside jet engines.",
+    "uses": [
+      "Lithium-ion batteries",
+      "Jet engine superalloys",
+      "Blue glass and ceramics"
+    ],
+    "fact": "Cobalt's name comes from kobold, a German word for a goblin, because miners long ago blamed mischievous spirits for its troublesome ores."
+  },
+  "28": {
+    "summary": "Nickel is a silvery-white metal that resists corrosion and can be magnetized. It matters because it is a key ingredient of stainless steel and is also used in coins and rechargeable batteries.",
+    "uses": [
+      "Stainless steel alloys",
+      "Coin making",
+      "Electric vehicle batteries"
+    ],
+    "fact": "The US five-cent coin known as a nickel is actually three quarters copper and only one quarter nickel."
+  },
+  "29": {
+    "summary": "Copper is a reddish-orange metal that conducts electricity and heat extremely well. It matters because most electrical wiring is made of it, and people have been shaping it into tools for thousands of years.",
+    "uses": [
+      "Electrical wiring",
+      "Water pipes",
+      "Bronze and brass"
+    ],
+    "fact": "The Statue of Liberty is covered in copper sheets, which slowly turned from reddish brown to green as the metal reacted with the air."
+  },
+  "30": {
+    "summary": "Zinc is a bluish-white metal that protects other metals from rusting. It matters because coating steel with zinc, called galvanizing, makes it last far longer, and your body needs zinc to stay healthy.",
+    "uses": [
+      "Galvanized steel",
+      "Brass alloys",
+      "Sunscreen and skin creams"
+    ],
+    "fact": "US pennies made since 1983 are almost entirely zinc, with just a thin coating of copper on the outside."
+  },
+  "31": {
+    "summary": "Gallium is a soft, silvery metal that is not found pure in nature. It matters because its compounds are used in LEDs, lasers, and the fast electronic chips inside mobile phones.",
+    "uses": [
+      "LED lighting",
+      "Mobile phone chips",
+      "High-efficiency solar cells"
+    ],
+    "fact": "Gallium melts at about 30 degrees Celsius, so a solid piece will slowly turn to liquid in the palm of your hand."
+  },
+  "32": {
+    "summary": "Germanium is a hard, grayish-white element that is a semiconductor, meaning it conducts electricity better than an insulator but worse than a metal. It matters because it is used in fiber-optic cables and in lenses for infrared cameras.",
+    "uses": [
+      "Fiber-optic cables",
+      "Infrared camera lenses",
+      "High-speed electronics"
+    ],
+    "fact": "The very first transistor, built at Bell Labs in 1947, used germanium rather than the silicon that dominates electronics today."
+  },
+  "33": {
+    "summary": "Arsenic is a gray, brittle element best known as a notorious poison. It still matters today because small amounts are used in electronics, and natural arsenic in groundwater is a serious health problem in some countries.",
+    "uses": [
+      "Gallium arsenide electronics",
+      "Wood preservatives",
+      "Lead battery alloys"
+    ],
+    "fact": "In the 1800s a fashionable green pigment containing arsenic was used in wallpaper and clothing, sometimes making people ill."
+  },
+  "34": {
+    "summary": "Selenium is a nonmetal that conducts electricity better when light shines on it. It matters because your body needs tiny amounts of it to stay healthy, although too much is poisonous.",
+    "uses": [
+      "Glass making",
+      "Dietary supplements",
+      "Anti-dandruff shampoos"
+    ],
+    "fact": "Selenium was named after Selene, the Greek goddess of the Moon, to pair it with tellurium, which had been named after the Earth."
+  },
+  "35": {
+    "summary": "Bromine is a dark reddish-brown liquid that gives off choking, orange-brown fumes. It matters because its compounds are used to make materials harder to set alight and to keep water free of germs.",
+    "uses": [
+      "Flame retardants",
+      "Water treatment chemicals",
+      "Traditional photographic film"
+    ],
+    "fact": "Bromine is one of only two elements that are liquid at room temperature, and its name comes from a Greek word meaning stench."
+  },
+  "36": {
+    "summary": "Krypton is a colorless, odorless gas found in tiny traces in the air. It matters because it is used in some bright lamps and lasers, and it helps insulate energy-saving windows.",
+    "uses": [
+      "Insulated window filling",
+      "Photographic flash lamps",
+      "Krypton fluoride lasers"
+    ],
+    "fact": "From 1960 to 1983 the meter was officially defined using the wavelength of orange-red light given off by krypton atoms."
+  },
+  "37": {
+    "summary": "Rubidium is a very soft, silvery metal that reacts violently with water and can catch fire in air. It matters mostly in science and technology, where it is used in very accurate clocks.",
+    "uses": [
+      "Atomic clocks",
+      "Scientific research",
+      "Specialty glass"
+    ],
+    "fact": "Rubidium's name comes from the Latin for deep red, after the red lines scientists saw when they first examined its light."
+  },
+  "38": {
+    "summary": "Strontium is a soft, silvery metal that quickly turns yellowish in air. It matters because its compounds produce the brilliant red colors in fireworks and flares, and others make long-lasting glow-in-the-dark materials.",
+    "uses": [
+      "Red fireworks",
+      "Emergency flares",
+      "Glow-in-the-dark paints"
+    ],
+    "fact": "Strontium is named after Strontian, a village in Scotland where the mineral containing it was first found."
+  },
+  "39": {
+    "summary": "Yttrium is a silvery metal usually grouped with the rare earth elements. It matters because its compounds are used in white LEDs, lasers, and materials that conduct electricity without resistance when cooled.",
+    "uses": [
+      "White LED lighting",
+      "Solid-state lasers",
+      "High-temperature superconductors"
+    ],
+    "fact": "Four elements, yttrium, ytterbium, terbium, and erbium, are all named after the same small Swedish village, Ytterby."
+  },
+  "40": {
+    "summary": "Zirconium is a strong, silvery-gray metal that resists corrosion extremely well. It matters in nuclear power stations, where it is used to wrap the fuel because it lets neutrons pass through easily.",
+    "uses": [
+      "Nuclear fuel cladding",
+      "Ceramic knives",
+      "Dental crowns"
+    ],
+    "fact": "Cubic zirconia, a sparkling crystal form of zirconium dioxide, is widely used as an inexpensive stand-in for diamond in jewelry."
+  },
+  "41": {
+    "summary": "Niobium is a soft, gray metal that makes steel much stronger when a small amount is added. It matters because niobium alloys can carry electricity with no resistance at very low temperatures, making powerful magnets possible.",
+    "uses": [
+      "Pipeline steel",
+      "Superconducting magnets",
+      "Jet engine alloys"
+    ],
+    "fact": "Niobium is named after Niobe, daughter of Tantalus in Greek myth, because it is so similar to the element tantalum."
+  },
+  "42": {
+    "summary": "Molybdenum is a silvery metal with a very high melting point. It matters because adding it to steel makes the steel stronger and more resistant to heat and corrosion, which suits it to tools and engine parts.",
+    "uses": [
+      "High-strength steel alloys",
+      "Industrial lubricants",
+      "Oil refining catalysts"
+    ],
+    "fact": "Many of the bacteria that turn nitrogen from the air into food for plants depend on an enzyme that contains molybdenum."
+  },
+  "43": {
+    "summary": "Technetium is a silvery, radioactive metal with no stable forms, so almost none exists naturally on Earth. It matters in hospitals, where a short-lived form helps doctors take images of organs and bones.",
+    "uses": [
+      "Medical imaging tracers",
+      "Bone and heart scans",
+      "Scientific research"
+    ],
+    "fact": "Technetium was the first element to be made artificially, and its name comes from a Greek word meaning artificial."
+  },
+  "44": {
+    "summary": "Ruthenium is a rare, hard, silvery-white metal belonging to the platinum family. It matters because small amounts harden other precious metals and help make durable electrical contacts and computer hard disks.",
+    "uses": [
+      "Electrical contacts",
+      "Hard disk drives",
+      "Chemical catalysts"
+    ],
+    "fact": "Ruthenium is named after Ruthenia, a Latin name for Russia, where the ore it was discovered in had been mined."
+  },
+  "45": {
+    "summary": "Rhodium is a rare, silvery-white metal that is very hard and highly reflective. It matters because it is used in car exhaust systems to turn harmful gases into less harmful ones.",
+    "uses": [
+      "Catalytic converters",
+      "Jewelry plating",
+      "Reflective mirror coatings"
+    ],
+    "fact": "Rhodium is one of the rarest and most expensive precious metals, and at times it has cost many times more than gold."
+  },
+  "46": {
+    "summary": "Palladium is a rare, silvery-white precious metal closely related to platinum. It matters because most of it goes into catalytic converters, which clean up the exhaust fumes from gasoline-powered cars.",
+    "uses": [
+      "Catalytic converters",
+      "White gold jewelry",
+      "Electronic components"
+    ],
+    "fact": "Palladium can soak up hydrogen like a sponge, absorbing hundreds of times its own volume of the gas."
+  },
+  "47": {
+    "summary": "Silver is a shiny, white precious metal that people have made into jewelry and coins for thousands of years. It matters in technology too, because it is used in solar panels and electronics.",
+    "uses": [
+      "Jewelry and silverware",
+      "Solar panels",
+      "Mirror coatings"
+    ],
+    "fact": "Silver conducts both electricity and heat better than any other metal, beating even copper, though it is too costly for ordinary wiring."
+  },
+  "48": {
+    "summary": "Cadmium is a soft, bluish-white metal that is toxic to people and wildlife. It matters because it has been widely used in rechargeable batteries and pigments, so it must be handled and recycled carefully.",
+    "uses": [
+      "Nickel-cadmium batteries",
+      "Yellow and red pigments",
+      "Thin-film solar panels"
+    ],
+    "fact": "Cadmium compounds give artists some of their brightest yellow, orange, and red paints, which have been popular since the 1800s."
+  },
+  "49": {
+    "summary": "Indium is a very soft, silvery metal that can be scratched with a fingernail. It matters because a transparent compound containing indium conducts electricity, which is what makes touchscreens and flat-panel displays work.",
+    "uses": [
+      "Touchscreen coatings",
+      "Flat-panel displays",
+      "Low-melting solders"
+    ],
+    "fact": "Indium is named after the bright indigo-blue line seen in its light spectrum, not after the country of India."
+  },
+  "50": {
+    "summary": "Tin is a soft, silvery metal that resists corrosion. It matters because a thin coating of it protects steel food cans, and mixing it with copper makes bronze, one of the earliest alloys people used.",
+    "uses": [
+      "Tin-plated food cans",
+      "Electronics solder",
+      "Bronze and pewter"
+    ],
+    "fact": "In very cold conditions tin can slowly crumble into a gray powder, a change nicknamed tin pest."
+  },
+  "51": {
+    "summary": "Antimony is a brittle, silvery-gray element with properties between those of metals and nonmetals. It matters because its compounds make plastics and fabrics harder to burn, and it hardens the lead used in batteries.",
+    "uses": [
+      "Flame retardants",
+      "Lead-acid battery plates",
+      "Semiconductor devices"
+    ],
+    "fact": "Antimony's symbol Sb comes from stibium, its Latin name, and its dark mineral stibnite was ground into eye makeup in parts of the ancient world."
+  },
+  "52": {
+    "summary": "Tellurium is a brittle, silvery-white element that is one of the rarest in Earth's crust. It matters because it is used in some solar panels and in alloys that are easier to cut and shape.",
+    "uses": [
+      "Thin-film solar panels",
+      "Steel and copper alloys",
+      "Thermoelectric cooling devices"
+    ],
+    "fact": "People who absorb even tiny amounts of tellurium develop breath that smells strongly of garlic, an effect that can linger for weeks."
+  },
+  "53": {
+    "summary": "Iodine is a dark, shiny solid that turns into a violet vapor when warmed. It matters because your thyroid gland needs it to make hormones that control growth and how your body uses energy.",
+    "uses": [
+      "Iodized table salt",
+      "Antiseptic wound cleaners",
+      "X-ray contrast dyes"
+    ],
+    "fact": "Iodine was discovered in 1811 by Bernard Courtois, who noticed purple vapor rising from seaweed ash he was treating with acid."
+  },
+  "54": {
+    "summary": "Xenon is a heavy, colorless gas present in the air in very small traces. It matters because it gives a brilliant white light in lamps and is used to propel some spacecraft.",
+    "uses": [
+      "Bright car headlights",
+      "Cinema projector lamps",
+      "Spacecraft ion engines"
+    ],
+    "fact": "Xenon was thought to be completely unreactive until 1962, when Neil Bartlett used it to make the first noble gas compound."
+  },
+  "55": {
+    "summary": "Cesium is a soft, pale gold metal that melts just above room temperature and reacts explosively with water. It matters because clocks based on cesium atoms keep time accurately enough to set the world's official time.",
+    "uses": [
+      "Atomic clocks",
+      "Oil drilling fluids",
+      "Photoelectric cells"
+    ],
+    "fact": "Since 1967 the second has been officially defined by counting a particular vibration of cesium atoms that repeats more than nine billion times."
+  },
+  "56": {
+    "summary": "Barium is a soft, silvery metal that reacts quickly with air and water, so it is never found pure in nature. It matters because one of its compounds shows up clearly on X-rays, helping doctors examine the digestive system.",
+    "uses": [
+      "Medical X-ray imaging",
+      "Green fireworks",
+      "Oil well drilling mud"
+    ],
+    "fact": "Barium compounds that dissolve in water are poisonous, yet barium sulfate is safe to swallow for X-rays because it does not dissolve in the body."
+  },
+  "57": {
+    "summary": "Lanthanum is a soft, silvery-white metal that gives its name to the lanthanide series of elements. It matters because it is used in camera lenses, oil refining, and the batteries of many hybrid cars.",
+    "uses": [
+      "Camera lens glass",
+      "Hybrid car batteries",
+      "Oil refining catalysts"
+    ],
+    "fact": "Lanthanum's name comes from a Greek word meaning to lie hidden, because it was found concealed inside a mineral of cerium."
+  },
+  "58": {
+    "summary": "Cerium is a soft, gray metal and the most abundant of the rare earth elements. It matters because its oxide is used to polish glass and to help clean up car exhaust fumes.",
+    "uses": [
+      "Glass polishing powder",
+      "Catalytic converters",
+      "Lighter flints"
+    ],
+    "fact": "The sparks from a cigarette lighter's flint come from an alloy rich in cerium, which sheds burning shavings when it is scratched."
+  },
+  "59": {
+    "summary": "Praseodymium is a soft, silvery rare earth metal that slowly develops a green coating in air. It matters because it helps make very strong magnets and special glass that protects the eyes of welders and glassblowers.",
+    "uses": [
+      "Powerful permanent magnets",
+      "Welding goggle glass",
+      "Yellow ceramic glazes"
+    ],
+    "fact": "Its name means green twin in Greek, because it was separated in 1885 from a material once believed to be a single element."
+  }
+}

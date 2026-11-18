@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#07070d" />
+    <meta name="description" content="Periodica turns the periodic table into fast, satisfying puzzle rounds. Place elements, master all 118, and learn something real about each one." />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <title>Periodica — Master the Periodic Table</title>
+    <script>
+      try {
+        var s = JSON.parse(localStorage.getItem('periodica-settings') || '{}');
+        var t = (s.state && s.state.theme) || 'system';
+        if (t === 'light' || (t === 'system' && matchMedia('(prefers-color-scheme: light)').matches)) document.documentElement.dataset.theme = 'light';
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

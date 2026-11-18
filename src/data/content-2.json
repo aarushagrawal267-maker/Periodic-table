@@ -1,0 +1,533 @@
+{
+  "60": {
+    "summary": "Neodymium is a silvery rare earth metal used to make very strong permanent magnets. These magnets are found in headphones, electric car motors, and wind turbines, which makes the element important for modern technology.",
+    "uses": [
+      "Powerful permanent magnets",
+      "Electric vehicle motors",
+      "Industrial and medical lasers"
+    ],
+    "fact": "Glass colored with neodymium appears lilac in daylight but can look pale blue under fluorescent lamps, because it absorbs a narrow band of yellow light."
+  },
+  "61": {
+    "summary": "Promethium is a radioactive rare earth metal that is almost never found in nature. All of its forms decay away, so the tiny amounts that scientists use are made in nuclear reactors.",
+    "uses": [
+      "Luminous paint",
+      "Thickness measuring gauges",
+      "Atomic batteries"
+    ],
+    "fact": "Promethium is named after Prometheus, the figure in Greek myth who stole fire from the gods and gave it to humans."
+  },
+  "62": {
+    "summary": "Samarium is a silvery rare earth metal that helps make magnets which keep working at high temperatures. It is also good at absorbing neutrons, so it is useful inside nuclear reactors.",
+    "uses": [
+      "Samarium-cobalt magnets",
+      "Nuclear reactor control rods",
+      "Cancer pain treatment"
+    ],
+    "fact": "Samarium takes its name from the mineral samarskite, which honors Vasili Samarsky-Bykhovets, a Russian mining official who gave scientists access to the mineral samples."
+  },
+  "63": {
+    "summary": "Europium is a soft, silvery rare earth metal that reacts quickly with air and water. Its compounds glow brightly when energized, which makes the element valuable for producing red and blue light in screens and lamps.",
+    "uses": [
+      "Red screen phosphors",
+      "Fluorescent lamps",
+      "Anti-counterfeiting inks"
+    ],
+    "fact": "Europium is named after the continent of Europe, and its compounds that glow under ultraviolet light are used in security inks that help expose forged documents."
+  },
+  "64": {
+    "summary": "Gadolinium is a silvery rare earth metal with unusual magnetic properties. Doctors use its compounds to make MRI scans clearer, and it is excellent at absorbing neutrons inside nuclear reactors.",
+    "uses": [
+      "MRI contrast agents",
+      "Neutron absorbers in reactors",
+      "X-ray imaging screens"
+    ],
+    "fact": "Gadolinium is strongly magnetic like iron on a cool day, but it loses that strong magnetism when it is warmed to roughly room temperature."
+  },
+  "65": {
+    "summary": "Terbium is a soft, silvery rare earth metal whose compounds glow bright green. That green glow helps create the colors in screens and efficient lamps, and terbium also improves powerful magnets.",
+    "uses": [
+      "Green screen phosphors",
+      "Fluorescent lamps",
+      "Sonar transducers"
+    ],
+    "fact": "Four elements, terbium, yttrium, erbium, and ytterbium, are all named after the same small Swedish village, Ytterby, where their minerals were first found."
+  },
+  "66": {
+    "summary": "Dysprosium is a bright, silvery rare earth metal that is added to powerful magnets. It helps those magnets keep their strength when they get hot, which matters in electric cars and wind turbines.",
+    "uses": [
+      "Heat-resistant magnets",
+      "Wind turbine generators",
+      "Nuclear reactor control rods"
+    ],
+    "fact": "Dysprosium's name comes from a Greek word meaning hard to get at, because its discoverer needed many repeated steps to separate it."
+  },
+  "67": {
+    "summary": "Holmium is a soft, silvery rare earth metal with remarkable magnetic strength. It is used in special magnets and in medical lasers that help surgeons cut tissue and break up kidney stones.",
+    "uses": [
+      "Medical lasers",
+      "Magnet pole pieces",
+      "Colored glass"
+    ],
+    "fact": "Holmium gets its name from Holmia, the Latin name for Stockholm, the Swedish capital that lies close to where many rare earth minerals were found."
+  },
+  "68": {
+    "summary": "Erbium is a soft, silvery rare earth metal that gives glass a pink color. Tiny amounts inside optical fibers boost the light signals that carry internet data across long distances.",
+    "uses": [
+      "Fiber-optic signal amplifiers",
+      "Pink glass coloring",
+      "Dental and skin lasers"
+    ],
+    "fact": "Early chemists confused erbium with terbium so badly that the two names ended up swapped compared with how their discoverer first assigned them."
+  },
+  "69": {
+    "summary": "Thulium is a silvery rare earth metal that is among the scarcest of its family. A radioactive form of it gives off X-rays and has been used in portable X-ray devices that need no electricity supply.",
+    "uses": [
+      "Portable X-ray sources",
+      "Surgical lasers",
+      "Fiber-optic signal amplifiers"
+    ],
+    "fact": "Thulium is named after Thule, an ancient name for a mysterious land in the far north that is often linked with Scandinavia."
+  },
+  "70": {
+    "summary": "Ytterbium is a soft, silvery rare earth metal that is fairly easy to bend and shape. It is used in powerful industrial lasers and in some of the most accurate atomic clocks ever built.",
+    "uses": [
+      "Atomic clocks",
+      "Industrial fiber lasers",
+      "Chemical reaction catalysts"
+    ],
+    "fact": "Ytterbium's electrical resistance changes when it is squeezed very hard, so it has been used in gauges that measure the shock from explosions and earthquakes."
+  },
+  "71": {
+    "summary": "Lutetium is a hard, dense, silvery metal that is the last member of the lanthanide series. It is difficult to separate from its neighbors, and it is used in medical scanners and cancer treatment.",
+    "uses": [
+      "PET scanner detectors",
+      "Targeted cancer therapy",
+      "Oil refining catalysts"
+    ],
+    "fact": "Lutetium is named after Lutetia, the Roman name for the settlement that grew into the city of Paris."
+  },
+  "72": {
+    "summary": "Hafnium is a shiny, silvery metal that resists corrosion and absorbs neutrons very well. This makes it useful for controlling nuclear reactors, and its compounds help shrink the transistors inside computer chips.",
+    "uses": [
+      "Nuclear reactor control rods",
+      "Computer chip insulators",
+      "High-temperature alloys"
+    ],
+    "fact": "Hafnium is named after Hafnia, the Latin name for Copenhagen, where it was finally found hiding in minerals of zirconium, which it closely resembles."
+  },
+  "73": {
+    "summary": "Tantalum is a hard, blue-gray metal that is extremely resistant to corrosion. It is used to make tiny capacitors for phones and computers, and the human body tolerates it well in implants.",
+    "uses": [
+      "Electronic capacitors",
+      "Surgical implants",
+      "Chemical processing equipment"
+    ],
+    "fact": "Tantalum is named after Tantalus from Greek myth, who stood in water he could never drink, because the metal's oxide would not take up acid."
+  },
+  "74": {
+    "summary": "Tungsten is a very dense, gray metal with the highest melting point of all metals. Its strength at extreme heat makes it valuable for cutting tools, light bulb filaments, and rocket parts.",
+    "uses": [
+      "Light bulb filaments",
+      "Carbide cutting tools",
+      "Welding electrodes"
+    ],
+    "fact": "Tungsten means heavy stone in Swedish, yet its symbol W comes from its other name, wolfram, which is still used in several languages."
+  },
+  "75": {
+    "summary": "Rhenium is a rare, dense, silvery metal with an extremely high melting point. It is added to the alloys used in jet engine turbine blades so that they can survive intense heat.",
+    "uses": [
+      "Jet engine turbine blades",
+      "Petroleum refining catalysts",
+      "High-temperature thermocouples"
+    ],
+    "fact": "Rhenium is named after the Rhine river in Germany, and it was the last element with a stable form to be discovered."
+  },
+  "76": {
+    "summary": "Osmium is a hard, bluish-white metal that is one of the densest substances known. It is very rare, and it is mixed with other metals to make extremely hard-wearing parts.",
+    "uses": [
+      "Fountain pen tips",
+      "Electrical contacts",
+      "Microscope sample staining"
+    ],
+    "fact": "Osmium's name comes from the Greek word for smell, because its powder slowly forms a toxic compound in air that has a sharp odor."
+  },
+  "77": {
+    "summary": "Iridium is a hard, silvery-white metal that is among the most corrosion-resistant metals known. It is extremely rare in Earth's crust and is used where parts must survive great heat and wear.",
+    "uses": [
+      "Spark plug tips",
+      "High-temperature crucibles",
+      "OLED screen materials"
+    ],
+    "fact": "A thin layer of iridium-rich clay found around the world is key evidence that an asteroid struck Earth when the dinosaurs died out."
+  },
+  "78": {
+    "summary": "Platinum is a dense, silvery-white precious metal that does not tarnish. It is prized for jewelry, and it speeds up chemical reactions, which helps clean car exhaust and produce many useful chemicals.",
+    "uses": [
+      "Catalytic converters",
+      "Fine jewelry",
+      "Cancer chemotherapy drugs"
+    ],
+    "fact": "Spanish explorers in South America called platinum platina, meaning little silver, and at first considered it a nuisance mixed in with their gold."
+  },
+  "79": {
+    "summary": "Gold is a soft, yellow precious metal that does not rust or tarnish. People have treasured it for thousands of years as jewelry and money, and it is also an excellent conductor in electronics.",
+    "uses": [
+      "Jewelry and coins",
+      "Electronic connectors",
+      "Dental crowns"
+    ],
+    "fact": "Gold can be hammered into sheets so thin that they become see-through, and its symbol Au comes from aurum, the Latin word for gold."
+  },
+  "80": {
+    "summary": "Mercury is a heavy, silvery metal that is liquid at room temperature. It was once common in thermometers, but it is poisonous, so many of its uses are now being phased out.",
+    "uses": [
+      "Fluorescent lamps",
+      "Older thermometers and barometers",
+      "Dental amalgam fillings"
+    ],
+    "fact": "Mercury is so dense that pieces of solid lead and even iron cannonballs will float on its surface instead of sinking."
+  },
+  "81": {
+    "summary": "Thallium is a soft, gray metal that is highly poisonous. It was once used in rat poison, and today small amounts are used in electronics, special glass, and medical heart scans.",
+    "uses": [
+      "Heart imaging scans",
+      "Infrared lens materials",
+      "Special low-melting glass"
+    ],
+    "fact": "Thallium was discovered by the bright green line it gives off in a flame, and its name comes from a Greek word for a green shoot."
+  },
+  "82": {
+    "summary": "Lead is a soft, heavy, gray metal that is easy to melt and shape. It is very useful in batteries and radiation shielding, but it is poisonous, so it has been removed from most paint and gasoline.",
+    "uses": [
+      "Car batteries",
+      "Radiation shielding",
+      "Weights and ballast"
+    ],
+    "fact": "The word plumbing and lead's symbol Pb both come from plumbum, the Latin name for lead, because Roman water pipes were made from it."
+  },
+  "83": {
+    "summary": "Bismuth is a brittle, silvery metal with a faint pink tinge. It is far less toxic than neighbors such as lead, so it is used in medicines, cosmetics, and lead-free alloys.",
+    "uses": [
+      "Stomach upset medicines",
+      "Lead-free solders",
+      "Cosmetic pigments"
+    ],
+    "fact": "Bismuth crystals grown in a laboratory form staircase-like spirals coated in a thin oxide layer that shimmers with rainbow colors."
+  },
+  "84": {
+    "summary": "Polonium is a rare, intensely radioactive metal found in tiny traces in uranium ores. It gives off so much energy that a small sample heats itself, and it is extremely dangerous if swallowed or inhaled.",
+    "uses": [
+      "Antistatic brushes",
+      "Spacecraft heat sources",
+      "Neutron sources"
+    ],
+    "fact": "Marie Curie named polonium after Poland, her homeland, which at the time did not exist as an independent country."
+  },
+  "85": {
+    "summary": "Astatine is an extremely rare radioactive element that forms in tiny traces as heavier elements decay. So little exists that nobody has ever seen a visible piece, and scientists study it mainly for possible cancer treatments.",
+    "uses": [
+      "Cancer therapy research",
+      "Scientific research",
+      "Nuclear medicine studies"
+    ],
+    "fact": "Astatine's name comes from the Greek word for unstable, which suits an element whose longest-lived form has a half-life of only about eight hours."
+  },
+  "86": {
+    "summary": "Radon is a colorless, odorless radioactive gas that forms naturally as uranium in rocks and soil breaks down. It can seep into buildings and collect in basements, where breathing it for years raises lung cancer risk.",
+    "uses": [
+      "Early cancer radiotherapy",
+      "Tracing groundwater flow",
+      "Studying air movement"
+    ],
+    "fact": "Radon is the heaviest of the noble gases found in nature, and it is roughly eight times denser than the air around us."
+  },
+  "87": {
+    "summary": "Francium is an extremely rare, highly radioactive metal that forms briefly in uranium ores. Its atoms break down so quickly that it has no practical uses and is studied only in tiny amounts.",
+    "uses": [
+      "Atomic physics research",
+      "Scientific research",
+      "Studying atomic structure"
+    ],
+    "fact": "Francium was discovered by Marguerite Perey, a former assistant of Marie Curie, who named the new element after her home country, France."
+  },
+  "88": {
+    "summary": "Radium is a silvery-white radioactive metal found in tiny amounts in uranium ores. It once made watch dials glow in the dark, until people learned how dangerous its radiation is.",
+    "uses": [
+      "Historic glowing watch dials",
+      "Cancer radiotherapy",
+      "Early neutron sources"
+    ],
+    "fact": "Factory workers known as the Radium Girls became seriously ill after licking their brushes to a point while painting glowing radium onto watch dials."
+  },
+  "89": {
+    "summary": "Actinium is a soft, silvery radioactive metal that glows pale blue in the dark. It is very rare in nature, and one form of it is being developed for targeted cancer treatments.",
+    "uses": [
+      "Targeted cancer therapy research",
+      "Neutron sources",
+      "Scientific research"
+    ],
+    "fact": "Actinium gives its name to the actinides, the row of fifteen radioactive elements that starts with it and ends with lawrencium."
+  },
+  "90": {
+    "summary": "Thorium is a silvery, slightly radioactive metal that is more common in Earth's crust than uranium. It can be turned into nuclear fuel, so scientists are studying it as a possible future energy source.",
+    "uses": [
+      "Gas lantern mantles",
+      "Nuclear fuel research",
+      "Heat-resistant magnesium alloys"
+    ],
+    "fact": "Thorium was named after Thor, the Norse god of thunder, by the Swedish chemist Berzelius, who first identified the element."
+  },
+  "91": {
+    "summary": "Protactinium is a dense, silvery radioactive metal that is very rare and highly toxic. It has no everyday uses, but measuring it in ocean sediments helps scientists learn about past ocean currents.",
+    "uses": [
+      "Dating ocean sediments",
+      "Scientific research",
+      "Nuclear chemistry studies"
+    ],
+    "fact": "Protactinium's name means parent of actinium, because it slowly decays into actinium as it gives off radiation."
+  },
+  "92": {
+    "summary": "Uranium is a heavy, silvery radioactive metal found in rocks around the world. Splitting its atoms releases enormous energy, which powers the nuclear reactors that generate electricity in many countries.",
+    "uses": [
+      "Nuclear power fuel",
+      "Submarine reactor fuel",
+      "Dating ancient rocks"
+    ],
+    "fact": "Uranium was named after the planet Uranus, which had been discovered only eight years before the element was identified in 1789."
+  },
+  "93": {
+    "summary": "Neptunium is a silvery radioactive metal that is made inside nuclear reactors. It was the first element heavier than uranium to be produced, opening the way to many more artificial elements.",
+    "uses": [
+      "Neutron detection instruments",
+      "Making plutonium-238",
+      "Scientific research"
+    ],
+    "fact": "Neptunium is named after the planet Neptune because it follows uranium in the table, just as Neptune follows Uranus in the solar system."
+  },
+  "94": {
+    "summary": "Plutonium is a heavy, silvery radioactive metal made in nuclear reactors. It can release huge amounts of energy, so it is used in nuclear weapons, some reactors, and long-lasting power supplies for spacecraft.",
+    "uses": [
+      "Deep-space probe power",
+      "Nuclear reactor fuel",
+      "Nuclear weapons"
+    ],
+    "fact": "Plutonium was named after Pluto, continuing the planet pattern set by uranium and neptunium, back when Pluto was still counted as a planet."
+  },
+  "95": {
+    "summary": "Americium is a silvery radioactive metal made in nuclear reactors. It is one of the few artificial elements found in ordinary homes, because tiny amounts are used in many smoke detectors.",
+    "uses": [
+      "Household smoke detectors",
+      "Industrial thickness gauges",
+      "Oil well logging"
+    ],
+    "fact": "Americium was discovered during the Manhattan Project, and Glenn Seaborg first revealed it to the public while answering a question on a children's radio quiz show."
+  },
+  "96": {
+    "summary": "Curium is a hard, silvery radioactive metal made in nuclear reactors. It is so radioactive that it glows in the dark, and it provides particles for instruments that study rocks on Mars.",
+    "uses": [
+      "Mars rover rock analyzers",
+      "Making heavier elements",
+      "Scientific research"
+    ],
+    "fact": "Curium is named after Marie and Pierre Curie, the married scientists who pioneered the study of radioactivity."
+  },
+  "97": {
+    "summary": "Berkelium is a soft, silvery radioactive metal that is produced only in tiny amounts in special nuclear reactors. It has no everyday uses, but scientists use it as a target for making heavier elements.",
+    "uses": [
+      "Making heavier elements",
+      "Scientific research",
+      "Nuclear chemistry studies"
+    ],
+    "fact": "Berkelium is named after Berkeley, California, and a berkelium target was used to create the first atoms of tennessine."
+  },
+  "98": {
+    "summary": "Californium is a silvery radioactive metal made in nuclear reactors. It gives off a strong stream of neutrons, which makes it valuable for starting reactors and for finding metals and oil underground.",
+    "uses": [
+      "Nuclear reactor startup sources",
+      "Oil well logging",
+      "Detecting metal ores"
+    ],
+    "fact": "Californium is named after the state and university of California, and its price has been quoted at millions of dollars per gram."
+  },
+  "99": {
+    "summary": "Einsteinium is a soft, silvery radioactive metal that is made only in tiny amounts. It is too rare and short-lived for everyday uses, so it is studied purely for scientific research.",
+    "uses": [
+      "Scientific research",
+      "Making heavier elements",
+      "Studying heavy atoms"
+    ],
+    "fact": "Einsteinium was first found in the debris of the first hydrogen bomb test in 1952, and its discovery was kept secret for several years."
+  },
+  "100": {
+    "summary": "Fermium is a radioactive metal that has only ever been produced in amounts far too small to see. It has no uses outside research, where it helps scientists understand very heavy atoms.",
+    "uses": [
+      "Scientific research",
+      "Nuclear physics experiments",
+      "Studying atomic nuclei"
+    ],
+    "fact": "Fermium is named after Enrico Fermi, who led the team that built the first nuclear reactor, and it was first found in hydrogen bomb debris."
+  },
+  "101": {
+    "summary": "Mendelevium is a radioactive metal that can only be made in particle accelerators, in amounts far too small to see. It has no practical uses, but studying it teaches scientists about the heaviest elements.",
+    "uses": [
+      "Scientific research",
+      "Heavy element chemistry studies",
+      "Nuclear physics experiments"
+    ],
+    "fact": "Mendelevium is named after Dmitri Mendeleev, the Russian chemist who created an early periodic table and left gaps for elements not yet discovered."
+  },
+  "102": {
+    "summary": "Nobelium is a radioactive metal made only in extremely small quantities in particle accelerators. Its atoms break down quickly, so it has no practical uses and is studied only in specialized laboratories.",
+    "uses": [
+      "Scientific research",
+      "Studying heavy atoms",
+      "Particle accelerator experiments"
+    ],
+    "fact": "Nobelium is named after Alfred Nobel, the Swedish inventor of dynamite whose fortune was used to found the Nobel Prizes."
+  },
+  "103": {
+    "summary": "Lawrencium is a radioactive metal that is the final member of the actinide series. It can only be made in extremely small quantities, so it is used purely for scientific research.",
+    "uses": [
+      "Scientific research",
+      "Testing periodic table theory",
+      "Nuclear physics experiments"
+    ],
+    "fact": "Lawrencium is named after Ernest Lawrence, who invented the cyclotron, a machine that speeds up particles and helped scientists create many new elements."
+  },
+  "104": {
+    "summary": "Rutherfordium is a radioactive artificial element made by smashing lighter atoms together in particle accelerators. Only small numbers of atoms have ever existed, and they break down too quickly for any practical use.",
+    "uses": [
+      "Scientific research",
+      "Single-atom chemistry experiments",
+      "Studying superheavy atoms"
+    ],
+    "fact": "Rutherfordium is named after Ernest Rutherford, the New Zealand-born physicist who discovered that atoms have a tiny, dense nucleus."
+  },
+  "105": {
+    "summary": "Dubnium is a highly radioactive artificial element created in particle accelerators. So few atoms have been made that scientists must study its chemistry one atom at a time before it decays.",
+    "uses": [
+      "Scientific research",
+      "Single-atom chemistry experiments",
+      "Nuclear physics experiments"
+    ],
+    "fact": "Dubnium is named after Dubna, the Russian town that is home to a famous laboratory where many superheavy elements were first made."
+  },
+  "106": {
+    "summary": "Seaborgium is a radioactive artificial element that sits below tungsten in the periodic table. It can only be made a few atoms at a time, and experiments suggest it behaves chemically much like tungsten.",
+    "uses": [
+      "Scientific research",
+      "Studying superheavy atoms",
+      "Testing periodic table trends"
+    ],
+    "fact": "Seaborgium is named after the American chemist Glenn Seaborg, who was still alive when the name was officially approved, a very rare honor."
+  },
+  "107": {
+    "summary": "Bohrium is a highly radioactive artificial element made by fusing lighter atoms together in particle accelerators. Only a few atoms exist at a time, and they decay quickly, so it has no uses beyond research.",
+    "uses": [
+      "Scientific research",
+      "Nuclear physics experiments",
+      "Studying superheavy atoms"
+    ],
+    "fact": "Bohrium is named after Niels Bohr, the Danish physicist whose model of the atom placed electrons in fixed energy levels around the nucleus."
+  },
+  "108": {
+    "summary": "Hassium is a radioactive artificial element that sits below osmium in the periodic table. Scientists have made only small numbers of atoms, yet they showed it forms an oxide that evaporates easily, just as osmium does.",
+    "uses": [
+      "Scientific research",
+      "Single-atom chemistry experiments",
+      "Studying nuclear stability"
+    ],
+    "fact": "Hassium is named after Hassia, the Latin name for the German state of Hesse, where it was first made at a laboratory in Darmstadt."
+  },
+  "109": {
+    "summary": "Meitnerium is a highly radioactive artificial element first made in Germany. Its atoms last only a short time, so very little is known about its chemistry and it has no practical uses.",
+    "uses": [
+      "Scientific research",
+      "Nuclear physics experiments",
+      "Studying superheavy atoms"
+    ],
+    "fact": "Meitnerium is named after Lise Meitner, the Austrian-born physicist who helped explain nuclear fission but was overlooked for the Nobel Prize."
+  },
+  "110": {
+    "summary": "Darmstadtium is a highly radioactive artificial element that sits below platinum in the periodic table. Only a few atoms have been made, and they decay so quickly that its properties are mostly predicted rather than measured.",
+    "uses": [
+      "Scientific research",
+      "Studying nuclear stability",
+      "Particle accelerator experiments"
+    ],
+    "fact": "Darmstadtium is named after Darmstadt, the German city whose research center first created it by firing nickel atoms at a lead target."
+  },
+  "111": {
+    "summary": "Roentgenium is a highly radioactive artificial element in the same column as copper, silver, and gold. Scientists have produced only a few atoms, so no one knows what a solid piece would look like.",
+    "uses": [
+      "Scientific research",
+      "Nuclear physics experiments",
+      "Studying superheavy atoms"
+    ],
+    "fact": "Roentgenium is named after Wilhelm Roentgen, the German physicist who discovered X-rays and won the very first Nobel Prize in Physics."
+  },
+  "112": {
+    "summary": "Copernicium is a highly radioactive artificial element that sits below mercury in the periodic table. Experiments on single atoms suggest it is unusually volatile, meaning it would turn into a gas very easily.",
+    "uses": [
+      "Scientific research",
+      "Single-atom chemistry experiments",
+      "Testing atomic theories"
+    ],
+    "fact": "Copernicium is named after Nicolaus Copernicus, the astronomer who argued that Earth orbits the Sun rather than the other way around."
+  },
+  "113": {
+    "summary": "Nihonium is a highly radioactive artificial element whose discovery is credited to scientists in Japan. Its atoms survive only briefly, so it has no practical uses and is studied to test ideas about superheavy atoms.",
+    "uses": [
+      "Scientific research",
+      "Studying superheavy atoms",
+      "Particle accelerator experiments"
+    ],
+    "fact": "Nihonium takes its name from Nihon, a Japanese word for Japan that is often translated as land of the rising sun."
+  },
+  "114": {
+    "summary": "Flerovium is a highly radioactive artificial element that sits below lead in the periodic table. Only a small number of atoms have been made, and each one decays very quickly after it forms.",
+    "uses": [
+      "Scientific research",
+      "Studying nuclear stability",
+      "Single-atom chemistry experiments"
+    ],
+    "fact": "Flerovium is named after the Flerov Laboratory of Nuclear Reactions in Dubna, Russia, which itself honors the physicist Georgy Flerov."
+  },
+  "115": {
+    "summary": "Moscovium is a highly radioactive artificial element made by firing calcium atoms at americium. Its atoms typically last for less than a second, so it exists only briefly inside research laboratories.",
+    "uses": [
+      "Scientific research",
+      "Nuclear physics experiments",
+      "Studying superheavy atoms"
+    ],
+    "fact": "Moscovium is named after the Moscow region of Russia, which includes the town of Dubna, where the laboratory that helped discover it is located."
+  },
+  "116": {
+    "summary": "Livermorium is a highly radioactive artificial element that sits below polonium in the periodic table. Only a small number of atoms have ever been made, and they fall apart in a fraction of a second.",
+    "uses": [
+      "Scientific research",
+      "Studying nuclear stability",
+      "Particle accelerator experiments"
+    ],
+    "fact": "Livermorium is named after the Lawrence Livermore National Laboratory in California, whose scientists worked with Russian researchers to discover it."
+  },
+  "117": {
+    "summary": "Tennessine is a highly radioactive artificial element in the same column as fluorine, chlorine, and iodine. It is one of the most recently discovered elements, and only a small number of atoms have been made.",
+    "uses": [
+      "Scientific research",
+      "Studying superheavy atoms",
+      "Testing atomic theories"
+    ],
+    "fact": "Tennessine is named after the American state of Tennessee, home to Oak Ridge National Laboratory, which supplied material needed to make it."
+  },
+  "118": {
+    "summary": "Oganesson is a highly radioactive artificial element with the highest atomic number of any element made so far. It sits in the noble gas column, but scientists predict it may not behave like a typical noble gas.",
+    "uses": [
+      "Scientific research",
+      "Nuclear physics experiments",
+      "Testing atomic theories"
+    ],
+    "fact": "Oganesson is named after Yuri Oganessian, a Russian physicist of Armenian descent, who was still living when the element officially received his name."
+  }
+}
