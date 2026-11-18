@@ -1,7 +1,8 @@
 import { motion } from 'motion/react';
-import { DIFFICULTIES, useSettings } from '../store/settings';
+import { DIFFICULTIES, useSettings, type Difficulty } from '../store/settings';
 
-export function DifficultyPicker() {
+/** `extra` adds a mode-specific sentence to a level's description, e.g. what the quiz adds on Expert. */
+export function DifficultyPicker({ extra }: { extra?: Partial<Record<Difficulty, string>> } = {}) {
   const difficulty = useSettings((s) => s.difficulty);
   const set = useSettings((s) => s.set);
   const current = DIFFICULTIES.find((d) => d.id === difficulty)!;
@@ -18,7 +19,10 @@ export function DifficultyPicker() {
           );
         })}
       </div>
-      <p className="mt-2 text-sm text-ink-3">{current.desc}</p>
+      <p className="mt-2 text-sm text-ink-3">
+        {current.desc}
+        {extra?.[difficulty] ? ` ${extra[difficulty]}` : ''}
+      </p>
     </div>
   );
 }

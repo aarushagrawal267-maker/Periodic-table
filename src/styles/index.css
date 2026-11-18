@@ -36,7 +36,7 @@
   --ink: #f4f4fa;
   --ink-2: #a9a9c2;
   /* ink-3 is used for small captions: keep it at 4.5:1 or better on --bg and cards. */
-  --ink-3: #7f7f9c;
+  --ink-3: #8282a0;
   --accent: #8b7cff;
   --accent-2: #4fd1ff;
   --accent-3: #5cf2b0;
@@ -44,7 +44,18 @@
   --bad: #ff5470;
   --gold: #ffc94a;
   --cell-empty: rgb(255 255 255 / 0.035);
-  --cell-ink-mix: 72%;
+  /* Empty-slot outline: 3:1 or better against the slot and the page (WCAG 1.4.11). */
+  --slot-line: rgb(255 255 255 / 0.4);
+  /* Focus ring: 3:1 or better against --bg, --bg-2 and cards in each theme. */
+  --focus: #4fd1ff;
+  /*
+   * Tile, chip and .cat-ink text = category colour mixed with --ink by this amount.
+   * Tuned per palette so text stays at 4.5:1 or better on its tinted background
+   * (checked for every category colour, heat-map colour and mastery colour).
+   */
+  --cell-ink-mix: 66%;
+  /* Heat-map lenses in Explore use a deep blue that needs more --ink to stay readable. */
+  --heat-ink-mix: 50%;
   --on-grad: #07070d;
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow-md: 0 12px 32px -14px rgb(0 0 0 / 0.75);
@@ -74,7 +85,7 @@
   --line-strong: rgb(20 20 50 / 0.18);
   --ink: #0d0d1c;
   --ink-2: #4b4b66;
-  --ink-3: #6b6b85;
+  --ink-3: #666680;
   /* Darker than the dark-theme accents so accent text and white-on-gradient both pass 4.5:1. */
   --accent: #6a56ff;
   --accent-2: #0a74b8;
@@ -83,7 +94,9 @@
   --bad: #d42a45;
   --gold: #d99a00;
   --cell-empty: rgb(20 20 50 / 0.045);
-  --cell-ink-mix: 62%;
+  --slot-line: rgb(20 20 50 / 0.55);
+  --focus: #0a74b8;
+  --cell-ink-mix: 56%;
   --on-grad: #ffffff;
   --shadow-sm: 0 1px 2px rgb(30 30 80 / 0.08);
   --shadow-md: 0 14px 34px -18px rgb(30 30 80 / 0.28);
@@ -114,6 +127,13 @@
   --cat-lanthanide: #9ad0a0;
   --cat-actinide: #b08cff;
 }
+/* Several Okabe–Ito colours are very light or very dark, so text leans further towards --ink. */
+[data-colorblind='true']:not([data-theme='light']) {
+  --cell-ink-mix: 58%;
+}
+[data-theme='light'][data-colorblind='true'] {
+  --cell-ink-mix: 46%;
+}
 
 html {
   background: var(--bg);
@@ -137,9 +157,15 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
   border-radius: 10px;
+}
+/* Headings and the main region take focus after navigation so they are read out. They are not controls, so no ring. */
+h1[tabindex='-1']:focus,
+h2[tabindex='-1']:focus,
+#main:focus {
+  outline: none;
 }
 
 .font-display {
@@ -241,12 +267,19 @@ body {
     linear-gradient(160deg, color-mix(in oklab, var(--c) 20%, white), color-mix(in oklab, var(--c) 6%, white) 70%);
   border-color: color-mix(in oklab, var(--c) 50%, transparent);
 }
+/* Element name on a tile: plain --ink-2 dips just under 4.5:1 on the brightest dark tiles. */
+.tile-name {
+  color: color-mix(in oklab, var(--ink-2) 60%, var(--ink));
+}
+[data-theme='light'] .tile-name {
+  color: var(--ink-2);
+}
 
 .slot {
   background:
     radial-gradient(120% 90% at 50% 0%, rgb(255 255 255 / 0.035), transparent 70%),
     var(--cell-empty);
-  border: 1px dashed var(--line-strong);
+  border: 1px dashed var(--slot-line);
   box-shadow: inset 0 1px 6px rgb(0 0 0 / 0.25);
 }
 [data-theme='light'] .slot {

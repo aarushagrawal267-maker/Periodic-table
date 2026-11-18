@@ -34,7 +34,14 @@ const CATEGORY = {
   Actinide: 'actinide',
 };
 
-const PERIOD_START = [1, 3, 11, 19, 37, 55, 87, 119];
+// PubChem uses US spellings. Use the IUPAC names, which match the British
+// spelling in the rest of the app. (Sulfur is already the IUPAC spelling.)
+const IUPAC_NAME = {
+  Aluminum: 'Aluminium',
+  Cesium: 'Caesium',
+};
+
+const PERIOD_START =[1, 3, 11, 19, 37, 55, 87, 119];
 const SUP = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
 
 function position(z) {
@@ -72,7 +79,7 @@ const elements = rows.map((r) => {
   return {
     number: z,
     symbol: r.Symbol,
-    name: r.Name,
+    name: IUPAC_NAME[r.Name] ?? r.Name,
     mass: Number(Number(r.AtomicWeight).toPrecision(z > 103 ? 3 : 6)),
     category: CATEGORY[r.GroupBlock],
     ...position(z),

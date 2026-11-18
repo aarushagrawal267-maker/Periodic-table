@@ -1,4 +1,4 @@
-import { CATEGORIES, ELEMENTS, byNumber, categoryLabel, type Element } from './elements';
+import { CATEGORIES, ELEMENTS, byNumber, categoryLabel, type Category, type Element } from './elements';
 import { sample, shuffle } from './random';
 import type { Difficulty } from '../store/settings';
 import type { Mastery } from '../store/progress';
@@ -77,6 +77,15 @@ function pickWrong(e: Element, n: number, ...lists: Element[][]) {
   return picks;
 }
 
+/** Category pairs where one is a kind of the other, so both would be a correct answer. */
+const OVERLAPS: [Category, Category][] = [
+  ['nonmetal', 'halogen'],
+  ['nonmetal', 'noble-gas'],
+  ['transition-metal', 'lanthanide'],
+  ['transition-metal', 'actinide'],
+];
+export const overlaps = (a: Category, b: Category) => OVERLAPS.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
+
 const looksLike = (e: Element) => (x: Element) => x.category === e.category || Math.abs(x.number - e.number) <= 4;
 
 /** Wrong answers that look like e, drawn from familiar elements first so they are plausible, not obscure. */
@@ -107,7 +116,8 @@ function build(kind: Question['kind'], e: Element, known: Element[], all: Elemen
     case 'category': {
       // Prefer kinds of element the player has actually seen.
       const seen = new Set(known.map((x) => x.category));
-      const others = CATEGORIES.filter((c) => c.id !== e.category);
+      // Never offer a wrong option that is also true (every halogen is a nonmetal, lanthanides are inner transition metals).
+      const others = CATEGORIES.filter((c) => c.id !== e.category && !overlaps(c.id, e.category));
       const wrong = sample(others.filter((c) => seen.has(c.id)), 3);
       if (wrong.length < 3) wrong.push(...sample(others.filter((c) => !wrong.includes(c)), 3 - wrong.length));
       return { id, kind, element: e.number, hero: e.symbol, prompt: `What kind of element is ${e.name}?`, ...opts(categoryLabel(e.category), wrong.map((c) => c.label)) };

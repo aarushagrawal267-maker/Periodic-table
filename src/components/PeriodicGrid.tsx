@@ -139,7 +139,8 @@ export function PeriodicGrid({
                       width: layout.cell,
                       height: layout.cell,
                       borderColor: `color-mix(in oklab, ${catVar(m.category)} 50%, transparent)`,
-                      color: catVar(m.category),
+                      // Text needs 4.5:1 in every palette, so lean the category colour towards ink, like tile text.
+                      color: `color-mix(in oklab, ${catVar(m.category)} var(--cell-ink-mix), var(--ink))`,
                       fontSize: Math.max(7, layout.cell * 0.17),
                     }}
                     aria-hidden

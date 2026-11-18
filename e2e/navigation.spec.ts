@@ -5,7 +5,15 @@ test.describe('home and navigation', { tag: '@phone' }, () => {
     const phone = testInfo.project.name === 'phone';
 
     await page.goto('./');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+
+    // A new visitor gets one clear first step: the first 20 elements, a lesson at a time.
+    await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements\./ })).toBeVisible();
+    await expect(page.getByRole('progressbar', { name: 'Your first 20 elements' })).toHaveAttribute('aria-valuenow', '0');
+    await expect(page.getByRole('link', { name: 'Start the first lesson' })).toHaveAttribute('href', '#/learn/lightest-ten');
+    await expect(page.getByRole('link', { name: 'Try a quick game' })).toHaveAttribute('href', '#/match');
+    await expect(page.getByRole('banner').getByRole('img', { name: 'Daily goal: 0 of 150 XP' })).toBeVisible();
+    // Nothing is due for review yet.
+    await expect(page.getByText(/ready for a quick review/)).toHaveCount(0);
 
     // Only one "Main" nav is rendered for each layout: top bar on desktop, tab bar on phones.
     const nav = page.getByRole('navigation', { name: 'Main' });

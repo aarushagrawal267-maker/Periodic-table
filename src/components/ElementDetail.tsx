@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { ChevronLeft, ChevronRight, Lightbulb } from 'lucide-react';
-import { useEffect, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ELEMENTS, byNumber, catVar, categoryLabel, formatNumber, type Element } from '../lib/elements';
 import { shells } from '../lib/shells';
 import { useProgress } from '../store/progress';
@@ -8,10 +8,30 @@ import { announceAchievements, useUi } from '../store/ui';
 import { Sheet } from './Sheet';
 import { ElementTile } from './ElementTile';
 
+/**
+ * Where focus should land after browsing to another element. The article is keyed by element
+ * (so its animations replay), which unmounts the button that had focus; the new render reclaims it.
+ */
+let refocus: 'prev' | 'next' | 'heading' | null = null;
+
 export function ElementDetailSheet() {
   const detail = useUi((s) => s.detail);
   const openDetail = useUi((s) => s.openDetail);
   const markExplored = useProgress((s) => s.markExplored);
+  const [announce, setAnnounce] = useState('');
+
+  /** Move to another element from inside the sheet, keeping focus in the dialog and saying where you are. */
+  const browse = useCallback(
+    (n: number, focus: 'prev' | 'next' | 'heading') => {
+      const a = document.activeElement;
+      // Only reclaim focus when it was inside the sheet; the buttons that held it are about to unmount.
+      refocus = a instanceof HTMLElement && a.closest('[role="dialog"]') ? focus : null;
+      const e = byNumber(n);
+      setAnnounce(`${e.name}, element ${e.number}`);
+      openDetail(n);
+    },
+    [openDetail],
+  );
 
   useEffect(() => {
     if (detail) announceAchievements(markExplored(detail));
@@ -20,24 +40,41 @@ export function ElementDetailSheet() {
   useEffect(() => {
     if (!detail) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') openDetail(detail === 118 ? 1 : detail + 1);
-      if (e.key === 'ArrowLeft') openDetail(detail === 1 ? 118 : detail - 1);
+      if (e.key === 'ArrowRight') browse(detail === 118 ? 1 : detail + 1, 'heading');
+      if (e.key === 'ArrowLeft') browse(detail === 1 ? 118 : detail - 1, 'heading');
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [detail, openDetail]);
+  }, [detail, browse]);
+
+  // A fresh open starts with nothing to announce; the dialog's own name says which element it is.
+  useEffect(() => {
+    if (!detail) setAnnounce('');
+  }, [detail]);
 
   const e = detail ? byNumber(detail) : null;
   return (
     <Sheet open={!!e} onClose={() => openDetail(null)} label={e ? `${e.name} details` : 'Element details'} wide>
-      {e && <ElementDetail key={e.number} e={e} />}
+      <p className="sr-only" aria-live="polite">
+        {announce}
+      </p>
+      {e && <ElementDetail key={e.number} e={e} browse={browse} />}
     </Sheet>
   );
 }
 
-function ElementDetail({ e }: { e: Element }) {
-  const openDetail = useUi((s) => s.openDetail);
+function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: 'prev' | 'next' | 'heading') => void }) {
   const m = useProgress((s) => s.mastery[e.number]);
+  const root = useRef<HTMLElement>(null);
+
+  // After browsing, put focus back on the same control in the new element's card (WCAG 2.4.3).
+  useEffect(() => {
+    const target = refocus;
+    refocus = null;
+    if (!target || !root.current) return;
+    const el = root.current.querySelector<HTMLElement>(target === 'heading' ? 'h2' : `[data-neighbour="${target}"]`);
+    el?.focus({ preventScroll: target !== 'heading' });
+  }, []);
   const c = catVar(e.category);
   const toC = (k: number | null) => (k === null ? null : Math.round(k - 273.15));
 
@@ -57,7 +94,7 @@ function ElementDetail({ e }: { e: Element }) {
   ];
 
   return (
-    <article style={{ '--c': c } as CSSProperties}>
+    <article ref={root} style={{ '--c': c } as CSSProperties}>
       <header className="relative overflow-hidden px-6 pb-6 pt-8 sm:px-8">
         <div
           className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[140%] -translate-x-1/2 rounded-full opacity-40 blur-3xl"
@@ -74,14 +111,13 @@ function ElementDetail({ e }: { e: Element }) {
             <ElementTile element={e} size={144} showName={false} />
           </motion.div>
           <div className="min-w-0 flex-1 text-center sm:text-left">
-            <span
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
-              style={{ background: `color-mix(in oklab, ${c} 16%, transparent)`, color: c }}
-            >
+            <span className="cat-chip inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold">
               <span className="h-1.5 w-1.5 rounded-full" style={{ background: c }} />
               {categoryLabel(e.category)}
             </span>
-            <h2 className="font-display mt-2 text-4xl font-semibold sm:text-5xl">{e.name}</h2>
+            <h2 tabIndex={-1} className="font-display mt-2 text-4xl font-semibold outline-none sm:text-5xl">
+              {e.name}
+            </h2>
             <p className="mt-1 text-sm text-ink-2">
               Element {e.number} · <span className="font-mono tracking-tight">{e.config}</span>
               {e.configPredicted && ' (predicted)'}
@@ -96,7 +132,7 @@ function ElementDetail({ e }: { e: Element }) {
           <p className="text-[15px] leading-relaxed text-ink">{e.summary}</p>
           {e.fact && (
             <div className="rounded-2xl border p-4" style={{ borderColor: `color-mix(in oklab, ${c} 30%, transparent)`, background: `color-mix(in oklab, ${c} 7%, transparent)` }}>
-              <div className="mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider" style={{ color: c }}>
+              <div className="cat-ink mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider">
                 <Lightbulb size={14} /> Did you know?
               </div>
               <p className="text-[15px] leading-relaxed">{e.fact}</p>
@@ -128,9 +164,9 @@ function ElementDetail({ e }: { e: Element }) {
       </dl>
 
       <nav className="flex items-center justify-between px-4 py-4 sm:px-6" aria-label="Neighbouring elements">
-        <NeighbourButton n={e.number === 1 ? 118 : e.number - 1} dir="prev" onClick={openDetail} />
+        <NeighbourButton n={e.number === 1 ? 118 : e.number - 1} dir="prev" onClick={(n) => browse(n, 'prev')} />
         <span className="hidden text-xs text-ink-3 sm:block">Use ← → to browse</span>
-        <NeighbourButton n={e.number === 118 ? 1 : e.number + 1} dir="next" onClick={openDetail} />
+        <NeighbourButton n={e.number === 118 ? 1 : e.number + 1} dir="next" onClick={(n) => browse(n, 'next')} />
       </nav>
       <p className="px-6 pb-6 text-[11px] text-ink-3 sm:px-8">Property data: PubChem (NCBI). Values for superheavy elements are predictions or estimates.</p>
     </article>
@@ -140,11 +176,17 @@ function ElementDetail({ e }: { e: Element }) {
 function NeighbourButton({ n, dir, onClick }: { n: number; dir: 'prev' | 'next'; onClick: (n: number) => void }) {
   const e = ELEMENTS[n - 1];
   return (
-    <button onClick={() => onClick(n)} className="btn-ghost flex items-center gap-2 rounded-full py-2 pl-3 pr-4 text-sm" aria-label={`${dir === 'prev' ? 'Previous' : 'Next'}: ${e.name}`}>
+    <button
+      onClick={() => onClick(n)}
+      data-neighbour={dir}
+      className="btn-ghost flex items-center gap-2 rounded-full py-2 pl-3 pr-4 text-sm"
+      // Includes the visible symbol and name, so "click Next" and "click Co" both work (WCAG 2.5.3).
+      aria-label={`${dir === 'prev' ? 'Previous' : 'Next'}: ${e.symbol}, ${e.name}`}
+    >
       {dir === 'prev' && <ChevronLeft size={16} />}
-      <span className="font-display font-semibold" style={{ color: catVar(e.category) }}>
+      <span className="cat-ink font-display font-semibold" style={{ '--c': catVar(e.category) } as CSSProperties}>
         {e.symbol}
-      </span>
+      </span>{' '}
       <span className="text-ink-2">{e.name}</span>
       {dir === 'next' && <ChevronRight size={16} />}
     </button>

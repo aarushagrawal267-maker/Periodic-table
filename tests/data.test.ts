@@ -45,6 +45,17 @@ describe('element data', () => {
     expect(shells(ELEMENTS[25])).toEqual([2, 8, 14, 2]); // Fe
   });
 
+  test('uses IUPAC (British) spellings, not Aluminum or Cesium', () => {
+    expect(ELEMENTS[12].name).toBe('Aluminium');
+    expect(ELEMENTS[54].name).toBe('Caesium');
+    expect(ELEMENTS[15].name).toBe('Sulfur');
+    for (const e of ELEMENTS) {
+      const text = [e.name, e.summary, e.fact, ...e.uses].join(' ');
+      expect(text, e.symbol).not.toMatch(/aluminum|cesium/i);
+      expect(e.summary!.startsWith(e.name), e.symbol).toBe(true);
+    }
+  });
+
   test('regions are non-empty and the full table covers everything', () => {
     for (const r of REGIONS) expect(r.numbers.length).toBeGreaterThan(0);
     expect(REGIONS.find((r) => r.id === 'full')!.numbers).toHaveLength(118);
@@ -62,6 +73,10 @@ describe('learning content', () => {
       expect(c.mnemonic.map(([, s]) => s), c.id).toEqual(c.numbers.map((n) => byNumber(n).symbol));
       for (const [word, s] of c.mnemonic) expect(word.toLowerCase().replace(/[^a-z]/g, ''), `${c.id} ${word}`).toContain(s[0].toLowerCase());
     }
+  });
+  test('chapter and everyday text uses IUPAC spellings', () => {
+    const text = JSON.stringify([CHAPTERS, THINGS]);
+    expect(text).not.toMatch(/aluminum|cesium/i);
   });
   test('everyday objects reference real elements', () => {
     for (const t of THINGS) for (const [s] of t.contains) expect(bySymbol.get(s.toLowerCase()), `${t.id} ${s}`).toBeTruthy();

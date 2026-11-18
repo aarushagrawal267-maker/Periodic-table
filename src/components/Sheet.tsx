@@ -2,6 +2,10 @@ import { AnimatePresence, motion } from 'motion/react';
 import { X } from 'lucide-react';
 import { useEffect, useRef, type ReactNode } from 'react';
 
+const FOCUSABLE = ['button', '[href]', 'input', 'select', 'textarea', '[tabindex]']
+  .map((q) => `${q}:not([disabled]):not([tabindex="-1"])`)
+  .join(', ');
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -16,22 +20,27 @@ interface Props {
  */
 export function Sheet({ open, onClose, label, children, wide }: Props) {
   const panel = useRef<HTMLDivElement>(null);
+  // Callers usually pass onClose inline; keep it in a ref so focus only moves when the sheet opens.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
 
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
     const t = setTimeout(() => panel.current?.focus(), 30);
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') closeRef.current();
       if (e.key === 'Tab' && panel.current) {
-        const f = panel.current.querySelectorAll<HTMLElement>('button, [href], input, select, [tabindex]:not([tabindex="-1"])');
+        const f = panel.current.querySelectorAll<HTMLElement>(FOCUSABLE);
         if (!f.length) return;
         const first = f[0];
         const last = f[f.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
+        const active = document.activeElement;
+        const outside = !(active instanceof Node) || !panel.current.contains(active) || active === panel.current;
+        if (e.shiftKey && (outside || active === first)) {
           e.preventDefault();
           last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
+        } else if (!e.shiftKey && (outside ? active !== panel.current : active === last)) {
           e.preventDefault();
           first.focus();
         }
@@ -45,7 +54,7 @@ export function Sheet({ open, onClose, label, children, wide }: Props) {
       document.body.style.overflow = '';
       previous?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   return (
     <AnimatePresence>

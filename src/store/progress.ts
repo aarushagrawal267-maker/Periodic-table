@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ACHIEVEMENTS } from '../lib/achievements';
+import { CHAPTERS } from '../lib/chapters';
 import { previousKey, todayKey } from '../lib/daily';
 import { ELEMENTS } from '../lib/elements';
 export { DAILY_GOAL_XP } from '../lib/scoring';
@@ -118,18 +119,20 @@ export const useProgress = create<ProgressState>()(
         const newBest = r.completed && (!prev || r.score > prev.score);
         const best = newBest && r.kind === 'place' ? { ...p.best, [key]: { score: r.score, stars: r.stars, timeMs: r.timeMs } } : p.best;
 
-        const chapters =
-          r.kind === 'lesson' && r.regionId && r.completed ? { ...p.chapters, [r.regionId]: Math.max(p.chapters[r.regionId] ?? 0, r.stars) } : p.chapters;
+        // Only real chapters of the path earn chapter stars; a spaced-review round ('review') does not.
+        const isChapter = r.kind === 'lesson' && r.completed && !!r.regionId && CHAPTERS.some((c) => c.id === r.regionId);
+        const chapters = isChapter ? { ...p.chapters, [r.regionId!]: Math.max(p.chapters[r.regionId!] ?? 0, r.stars) } : p.chapters;
 
         let daily = p.daily;
         if (r.kind === 'daily' && r.dailyKey && !p.daily.results[r.dailyKey]) {
-          const streak = p.daily.lastKey === previousKey(r.dailyKey) ? p.daily.streak + 1 : 1;
-          daily = {
-            results: { ...p.daily.results, [r.dailyKey]: { score: r.score, timeMs: r.timeMs, mistakes: r.mistakes, stars: r.stars, trail: r.trail } },
-            streak,
-            bestStreak: Math.max(p.daily.bestStreak, streak),
-            lastKey: r.dailyKey,
-          };
+          const results = { ...p.daily.results, [r.dailyKey]: { score: r.score, timeMs: r.timeMs, mistakes: r.mistakes, stars: r.stars, trail: r.trail } };
+          if (r.completed) {
+            const streak = p.daily.lastKey === previousKey(r.dailyKey) ? p.daily.streak + 1 : 1;
+            daily = { ...p.daily, results, streak, bestStreak: Math.max(p.daily.bestStreak, streak), lastKey: r.dailyKey };
+          } else {
+            // A daily left before the end uses up the attempt but does not grow the streak.
+            daily = { ...p.daily, results };
+          }
         }
 
         const xpGained = Math.round(r.score / 10) + r.stars * 25 + masteryUp.length * 10;
@@ -176,8 +179,12 @@ export const masteredCount = (m: Record<number, Mastery>) => Object.values(m).fi
 export const masteryPercent = (m: Record<number, Mastery>) =>
   Object.values(m).reduce((s, x) => s + x.s, 0) / (ELEMENTS.length * 5);
 
-/** The daily streak only counts if the last daily was today or yesterday. */
+/**
+ * The daily streak only counts if the last finished daily was today or yesterday.
+ * Leaving today's daily early uses up today's try, so the streak is already broken.
+ */
 export function liveStreak(d: ProgressData['daily'], today: string) {
   if (!d.lastKey) return 0;
+  if (d.lastKey !== today && d.results[today]) return 0;
   return d.lastKey === today || d.lastKey === previousKey(today) ? d.streak : 0;
 }

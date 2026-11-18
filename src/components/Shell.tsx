@@ -21,7 +21,7 @@ const NAV = [
 export function Logo({ size = 32 }: { size?: number }) {
   return (
     <a href="#/" className="flex items-center gap-2.5" aria-label="Periodica home">
-      <div className="relative grid place-items-center rounded-[10px] p-[1.5px]" style={{ width: size, height: size, background: 'var(--grad)' }}>
+      <div aria-hidden className="relative grid place-items-center rounded-[10px] p-[1.5px]" style={{ width: size, height: size, background: 'var(--grad)' }}>
         <div className="font-display grid h-full w-full place-items-center rounded-[9px] bg-bg text-[13px] font-bold">
           <span className="text-grad">Pa</span>
         </div>
@@ -39,12 +39,18 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
   const streak = liveStreak(daily, todayKey());
   const active = route === 'game' ? 'play' : route;
 
-  if (immersive) return <div className="relative z-10">{children}</div>;
+  // Immersive screens (games, lessons) bring their own <main>, so the skip-link target here is a plain wrapper.
+  if (immersive)
+    return (
+      <div id="main" tabIndex={-1} className="relative z-10 outline-none">
+        {children}
+      </div>
+    );
 
   return (
     <div className="relative z-10 flex min-h-dvh flex-col">
       <header className="sticky top-0 z-40 border-b border-line bg-bg/70 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-3 min-[360px]:gap-6 min-[360px]:px-4 sm:px-6">
           <Logo />
           <nav className="ml-4 hidden items-center gap-1 md:flex" aria-label="Main">
             {NAV.map((n) => {
@@ -57,16 +63,19 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
               );
             })}
           </nav>
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
+          <div className="ml-auto flex min-w-0 items-center gap-1 min-[360px]:gap-1.5 sm:gap-3">
             <a href="#/daily" className="btn-ghost flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold" aria-label={`Daily streak: ${streak} days`}>
               <Flame size={17} className={streak ? 'fill-[#ff9f43] text-[#ff9f43]' : 'text-ink-3'} />
               <span className="tabular-nums">{streak}</span>
             </a>
-            <GoalRingBadge />
-            <a href="#/progress" className="btn-ghost flex h-10 items-center gap-2 rounded-full pl-1 pr-3 text-sm font-semibold" aria-label={`Level ${lvl.level}, ${Math.round(lvl.progress * 100)} percent to next level`}>
+            {/* Below 360px (e.g. 400% zoom) there is no room; the goal is on Home anyway (WCAG 1.4.10). */}
+            <div className="hidden min-[360px]:contents">
+              <GoalRingBadge />
+            </div>
+            <a href="#/progress" className="btn-ghost flex h-10 items-center gap-2 rounded-full pl-1 pr-3 text-sm font-semibold" aria-label={`Level ${lvl.level}, ${xp.toLocaleString('en-US')} XP, ${Math.round(lvl.progress * 100)} percent to next level`}>
               <Ring value={lvl.progress} size={32} stroke={3}>
                 <span className="text-[11px] font-bold">{lvl.level}</span>
-              </Ring>
+              </Ring>{' '}
               <span className="hidden tabular-nums sm:inline">{xp.toLocaleString('en-US')} XP</span>
             </a>
             <button onClick={() => setSettings(true)} className="btn-ghost grid h-10 w-10 place-items-center rounded-full" aria-label="Settings">
@@ -76,7 +85,9 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
         </div>
       </header>
 
-      <div className="flex-1 pb-24 md:pb-0">{children}</div>
+      <main id="main" tabIndex={-1} className="flex-1 pb-24 outline-none md:pb-0">
+        {children}
+      </main>
 
       <footer className="hidden border-t border-line py-8 text-center text-xs text-ink-3 md:block">
         Periodica · Property data from PubChem (NCBI) · Made for curious minds

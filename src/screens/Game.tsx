@@ -33,9 +33,13 @@ interface Props {
   onReplay?: () => void;
   onNext?: () => void;
   nextLabel?: string;
+  /** Label of the results screen's exit button. Say where it goes. */
+  exitLabel?: string;
+  /** Called once, on the first placement attempt or hint. The daily only counts as attempted from then on. */
+  onFirstMove?: () => void;
 }
 
-export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
+export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, onFirstMove }: Props) {
   const [state, dispatch] = useReducer(gameReducer, config, (c) => createGame(c.targets, c.difficulty, c.order));
   const [result, setResult] = useState<{ summary: RoundSummary; outcome: RoundOutcome } | null>(null);
   const [confirmLeave, setConfirmLeave] = useState(false);
@@ -61,6 +65,15 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
   const tiles = hand(state);
   const learner = config.difficulty === 'learner';
   const expert = config.difficulty === 'expert';
+
+  // The first real move (a drop or a hint). Before it, leaving costs nothing, not even on the daily.
+  const moved = state.event !== null || state.hints > 0;
+  const firstMoveRef = useRef(onFirstMove);
+  firstMoveRef.current = onFirstMove;
+  useEffect(() => {
+    if (moved) firstMoveRef.current?.();
+  }, [moved]);
+  const isDaily = config.kind === 'daily';
 
   // Countdown, then start.
   const [count, setCount] = useState(reduceMotion ? 0 : 3);
@@ -213,8 +226,9 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
         if (state.selected !== null) dispatch({ type: 'select', number: null });
         return;
       }
-      // Character shortcuts only apply on the page itself or inside the board and tray (WCAG 2.1.4).
-      const inGame = !t || t === document.body || t === document.documentElement || !!boardRef.current?.contains(t) || !!trayRef.current?.contains(t);
+      // Character shortcuts apply inside the board and tray, or when nothing interactive has focus
+      // (the page, a heading). Never while another control such as "Leave round" has focus (WCAG 2.1.4).
+      const inGame = !t || !!boardRef.current?.contains(t) || !!trayRef.current?.contains(t) || !t.closest(INTERACTIVE);
       if (!inGame || document.querySelector('[role="dialog"][aria-modal="true"]')) return;
       const i = /^[1-5]$/.test(e.key) ? Number(e.key) - 1 : -1;
       if (i >= 0 && i < tiles.length) {
@@ -271,7 +285,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
         <button
           className="relative block h-full w-full"
           onClick={() => openDetail(e.number)}
-          aria-label={`${e.name}, placed. Open details`}
+          aria-label={`${e.symbol}, ${e.name}, placed. Open details`}
           tabIndex={-1}
         >
           <motion.div
@@ -280,7 +294,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
             animate={{ scale: 1, opacity: 1, rotate: 0 }}
             transition={{ type: 'spring', damping: 14, stiffness: 260 }}
           >
-            <ElementTile element={e} size={rect.size} showNumber={rect.size >= 44} />
+            <ElementTile element={e} size={rect.size} showNumber={rect.size >= 44} quietNumber />
           </motion.div>
           {fresh && (
             <>
@@ -325,7 +339,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
         style={{
           borderRadius: Math.max(5, rect.size * 0.14),
           background: isOver ? 'color-mix(in oklab, var(--accent-2) 22%, transparent)' : isHint ? 'color-mix(in oklab, var(--accent-2) 14%, transparent)' : tint,
-          borderColor: isOver || isHint ? 'var(--accent-2)' : learner ? `color-mix(in oklab, ${catVar(e.category)} 40%, transparent)` : undefined,
+          borderColor: isOver || isHint ? 'var(--accent-2)' : undefined,
           borderStyle: isOver || isHint ? 'solid' : undefined,
           transform: isOver ? 'scale(1.08)' : undefined,
           cursor: state.selected ? 'pointer' : 'default',
@@ -342,7 +356,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
       {/* HUD */}
       <header className="glass sticky top-0 z-30 border-x-0 border-t-0">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-3 py-2.5 sm:px-6">
-          <button onClick={() => (state.phase === 'playing' && state.placed.length ? setConfirmLeave(true) : onExit())} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave round">
+          <button onClick={() => (state.phase === 'playing' && moved ? setConfirmLeave(true) : onExit())} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave round">
             <ArrowLeft size={18} />
           </button>
           <div className="min-w-0 flex-1">
@@ -510,8 +524,10 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
 
       <Sheet open={confirmLeave} onClose={() => setConfirmLeave(false)} label="Leave round">
         <div className="p-7 pt-9">
-          <h2 className="font-display text-2xl font-semibold">Leave this round?</h2>
-          <p className="mt-2 text-ink-2">Your progress in this round won't be saved.</p>
+          <h2 className="font-display text-2xl font-semibold">{isDaily ? "Leave today's daily?" : 'Leave this round?'}</h2>
+          <p className="mt-2 text-ink-2">
+            {isDaily ? "Leaving now uses today's only try, and an unfinished daily has no score. A new puzzle comes at midnight." : "Your progress in this round won't be saved."}
+          </p>
           <div className="mt-6 flex gap-3">
             <button className="btn-ghost h-12 flex-1 rounded-2xl font-medium" onClick={() => setConfirmLeave(false)}>
               Keep playing
@@ -533,11 +549,14 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
           onNext={onNext}
           nextLabel={nextLabel}
           onExit={onExit}
+          exitLabel={exitLabel}
         />
       )}
     </div>
   );
 }
+
+const INTERACTIVE = 'button, a[href], input, select, textarea, summary, [role="button"], [role="switch"], [role="radio"], [role="tab"], [role="link"]';
 
 const ELEMENT_AT = new Map(ELEMENTS.map((e) => [`${e.row}-${e.col}`, e.number]));
 const slotNumber = (key: string) => ELEMENT_AT.get(key) ?? -1;
@@ -618,7 +637,8 @@ function TrayButton({ e, index, difficulty, selected, missed, dimmed, onActivate
       layout
       data-tile={e.number}
       aria-pressed={selected}
-      aria-label={`${e.name}${difficulty === 'learner' ? `, atomic number ${e.number}` : ''}`}
+      // Starts with the visible symbol, so speech users can say "click Cl" (WCAG 2.5.3).
+      aria-label={`${e.symbol}, ${e.name}${difficulty === 'learner' ? `, atomic number ${e.number}` : ''}`}
       aria-keyshortcuts={present ? String(index + 1) : undefined}
       inert={!present}
       tabIndex={present ? undefined : -1}
@@ -635,7 +655,7 @@ function TrayButton({ e, index, difficulty, selected, missed, dimmed, onActivate
       }}
     >
       <TrayTile e={e} difficulty={difficulty} selected={selected} />
-      <kbd className="solid absolute -bottom-2 left-1/2 hidden -translate-x-1/2 rounded-md border border-line px-1.5 text-[10px] font-semibold leading-4 text-ink-3 sm:block">{index + 1}</kbd>
+      <kbd aria-hidden className="solid absolute -bottom-2 left-1/2 hidden -translate-x-1/2 rounded-md border border-line px-1.5 text-[10px] font-semibold leading-4 text-ink-3 sm:block">{index + 1}</kbd>
     </motion.button>
   );
 }
@@ -661,7 +681,7 @@ function TrayTile({ e, difficulty, selected }: { e: Element; difficulty: Difficu
       {learner && (
         <span
           aria-hidden
-          className="pointer-events-none absolute left-[7px] top-[4px] text-[10px] font-semibold tabular-nums leading-none opacity-85 sm:left-[9%] sm:top-[7%] sm:text-[12.5px] sm:font-medium"
+          className="pointer-events-none absolute left-[7px] top-[4px] text-[10px] font-semibold tabular-nums leading-none sm:left-[9%] sm:top-[7%] sm:text-[12.5px] sm:font-medium"
           style={{ color: 'color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink))' }}
         >
           {e.number}

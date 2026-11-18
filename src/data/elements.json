@@ -57,7 +57,7 @@
   "density": 0.0001785,
   "year": 1868,
   "ancient": false,
-  "summary": "Helium is a colorless, very light gas that does not react with other elements. It matters because liquid helium is cold enough to chill the powerful magnets inside hospital MRI scanners, and the gas lifts balloons and airships.",
+  "summary": "Helium is a colourless, very light gas that does not react with other elements. It matters because liquid helium is cold enough to chill the powerful magnets inside hospital MRI scanners, and the gas lifts balloons and airships.",
   "uses": [
    "MRI scanner cooling",
    "Weather and party balloons",
@@ -123,13 +123,13 @@
   "density": 1.85,
   "year": 1798,
   "ancient": false,
-  "summary": "Beryllium is a hard, gray metal that is unusually light and stiff. It matters in aerospace and science, where it is used for precision parts, although its dust is toxic and must be handled with great care.",
+  "summary": "Beryllium is a hard, grey metal that is unusually light and stiff. It matters in aerospace and science, where it is used for precision parts, although its dust is toxic and must be handled with great care.",
   "uses": [
    "Space telescope mirrors",
    "X-ray tube windows",
    "Non-sparking tools"
   ],
-  "fact": "Emeralds and aquamarines are both varieties of beryl, a mineral containing beryllium, with traces of other elements giving each gemstone its color."
+  "fact": "Emeralds and aquamarines are both varieties of beryl, a mineral containing beryllium, with traces of other elements giving each gemstone its colour."
  },
  {
   "number": 5,
@@ -156,13 +156,13 @@
   "density": 2.37,
   "year": 1808,
   "ancient": false,
-  "summary": "Boron is a hard, dark element whose behavior sits between that of metals and nonmetals. It matters because its compounds make glass that survives sudden temperature changes, and plants need small amounts of it to grow.",
+  "summary": "Boron is a hard, dark element whose behaviour sits between that of metals and nonmetals. It matters because its compounds make glass that survives sudden temperature changes, and plants need small amounts of it to grow.",
   "uses": [
    "Heat-resistant borosilicate glass",
    "Laundry and cleaning products",
    "Nuclear reactor control rods"
   ],
-  "fact": "Boron carbide, a compound of boron and carbon, is one of the hardest materials known and is used in body armor."
+  "fact": "Boron carbide, a compound of boron and carbon, is one of the hardest materials known and is used in body armour."
  },
  {
   "number": 6,
@@ -192,7 +192,7 @@
   "summary": "Carbon is the element at the heart of all known life, because its atoms can link into long chains and rings. It also forms coal, graphite, and diamond, and the carbon dioxide that affects Earth's climate.",
   "uses": [
    "Activated charcoal filters",
-   "Carbon fiber composites",
+   "Carbon fibre composites",
    "Diamond cutting tools"
   ],
   "fact": "Sparkling diamond and the soft graphite in a pencil are both pure carbon, differing only in the way their atoms are arranged."
@@ -222,7 +222,7 @@
   "density": 0.0012506,
   "year": 1772,
   "ancient": false,
-  "summary": "Nitrogen is a colorless gas that makes up most of the air you breathe. It matters because every protein and every strand of DNA contains it, so all living things need it to grow.",
+  "summary": "Nitrogen is a colourless gas that makes up most of the air you breathe. It matters because every protein and every strand of DNA contains it, so all living things need it to grow.",
   "uses": [
    "Fertilizer production",
    "Food packaging gas",
@@ -321,13 +321,13 @@
   "density": 0.0008999,
   "year": 1898,
   "ancient": false,
-  "summary": "Neon is a colorless gas that does not react with other elements. It matters because it glows a brilliant reddish orange when electricity passes through it, which made bright advertising signs possible.",
+  "summary": "Neon is a colourless gas that does not react with other elements. It matters because it glows a brilliant reddish orange when electricity passes through it, which made bright advertising signs possible.",
   "uses": [
    "Glowing advertising signs",
    "Helium-neon lasers",
    "High-voltage indicators"
   ],
-  "fact": "Pure neon glows only reddish orange, so many so-called neon signs in other colors actually use different gases or coated glass tubes."
+  "fact": "Pure neon glows only reddish orange, so many so-called neon signs in other colours actually use different gases or coated glass tubes."
  },
  {
   "number": 11,
@@ -393,12 +393,12 @@
    "Fireworks and flares",
    "Antacid medicines"
   ],
-  "fact": "Every molecule of chlorophyll, the green pigment plants use to capture sunlight, has a single magnesium atom at its center."
+  "fact": "Every molecule of chlorophyll, the green pigment plants use to capture sunlight, has a single magnesium atom at its centre."
  },
  {
   "number": 13,
   "symbol": "Al",
-  "name": "Aluminum",
+  "name": "Aluminium",
   "mass": 26.9815,
   "category": "post-transition-metal",
   "period": 3,
@@ -420,13 +420,13 @@
   "density": 2.7,
   "year": null,
   "ancient": true,
-  "summary": "Aluminum is a light, silvery metal that resists corrosion because a thin oxide layer protects its surface. It matters because it is strong for its weight, which makes it ideal for aircraft, drink cans, and foil.",
+  "summary": "Aluminium is a light, silvery metal that resists corrosion because a thin oxide layer protects its surface. It matters because it is strong for its weight, which makes it ideal for aircraft, drink cans, and foil.",
   "uses": [
    "Drink cans",
    "Aircraft bodies",
    "Kitchen foil"
   ],
-  "fact": "Before cheap electricity, aluminum was so hard to extract that it was treated as a precious metal, even though it is the most abundant metal in Earth's crust."
+  "fact": "Before cheap electricity, aluminium was so hard to extract that it was treated as a precious metal, even though it is the most abundant metal in Earth's crust."
  },
  {
   "number": 14,
@@ -453,7 +453,7 @@
   "density": 2.3296,
   "year": 1854,
   "ancient": false,
-  "summary": "Silicon is a hard, gray, shiny element that behaves partly like a metal and partly like a nonmetal. It matters because computer chips and most solar cells are built on thin slices of very pure silicon.",
+  "summary": "Silicon is a hard, grey, shiny element that behaves partly like a metal and partly like a nonmetal. It matters because computer chips and most solar cells are built on thin slices of very pure silicon.",
   "uses": [
    "Computer chips",
    "Solar panels",
@@ -585,7 +585,7 @@
   "density": 0.0017837,
   "year": 1894,
   "ancient": false,
-  "summary": "Argon is a colorless, odorless gas that almost never reacts with anything. It matters because this unreactive nature makes it an ideal protective blanket for welding metals and for filling light bulbs.",
+  "summary": "Argon is a colourless, odourless gas that almost never reacts with anything. It matters because this unreactive nature makes it an ideal protective blanket for welding metals and for filling light bulbs.",
   "uses": [
    "Welding shield gas",
    "Incandescent light bulbs",
@@ -684,9 +684,9 @@
   "density": 2.99,
   "year": 1879,
   "ancient": false,
-  "summary": "Scandium is a soft, silvery metal that is spread thinly through Earth's crust and is costly to extract. It matters because adding a little to aluminum makes alloys that are both strong and light.",
+  "summary": "Scandium is a soft, silvery metal that is spread thinly through Earth's crust and is costly to extract. It matters because adding a little to aluminium makes alloys that are both strong and light.",
   "uses": [
-   "Aluminum-scandium alloys",
+   "Aluminium-scandium alloys",
    "Stadium floodlights",
    "Lightweight sports equipment"
   ],
@@ -750,13 +750,13 @@
   "density": 6,
   "year": 1801,
   "ancient": false,
-  "summary": "Vanadium is a hard, silvery-gray metal that is mostly used in small amounts mixed into steel. It matters because even a little makes steel much tougher and more resistant to shock and wear.",
+  "summary": "Vanadium is a hard, silvery-grey metal that is mostly used in small amounts mixed into steel. It matters because even a little makes steel much tougher and more resistant to shock and wear.",
   "uses": [
    "Tool and spring steel",
    "Sulfuric acid catalyst",
    "Large-scale flow batteries"
   ],
-  "fact": "Vanadium was named after Vanadis, another name for the Norse goddess Freyja, because its compounds come in so many beautiful colors."
+  "fact": "Vanadium was named after Vanadis, another name for the Norse goddess Freyja, because its compounds come in so many beautiful colours."
  },
  {
   "number": 24,
@@ -789,7 +789,7 @@
    "Chrome plating",
    "Paint pigments"
   ],
-  "fact": "Tiny traces of chromium are what give rubies their deep red color and emeralds their rich green color."
+  "fact": "Tiny traces of chromium are what give rubies their deep red colour and emeralds their rich green colour."
  },
  {
   "number": 25,
@@ -816,11 +816,11 @@
   "density": 7.3,
   "year": 1774,
   "ancient": false,
-  "summary": "Manganese is a hard, brittle, grayish metal that is rarely used on its own. It matters because nearly all steel contains some manganese, which makes the steel stronger and easier to shape.",
+  "summary": "Manganese is a hard, brittle, greyish metal that is rarely used on its own. It matters because nearly all steel contains some manganese, which makes the steel stronger and easier to shape.",
   "uses": [
    "Steel production",
    "Alkaline batteries",
-   "Aluminum drink cans"
+   "Aluminium drink cans"
   ],
   "fact": "Potato-sized lumps rich in manganese, called nodules, lie scattered across large areas of the deep ocean floor, having grown extremely slowly over millions of years."
  },
@@ -849,7 +849,7 @@
   "density": 7.874,
   "year": null,
   "ancient": true,
-  "summary": "Iron is a strong, grayish metal and the main ingredient of steel, which is used in buildings, bridges, cars, and tools. It also matters inside your body, where iron in your blood helps carry oxygen.",
+  "summary": "Iron is a strong, greyish metal and the main ingredient of steel, which is used in buildings, bridges, cars, and tools. It also matters inside your body, where iron in your blood helps carry oxygen.",
   "uses": [
    "Structural steel",
    "Cast iron cookware",
@@ -882,7 +882,7 @@
   "density": 8.86,
   "year": 1735,
   "ancient": false,
-  "summary": "Cobalt is a hard, bluish-gray metal that can be magnetized. It matters because it is used in many rechargeable batteries and in tough alloys that survive the heat inside jet engines.",
+  "summary": "Cobalt is a hard, bluish-grey metal that can be magnetized. It matters because it is used in many rechargeable batteries and in tough alloys that survive the heat inside jet engines.",
   "uses": [
    "Lithium-ion batteries",
    "Jet engine superalloys",
@@ -1047,9 +1047,9 @@
   "density": 5.323,
   "year": 1886,
   "ancient": false,
-  "summary": "Germanium is a hard, grayish-white element that is a semiconductor, meaning it conducts electricity better than an insulator but worse than a metal. It matters because it is used in fiber-optic cables and in lenses for infrared cameras.",
+  "summary": "Germanium is a hard, greyish-white element that is a semiconductor, meaning it conducts electricity better than an insulator but worse than a metal. It matters because it is used in fibre-optic cables and in lenses for infrared cameras.",
   "uses": [
-   "Fiber-optic cables",
+   "Fibre-optic cables",
    "Infrared camera lenses",
    "High-speed electronics"
   ],
@@ -1080,7 +1080,7 @@
   "density": 5.776,
   "year": null,
   "ancient": true,
-  "summary": "Arsenic is a gray, brittle element best known as a notorious poison. It still matters today because small amounts are used in electronics, and natural arsenic in groundwater is a serious health problem in some countries.",
+  "summary": "Arsenic is a grey, brittle element best known as a notorious poison. It still matters today because small amounts are used in electronics, and natural arsenic in groundwater is a serious health problem in some countries.",
   "uses": [
    "Gallium arsenide electronics",
    "Wood preservatives",
@@ -1179,13 +1179,13 @@
   "density": 0.003733,
   "year": 1898,
   "ancient": false,
-  "summary": "Krypton is a colorless, odorless gas found in tiny traces in the air. It matters because it is used in some bright lamps and lasers, and it helps insulate energy-saving windows.",
+  "summary": "Krypton is a colourless, odourless gas found in tiny traces in the air. It matters because it is used in some bright lamps and lasers, and it helps insulate energy-saving windows.",
   "uses": [
    "Insulated window filling",
    "Photographic flash lamps",
    "Krypton fluoride lasers"
   ],
-  "fact": "From 1960 to 1983 the meter was officially defined using the wavelength of orange-red light given off by krypton atoms."
+  "fact": "From 1960 to 1983 the metre was officially defined using the wavelength of orange-red light given off by krypton atoms."
  },
  {
   "number": 37,
@@ -1245,7 +1245,7 @@
   "density": 2.64,
   "year": 1790,
   "ancient": false,
-  "summary": "Strontium is a soft, silvery metal that quickly turns yellowish in air. It matters because its compounds produce the brilliant red colors in fireworks and flares, and others make long-lasting glow-in-the-dark materials.",
+  "summary": "Strontium is a soft, silvery metal that quickly turns yellowish in air. It matters because its compounds produce the brilliant red colours in fireworks and flares, and others make long-lasting glow-in-the-dark materials.",
   "uses": [
    "Red fireworks",
    "Emergency flares",
@@ -1311,13 +1311,13 @@
   "density": 6.52,
   "year": 1789,
   "ancient": false,
-  "summary": "Zirconium is a strong, silvery-gray metal that resists corrosion extremely well. It matters in nuclear power stations, where it is used to wrap the fuel because it lets neutrons pass through easily.",
+  "summary": "Zirconium is a strong, silvery-grey metal that resists corrosion extremely well. It matters in nuclear power stations, where it is used to wrap the fuel because it lets neutrons pass through easily.",
   "uses": [
    "Nuclear fuel cladding",
    "Ceramic knives",
    "Dental crowns"
   ],
-  "fact": "Cubic zirconia, a sparkling crystal form of zirconium dioxide, is widely used as an inexpensive stand-in for diamond in jewelry."
+  "fact": "Cubic zirconia, a sparkling crystal form of zirconium dioxide, is widely used as an inexpensive stand-in for diamond in jewellery."
  },
  {
   "number": 41,
@@ -1344,7 +1344,7 @@
   "density": 8.57,
   "year": 1801,
   "ancient": false,
-  "summary": "Niobium is a soft, gray metal that makes steel much stronger when a small amount is added. It matters because niobium alloys can carry electricity with no resistance at very low temperatures, making powerful magnets possible.",
+  "summary": "Niobium is a soft, grey metal that makes steel much stronger when a small amount is added. It matters because niobium alloys can carry electricity with no resistance at very low temperatures, making powerful magnets possible.",
   "uses": [
    "Pipeline steel",
    "Superconducting magnets",
@@ -1479,7 +1479,7 @@
   "summary": "Rhodium is a rare, silvery-white metal that is very hard and highly reflective. It matters because it is used in car exhaust systems to turn harmful gases into less harmful ones.",
   "uses": [
    "Catalytic converters",
-   "Jewelry plating",
+   "Jewellery plating",
    "Reflective mirror coatings"
   ],
   "fact": "Rhodium is one of the rarest and most expensive precious metals, and at times it has cost many times more than gold."
@@ -1512,7 +1512,7 @@
   "summary": "Palladium is a rare, silvery-white precious metal closely related to platinum. It matters because most of it goes into catalytic converters, which clean up the exhaust fumes from gasoline-powered cars.",
   "uses": [
    "Catalytic converters",
-   "White gold jewelry",
+   "White gold jewellery",
    "Electronic components"
   ],
   "fact": "Palladium can soak up hydrogen like a sponge, absorbing hundreds of times its own volume of the gas."
@@ -1542,9 +1542,9 @@
   "density": 10.501,
   "year": null,
   "ancient": true,
-  "summary": "Silver is a shiny, white precious metal that people have made into jewelry and coins for thousands of years. It matters in technology too, because it is used in solar panels and electronics.",
+  "summary": "Silver is a shiny, white precious metal that people have made into jewellery and coins for thousands of years. It matters in technology too, because it is used in solar panels and electronics.",
   "uses": [
-   "Jewelry and silverware",
+   "Jewellery and silverware",
    "Solar panels",
    "Mirror coatings"
   ],
@@ -1647,7 +1647,7 @@
    "Electronics solder",
    "Bronze and pewter"
   ],
-  "fact": "In very cold conditions tin can slowly crumble into a gray powder, a change nicknamed tin pest."
+  "fact": "In very cold conditions tin can slowly crumble into a grey powder, a change nicknamed tin pest."
  },
  {
   "number": 51,
@@ -1674,7 +1674,7 @@
   "density": 6.685,
   "year": null,
   "ancient": true,
-  "summary": "Antimony is a brittle, silvery-gray element with properties between those of metals and nonmetals. It matters because its compounds make plastics and fabrics harder to burn, and it hardens the lead used in batteries.",
+  "summary": "Antimony is a brittle, silvery-grey element with properties between those of metals and nonmetals. It matters because its compounds make plastics and fabrics harder to burn, and it hardens the lead used in batteries.",
   "uses": [
    "Flame retardants",
    "Lead-acid battery plates",
@@ -1740,13 +1740,13 @@
   "density": 4.93,
   "year": 1811,
   "ancient": false,
-  "summary": "Iodine is a dark, shiny solid that turns into a violet vapor when warmed. It matters because your thyroid gland needs it to make hormones that control growth and how your body uses energy.",
+  "summary": "Iodine is a dark, shiny solid that turns into a violet vapour when warmed. It matters because your thyroid gland needs it to make hormones that control growth and how your body uses energy.",
   "uses": [
    "Iodized table salt",
    "Antiseptic wound cleaners",
    "X-ray contrast dyes"
   ],
-  "fact": "Iodine was discovered in 1811 by Bernard Courtois, who noticed purple vapor rising from seaweed ash he was treating with acid."
+  "fact": "Iodine was discovered in 1811 by Bernard Courtois, who noticed purple vapour rising from seaweed ash he was treating with acid."
  },
  {
   "number": 54,
@@ -1773,7 +1773,7 @@
   "density": 0.005887,
   "year": 1898,
   "ancient": false,
-  "summary": "Xenon is a heavy, colorless gas present in the air in very small traces. It matters because it gives a brilliant white light in lamps and is used to propel some spacecraft.",
+  "summary": "Xenon is a heavy, colourless gas present in the air in very small traces. It matters because it gives a brilliant white light in lamps and is used to propel some spacecraft.",
   "uses": [
    "Bright car headlights",
    "Cinema projector lamps",
@@ -1784,7 +1784,7 @@
  {
   "number": 55,
   "symbol": "Cs",
-  "name": "Cesium",
+  "name": "Caesium",
   "mass": 132.905,
   "category": "alkali-metal",
   "period": 6,
@@ -1806,13 +1806,13 @@
   "density": 1.93,
   "year": 1860,
   "ancient": false,
-  "summary": "Cesium is a soft, pale gold metal that melts just above room temperature and reacts explosively with water. It matters because clocks based on cesium atoms keep time accurately enough to set the world's official time.",
+  "summary": "Caesium is a soft, pale gold metal that melts just above room temperature and reacts explosively with water. It matters because clocks based on caesium atoms keep time accurately enough to set the world's official time.",
   "uses": [
    "Atomic clocks",
    "Oil drilling fluids",
    "Photoelectric cells"
   ],
-  "fact": "Since 1967 the second has been officially defined by counting a particular vibration of cesium atoms that repeats more than nine billion times."
+  "fact": "Since 1967 the second has been officially defined by counting a particular vibration of caesium atoms that repeats more than nine billion times."
  },
  {
   "number": 56,
@@ -1905,7 +1905,7 @@
   "density": 6.77,
   "year": 1803,
   "ancient": false,
-  "summary": "Cerium is a soft, gray metal and the most abundant of the rare earth elements. It matters because its oxide is used to polish glass and to help clean up car exhaust fumes.",
+  "summary": "Cerium is a soft, grey metal and the most abundant of the rare earth elements. It matters because its oxide is used to polish glass and to help clean up car exhaust fumes.",
   "uses": [
    "Glass polishing powder",
    "Catalytic converters",
@@ -1977,7 +1977,7 @@
    "Electric vehicle motors",
    "Industrial and medical lasers"
   ],
-  "fact": "Glass colored with neodymium appears lilac in daylight but can look pale blue under fluorescent lamps, because it absorbs a narrow band of yellow light."
+  "fact": "Glass coloured with neodymium appears lilac in daylight but can look pale blue under fluorescent lamps, because it absorbs a narrow band of yellow light."
  },
  {
   "number": 61,
@@ -2043,7 +2043,7 @@
    "Nuclear reactor control rods",
    "Cancer pain treatment"
   ],
-  "fact": "Samarium takes its name from the mineral samarskite, which honors Vasili Samarsky-Bykhovets, a Russian mining official who gave scientists access to the mineral samples."
+  "fact": "Samarium takes its name from the mineral samarskite, which honours Vasili Samarsky-Bykhovets, a Russian mining official who gave scientists access to the mineral samples."
  },
  {
   "number": 63,
@@ -2136,7 +2136,7 @@
   "density": 8.23,
   "year": 1843,
   "ancient": false,
-  "summary": "Terbium is a soft, silvery rare earth metal whose compounds glow bright green. That green glow helps create the colors in screens and efficient lamps, and terbium also improves powerful magnets.",
+  "summary": "Terbium is a soft, silvery rare earth metal whose compounds glow bright green. That green glow helps create the colours in screens and efficient lamps, and terbium also improves powerful magnets.",
   "uses": [
    "Green screen phosphors",
    "Fluorescent lamps",
@@ -2206,7 +2206,7 @@
   "uses": [
    "Medical lasers",
    "Magnet pole pieces",
-   "Colored glass"
+   "Coloured glass"
   ],
   "fact": "Holmium gets its name from Holmia, the Latin name for Stockholm, the Swedish capital that lies close to where many rare earth minerals were found."
  },
@@ -2235,10 +2235,10 @@
   "density": 9.07,
   "year": 1843,
   "ancient": false,
-  "summary": "Erbium is a soft, silvery rare earth metal that gives glass a pink color. Tiny amounts inside optical fibers boost the light signals that carry internet data across long distances.",
+  "summary": "Erbium is a soft, silvery rare earth metal that gives glass a pink colour. Tiny amounts inside optical fibres boost the light signals that carry internet data across long distances.",
   "uses": [
-   "Fiber-optic signal amplifiers",
-   "Pink glass coloring",
+   "Fibre-optic signal amplifiers",
+   "Pink glass colouring",
    "Dental and skin lasers"
   ],
   "fact": "Early chemists confused erbium with terbium so badly that the two names ended up swapped compared with how their discoverer first assigned them."
@@ -2272,7 +2272,7 @@
   "uses": [
    "Portable X-ray sources",
    "Surgical lasers",
-   "Fiber-optic signal amplifiers"
+   "Fibre-optic signal amplifiers"
   ],
   "fact": "Thulium is named after Thule, an ancient name for a mysterious land in the far north that is often linked with Scandinavia."
  },
@@ -2304,7 +2304,7 @@
   "summary": "Ytterbium is a soft, silvery rare earth metal that is fairly easy to bend and shape. It is used in powerful industrial lasers and in some of the most accurate atomic clocks ever built.",
   "uses": [
    "Atomic clocks",
-   "Industrial fiber lasers",
+   "Industrial fibre lasers",
    "Chemical reaction catalysts"
   ],
   "fact": "Ytterbium's electrical resistance changes when it is squeezed very hard, so it has been used in gauges that measure the shock from explosions and earthquakes."
@@ -2334,7 +2334,7 @@
   "density": 9.84,
   "year": 1907,
   "ancient": false,
-  "summary": "Lutetium is a hard, dense, silvery metal that is the last member of the lanthanide series. It is difficult to separate from its neighbors, and it is used in medical scanners and cancer treatment.",
+  "summary": "Lutetium is a hard, dense, silvery metal that is the last member of the lanthanide series. It is difficult to separate from its neighbours, and it is used in medical scanners and cancer treatment.",
   "uses": [
    "PET scanner detectors",
    "Targeted cancer therapy",
@@ -2400,7 +2400,7 @@
   "density": 16.4,
   "year": 1802,
   "ancient": false,
-  "summary": "Tantalum is a hard, blue-gray metal that is extremely resistant to corrosion. It is used to make tiny capacitors for phones and computers, and the human body tolerates it well in implants.",
+  "summary": "Tantalum is a hard, blue-grey metal that is extremely resistant to corrosion. It is used to make tiny capacitors for phones and computers, and the human body tolerates it well in implants.",
   "uses": [
    "Electronic capacitors",
    "Surgical implants",
@@ -2433,7 +2433,7 @@
   "density": 19.3,
   "year": 1783,
   "ancient": false,
-  "summary": "Tungsten is a very dense, gray metal with the highest melting point of all metals. Its strength at extreme heat makes it valuable for cutting tools, light bulb filaments, and rocket parts.",
+  "summary": "Tungsten is a very dense, grey metal with the highest melting point of all metals. Its strength at extreme heat makes it valuable for cutting tools, light bulb filaments, and rocket parts.",
   "uses": [
    "Light bulb filaments",
    "Carbide cutting tools",
@@ -2505,7 +2505,7 @@
    "Electrical contacts",
    "Microscope sample staining"
   ],
-  "fact": "Osmium's name comes from the Greek word for smell, because its powder slowly forms a toxic compound in air that has a sharp odor."
+  "fact": "Osmium's name comes from the Greek word for smell, because its powder slowly forms a toxic compound in air that has a sharp odour."
  },
  {
   "number": 77,
@@ -2565,10 +2565,10 @@
   "density": 21.46,
   "year": 1735,
   "ancient": false,
-  "summary": "Platinum is a dense, silvery-white precious metal that does not tarnish. It is prized for jewelry, and it speeds up chemical reactions, which helps clean car exhaust and produce many useful chemicals.",
+  "summary": "Platinum is a dense, silvery-white precious metal that does not tarnish. It is prized for jewellery, and it speeds up chemical reactions, which helps clean car exhaust and produce many useful chemicals.",
   "uses": [
    "Catalytic converters",
-   "Fine jewelry",
+   "Fine jewellery",
    "Cancer chemotherapy drugs"
   ],
   "fact": "Spanish explorers in South America called platinum platina, meaning little silver, and at first considered it a nuisance mixed in with their gold."
@@ -2598,9 +2598,9 @@
   "density": 19.282,
   "year": null,
   "ancient": true,
-  "summary": "Gold is a soft, yellow precious metal that does not rust or tarnish. People have treasured it for thousands of years as jewelry and money, and it is also an excellent conductor in electronics.",
+  "summary": "Gold is a soft, yellow precious metal that does not rust or tarnish. People have treasured it for thousands of years as jewellery and money, and it is also an excellent conductor in electronics.",
   "uses": [
-   "Jewelry and coins",
+   "Jewellery and coins",
    "Electronic connectors",
    "Dental crowns"
   ],
@@ -2664,7 +2664,7 @@
   "density": 11.8,
   "year": 1861,
   "ancient": false,
-  "summary": "Thallium is a soft, gray metal that is highly poisonous. It was once used in rat poison, and today small amounts are used in electronics, special glass, and medical heart scans.",
+  "summary": "Thallium is a soft, grey metal that is highly poisonous. It was once used in rat poison, and today small amounts are used in electronics, special glass, and medical heart scans.",
   "uses": [
    "Heart imaging scans",
    "Infrared lens materials",
@@ -2697,7 +2697,7 @@
   "density": 11.342,
   "year": null,
   "ancient": true,
-  "summary": "Lead is a soft, heavy, gray metal that is easy to melt and shape. It is very useful in batteries and radiation shielding, but it is poisonous, so it has been removed from most paint and gasoline.",
+  "summary": "Lead is a soft, heavy, grey metal that is easy to melt and shape. It is very useful in batteries and radiation shielding, but it is poisonous, so it has been removed from most paint and gasoline.",
   "uses": [
    "Car batteries",
    "Radiation shielding",
@@ -2730,13 +2730,13 @@
   "density": 9.807,
   "year": 1753,
   "ancient": false,
-  "summary": "Bismuth is a brittle, silvery metal with a faint pink tinge. It is far less toxic than neighbors such as lead, so it is used in medicines, cosmetics, and lead-free alloys.",
+  "summary": "Bismuth is a brittle, silvery metal with a faint pink tinge. It is far less toxic than neighbours such as lead, so it is used in medicines, cosmetics, and lead-free alloys.",
   "uses": [
    "Stomach upset medicines",
    "Lead-free solders",
    "Cosmetic pigments"
   ],
-  "fact": "Bismuth crystals grown in a laboratory form staircase-like spirals coated in a thin oxide layer that shimmers with rainbow colors."
+  "fact": "Bismuth crystals grown in a laboratory form staircase-like spirals coated in a thin oxide layer that shimmers with rainbow colours."
  },
  {
   "number": 84,
@@ -2829,7 +2829,7 @@
   "density": 0.00973,
   "year": 1900,
   "ancient": false,
-  "summary": "Radon is a colorless, odorless radioactive gas that forms naturally as uranium in rocks and soil breaks down. It can seep into buildings and collect in basements, where breathing it for years raises lung cancer risk.",
+  "summary": "Radon is a colourless, odourless radioactive gas that forms naturally as uranium in rocks and soil breaks down. It can seep into buildings and collect in basements, where breathing it for years raises lung cancer risk.",
   "uses": [
    "Early cancer radiotherapy",
    "Tracing groundwater flow",
@@ -3161,7 +3161,7 @@
   "ancient": false,
   "summary": "Curium is a hard, silvery radioactive metal made in nuclear reactors. It is so radioactive that it glows in the dark, and it provides particles for instruments that study rocks on Mars.",
   "uses": [
-   "Mars rover rock analyzers",
+   "Mars rover rock analysers",
    "Making heavier elements",
    "Scientific research"
   ],
@@ -3495,7 +3495,7 @@
    "Studying superheavy atoms",
    "Testing periodic table trends"
   ],
-  "fact": "Seaborgium is named after the American chemist Glenn Seaborg, who was still alive when the name was officially approved, a very rare honor."
+  "fact": "Seaborgium is named after the American chemist Glenn Seaborg, who was still alive when the name was officially approved, a very rare honour."
  },
  {
   "number": 107,
@@ -3627,7 +3627,7 @@
    "Studying nuclear stability",
    "Particle accelerator experiments"
   ],
-  "fact": "Darmstadtium is named after Darmstadt, the German city whose research center first created it by firing nickel atoms at a lead target."
+  "fact": "Darmstadtium is named after Darmstadt, the German city whose research centre first created it by firing nickel atoms at a lead target."
  },
  {
   "number": 111,
@@ -3759,7 +3759,7 @@
    "Studying nuclear stability",
    "Single-atom chemistry experiments"
   ],
-  "fact": "Flerovium is named after the Flerov Laboratory of Nuclear Reactions in Dubna, Russia, which itself honors the physicist Georgy Flerov."
+  "fact": "Flerovium is named after the Flerov Laboratory of Nuclear Reactions in Dubna, Russia, which itself honours the physicist Georgy Flerov."
  },
  {
   "number": 115,

@@ -197,6 +197,7 @@ export function RegionGame({ regionId }: { regionId: string }) {
       key={`${region.id}-${round}-${difficulty}`}
       config={{ kind: 'place', title: region.name, subtitle: `${region.numbers.length} elements · ${diffName}`, targets: region.numbers, difficulty, regionId: region.id }}
       onExit={() => go('/play')}
+      exitLabel="All regions"
       onReplay={() => setRound((r) => r + 1)}
       onNext={next ? () => go(`/play/${next.id}`, true) : undefined}
       nextLabel={next ? `Next: ${next.name}` : undefined}

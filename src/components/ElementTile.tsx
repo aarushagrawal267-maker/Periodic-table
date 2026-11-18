@@ -10,6 +10,11 @@ interface Props {
   color?: string;
   className?: string;
   style?: CSSProperties;
+  /**
+   * Hide the atomic number from assistive tech. Use inside a control whose aria-label already says the number
+   * after the symbol and name, so the visible label (symbol, name) leads the accessible name (WCAG 2.5.3).
+   */
+  quietNumber?: boolean;
 }
 
 /**
@@ -25,6 +30,7 @@ export const ElementTile = memo(function ElementTile({
   color,
   className = '',
   style,
+  quietNumber = false,
 }: Props) {
   const tiny = size < 40;
   return (
@@ -33,17 +39,18 @@ export const ElementTile = memo(function ElementTile({
       style={{ '--c': color ?? catVar(e.category), borderRadius: Math.max(6, size * 0.16), ...style } as CSSProperties}
     >
       {showNumber && !tiny && (
-        <span className="absolute left-[9%] top-[6%] font-medium tabular-nums opacity-80" style={{ fontSize: Math.max(8, size * 0.17) }}>
+        <span className="absolute left-[9%] top-[6%] font-medium tabular-nums" style={{ fontSize: Math.max(8, size * 0.17) }} aria-hidden={quietNumber || undefined}>
           {e.number}
         </span>
       )}
+      {/* Spaces keep the parts separate words for assistive tech ("Fe Iron", not "FeIron"); flex layout ignores them. */}{' '}
       {showSymbol && (
         <span className="font-display font-semibold leading-none" style={{ fontSize: size * (tiny ? 0.42 : showName ? 0.36 : 0.4), marginTop: showName ? -size * 0.04 : 0 }}>
           {e.symbol}
         </span>
-      )}
+      )}{' '}
       {showName && (
-        <span className="mt-[6%] max-w-[92%] truncate font-medium text-ink-2" style={{ fontSize: Math.max(8, size * 0.135) }}>
+        <span className="tile-name mt-[6%] max-w-[92%] truncate font-medium" style={{ fontSize: Math.max(8, size * 0.135) }}>
           {e.name}
         </span>
       )}

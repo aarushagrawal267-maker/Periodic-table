@@ -23,7 +23,18 @@ export function Quiz() {
   return <QuizRun key={round} onReplay={() => setRound((r) => r + 1)} />;
 }
 
+/** The timer is optional (WCAG 2.2.1): never on Learner, and switchable on the other levels. */
+export function useQuizTimed() {
+  const difficulty = useSettings((s) => s.difficulty);
+  const quizTimer = useSettings((s) => s.quizTimer);
+  return difficulty !== 'learner' && quizTimer;
+}
+
 function QuizIntro({ onStart }: { onStart: () => void }) {
+  const difficulty = useSettings((s) => s.difficulty);
+  const quizTimer = useSettings((s) => s.quizTimer);
+  const set = useSettings((s) => s.set);
+  const timed = useQuizTimed();
   return (
     <div className="mx-auto flex min-h-dvh max-w-xl flex-col px-5 pb-10 pt-6">
       <button onClick={() => go('/play')} className="btn-ghost grid h-10 w-10 place-items-center rounded-full" aria-label="Back">
@@ -34,10 +45,26 @@ function QuizIntro({ onStart }: { onStart: () => void }) {
           <BrainCircuit size={38} />
         </motion.div>
         <h1 className="font-display mt-6 text-5xl font-semibold">Quick Quiz</h1>
-        <p className="mx-auto mt-3 max-w-sm text-ink-2">Ten questions, fifteen seconds each. Questions lean towards the elements you haven't mastered yet.</p>
+        <p className="mx-auto mt-3 max-w-sm text-ink-2">
+          Ten questions{timed ? ', fifteen seconds each' : ', no timer, so take your time'}. They come from elements you've met, plus a few new ones, with extra practice on the tricky ones.
+        </p>
         <div className="mt-8 flex justify-center">
-          <DifficultyPicker />
+          <DifficultyPicker extra={{ learner: 'No timer.', expert: 'Adds electronegativity questions.' }} />
         </div>
+        {difficulty !== 'learner' && (
+          <label className="mx-auto mt-5 flex cursor-pointer items-center gap-3 rounded-full border border-line bg-surface py-2 pl-4 pr-2 text-sm font-medium">
+            15-second timer
+            <button
+              type="button"
+              role="switch"
+              aria-checked={quizTimer}
+              onClick={() => set({ quizTimer: !quizTimer })}
+              className={`relative h-7 w-12 rounded-full transition-colors ${quizTimer ? 'bg-accent-2' : 'bg-line-strong'}`}
+            >
+              <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-[left] ${quizTimer ? 'left-6' : 'left-1'}`} />
+            </button>
+          </label>
+        )}
         <button onClick={onStart} className="btn-primary shine mx-auto mt-10 flex h-14 w-full max-w-xs items-center justify-center gap-2 rounded-2xl text-lg">
           Start <ArrowRight size={20} />
         </button>
@@ -48,6 +75,9 @@ function QuizIntro({ onStart }: { onStart: () => void }) {
 
 function QuizRun({ onReplay }: { onReplay: () => void }) {
   const difficulty = useSettings((s) => s.difficulty);
+  const timedSetting = useQuizTimed();
+  // Fixed for the whole round, even if settings change mid-quiz.
+  const [timed] = useState(timedSetting);
   const mastery = useProgress((s) => s.mastery);
   const recordRound = useProgress((s) => s.recordRound);
   const [questions] = useState<Question[]>(() => buildQuiz(difficulty, mastery));
@@ -61,6 +91,8 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
   const recorded = useRef(false);
   const askedAt = useRef(Date.now());
   const [remaining, setRemaining] = useState(QUESTION_MS);
+  const optionsRef = useRef<HTMLDivElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
 
   const q = questions[index];
   const answered = answers.length > index;
@@ -122,14 +154,14 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
 
   // Question timer.
   useEffect(() => {
-    if (answered || result) return;
+    if (!timed || answered || result) return;
     const id = setInterval(() => {
       const left = QUESTION_MS - (Date.now() - askedAt.current);
       setRemaining(left);
       if (left <= 0) answer(null);
     }, 100);
     return () => clearInterval(id);
-  }, [answered, answer, result]);
+  }, [timed, answered, answer, result]);
 
   // Auto-advance after a correct answer.
   useEffect(() => {
@@ -138,19 +170,30 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
     return () => clearTimeout(t);
   }, [answered, current, next]);
 
+  // After a wrong answer, focus moves to Next so keyboard and screen-reader users land on the way forward (WCAG 2.4.3).
+  useEffect(() => {
+    if (!answered || current?.ok) return;
+    const a = document.activeElement;
+    if (!a || a === document.body || optionsRef.current?.contains(a)) nextRef.current?.focus();
+  }, [answered, current]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (result) return;
+      if (result || e.ctrlKey || e.metaKey || e.altKey || shortcutsBlocked(e.target)) return;
       const i = Number(e.key) - 1;
-      if (!answered && i >= 0 && i < 4) answer(i);
-      else if (answered && (e.key === 'Enter' || e.key === ' ')) {
+      // Number keys answer from the answer buttons or when nothing interactive has focus (the page, the question),
+      // never while another control such as "Leave quiz" has focus (WCAG 2.1.4).
+      const t = e.target;
+      const onPage = !(t instanceof HTMLElement) || !!optionsRef.current?.contains(t) || !t.closest(INTERACTIVE);
+      if (!answered && onPage && i >= 0 && i < q.options.length && i < 4) answer(i);
+      else if (answered && (e.key === 'Enter' || e.key === ' ') && !isControl(e.target)) {
         e.preventDefault();
         next();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [answered, answer, next, result]);
+  }, [answered, answer, next, result, q]);
 
   const e = byNumber(q.element);
   const heroEl = q.hero ? byNumber(q.element) : null;
@@ -161,9 +204,9 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
         <button onClick={() => go('/play')} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave quiz">
           <ArrowLeft size={18} />
         </button>
-        <div className="flex flex-1 gap-1" aria-label={`Question ${index + 1} of ${QUIZ_LENGTH}`}>
+        <div className="flex flex-1 gap-1" role="progressbar" aria-label="Questions" aria-valuemin={1} aria-valuemax={QUIZ_LENGTH} aria-valuenow={index + 1} aria-valuetext={`Question ${index + 1} of ${QUIZ_LENGTH}`}>
           {questions.map((_, i) => (
-            <span key={i} className="h-1.5 flex-1 rounded-full transition-colors" style={{ background: answers[i] ? (answers[i].ok ? 'var(--good)' : 'var(--bad)') : i === index ? 'var(--ink-2)' : 'var(--line-strong)' }} />
+            <span key={i} aria-hidden className="h-1.5 flex-1 rounded-full transition-colors" style={{ background: answers[i] ? (answers[i].ok ? 'var(--good)' : 'var(--bad)') : i === index ? 'var(--ink-2)' : 'var(--line-strong)' }} />
           ))}
         </div>
         <div className="font-display w-20 text-right text-lg font-semibold">
@@ -171,9 +214,17 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
         </div>
       </header>
 
-      <div className="mt-3 h-1 overflow-hidden rounded-full bg-line">
-        <div className="h-full rounded-full transition-[width] duration-100 ease-linear" style={{ width: `${(answered ? 0 : Math.max(0, remaining) / QUESTION_MS) * 100}%`, background: remaining < 4000 ? 'var(--bad)' : 'var(--grad)' }} />
-      </div>
+      {timed && (
+        <>
+          <div className="mt-3 h-1 overflow-hidden rounded-full bg-line" aria-hidden>
+            <div className="h-full rounded-full transition-[width] duration-100 ease-linear" style={{ width: `${(answered ? 0 : Math.max(0, remaining) / QUESTION_MS) * 100}%`, background: remaining < 4000 ? 'var(--bad)' : 'var(--grad)' }} />
+          </div>
+          {/* Said once per question, so screen-reader users know time is nearly up. */}
+          <div className="sr-only" aria-live="polite">
+            {!answered && !result && remaining > 0 && remaining <= 5000 ? 'About 5 seconds left' : ''}
+          </div>
+        </>
+      )}
 
       <AnimatePresence mode="wait">
         <motion.main key={index} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ type: 'spring', damping: 26, stiffness: 300 }} className="flex flex-1 flex-col justify-center py-8">
@@ -192,10 +243,15 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
               )}
             </div>
           )}
-          <h1 className={`font-display mx-auto mt-6 max-w-lg text-center font-semibold ${q.kind === 'fact' ? 'text-xl leading-snug sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>{q.prompt}</h1>
+          <QuestionHeading className={`font-display mx-auto mt-6 max-w-lg text-center font-semibold ${q.kind === 'fact' ? 'text-xl leading-snug sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
+            <span className="sr-only">
+              Question {index + 1} of {QUIZ_LENGTH}:{' '}
+            </span>
+            {q.prompt}
+          </QuestionHeading>
           {q.kind === 'fact' && <p className="mt-2 text-center text-sm text-ink-3">Which element is this?</p>}
 
-          <div className="mt-8 grid gap-3 sm:grid-cols-2">
+          <div ref={optionsRef} className="mt-8 grid gap-3 sm:grid-cols-2" role="group" aria-label="Answers">
             {q.options.map((o, i) => {
               const isAnswer = i === q.answer;
               const chosen = current?.choice === i;
@@ -204,7 +260,8 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
                 <motion.button
                   key={o}
                   onClick={() => answer(i)}
-                  disabled={answered}
+                  // aria-disabled, not disabled, so the focused answer keeps focus after it is chosen.
+                  aria-disabled={answered || undefined}
                   animate={state === 'wrong' ? { x: [0, -8, 8, -6, 6, 0] } : state === 'right' ? { scale: [1, 1.04, 1] } : {}}
                   transition={{ duration: 0.4 }}
                   className={`flex min-h-16 items-center gap-3 rounded-2xl border px-4 py-3 text-left text-[17px] font-medium transition-colors ${
@@ -229,14 +286,14 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
                     {current.ok ? `Correct · +${current.points}` : current.choice === null ? "Time's up" : 'Not quite'}
                   </div>
                   <p className="mt-0.5 text-sm text-ink-2">
-                    <b className="text-ink" style={{ color: catVar(e.category) }}>
+                    <b className="cat-ink" style={{ '--c': catVar(e.category) } as React.CSSProperties}>
                       {e.name}
                     </b>{' '}
                     — {e.summary?.split('. ')[0]}.
                   </p>
                 </div>
                 {!current.ok && (
-                  <button onClick={next} className="btn-primary flex h-11 shrink-0 items-center gap-1 self-center rounded-xl px-4 text-sm">
+                  <button ref={nextRef} onClick={next} className="btn-primary flex h-11 shrink-0 items-center gap-1 self-center rounded-xl px-4 text-sm">
                     Next <ArrowRight size={16} />
                   </button>
                 )}
@@ -246,7 +303,38 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
         </motion.main>
       </AnimatePresence>
 
-      {result && <Results summary={result.summary} outcome={result.outcome} title="Quick Quiz" total={QUIZ_LENGTH} onReplay={onReplay} onExit={() => go('/')} />}
+      {result && <Results summary={result.summary} outcome={result.outcome} title="Quick Quiz" total={QUIZ_LENGTH} onReplay={onReplay} onExit={() => go('/')} exitLabel="Home" />}
     </div>
+  );
+}
+
+const INTERACTIVE = 'button, a[href], input, select, textarea, summary, [role="button"], [role="switch"], [role="radio"], [role="tab"], [role="link"]';
+
+/** Number-key shortcuts must not fire while typing or while a dialog (settings, element detail) is open. */
+function shortcutsBlocked(target: EventTarget | null) {
+  if (document.querySelector('[aria-modal="true"]')) return true;
+  if (!(target instanceof HTMLElement)) return false;
+  return target.isContentEditable || !!target.closest('input, textarea, select, [role="dialog"]');
+}
+
+/** Enter/Space on a focused control should activate that control, not skip ahead. */
+function isControl(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  const control = target.closest('button, a[href], input, select, textarea, [role="button"], [role="radio"], [role="switch"]');
+  return !!control && !control.matches(':disabled, [aria-disabled="true"]');
+}
+
+/** The question heading takes focus when a new question appears, so it is read out (WCAG 2.4.3, 4.1.3). */
+function QuestionHeading({ className, children }: { className: string; children: React.ReactNode }) {
+  const ref = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    const a = document.activeElement;
+    // Only when focus was lost with the old question (or the Start button); never steal it from another control.
+    if (!a || a === document.body) ref.current?.focus({ preventScroll: true });
+  }, []);
+  return (
+    <h1 ref={ref} tabIndex={-1} className={`${className} outline-none`}>
+      {children}
+    </h1>
   );
 }

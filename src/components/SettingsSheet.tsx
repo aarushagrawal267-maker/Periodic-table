@@ -1,5 +1,5 @@
 import { Monitor, Moon, Sun } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type KeyboardEvent } from 'react';
 import { DIFFICULTIES, useSettings, type Theme } from '../store/settings';
 import { useProgress } from '../store/progress';
 import { useUi } from '../store/ui';
@@ -25,12 +25,12 @@ export function SettingsSheet() {
 
         <section className="mt-6">
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Appearance</h3>
-          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Theme">
+          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Theme" onKeyDown={(e) => roveRadios(e, themes.map((t) => t.id), s.theme, (theme) => s.set({ theme }))}>
             {themes.map((t) => {
               const I = t.icon;
               const on = s.theme === t.id;
               return (
-                <button key={t.id} role="radio" aria-checked={on} onClick={() => s.set({ theme: t.id })} className={`flex flex-col items-center gap-1.5 rounded-2xl border py-3 text-sm font-medium transition-colors ${on ? 'border-accent-2 bg-accent-2/10' : 'border-line bg-surface hover:bg-surface-2'}`}>
+                <button key={t.id} role="radio" aria-checked={on} tabIndex={on ? 0 : -1} onClick={() => s.set({ theme: t.id })} className={`flex flex-col items-center gap-1.5 rounded-2xl border py-3 text-sm font-medium transition-colors ${on ? 'border-accent-2 bg-accent-2/10' : 'border-line bg-surface hover:bg-surface-2'}`}>
                   <I size={18} />
                   {t.label}
                 </button>
@@ -41,11 +41,11 @@ export function SettingsSheet() {
 
         <section className="mt-6">
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Default difficulty</h3>
-          <div className="space-y-2" role="radiogroup" aria-label="Default difficulty">
+          <div className="space-y-2" role="radiogroup" aria-label="Default difficulty" onKeyDown={(e) => roveRadios(e, DIFFICULTIES.map((d) => d.id), s.difficulty, (difficulty) => s.set({ difficulty }))}>
             {DIFFICULTIES.map((d) => {
               const on = s.difficulty === d.id;
               return (
-                <button key={d.id} role="radio" aria-checked={on} onClick={() => s.set({ difficulty: d.id })} className={`flex w-full items-start gap-3 rounded-2xl border p-3.5 text-left transition-colors ${on ? 'border-accent-2 bg-accent-2/10' : 'border-line bg-surface hover:bg-surface-2'}`}>
+                <button key={d.id} role="radio" aria-checked={on} tabIndex={on ? 0 : -1} onClick={() => s.set({ difficulty: d.id })} className={`flex w-full items-start gap-3 rounded-2xl border p-3.5 text-left transition-colors ${on ? 'border-accent-2 bg-accent-2/10' : 'border-line bg-surface hover:bg-surface-2'}`}>
                   <span className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border-2 ${on ? 'border-accent-2' : 'border-line-strong'}`}>{on && <span className="h-1.5 w-1.5 rounded-full bg-accent-2" />}</span>
                   <span>
                     <span className="block font-medium">{d.name}</span>
@@ -91,6 +91,23 @@ export function SettingsSheet() {
       </div>
     </Sheet>
   );
+}
+
+/**
+ * Arrow keys move the selection inside a radio group, as native radios do (roving tabindex):
+ * only the checked radio is in the Tab order, arrows check and focus the next or previous one.
+ */
+function roveRadios<T extends string>(e: KeyboardEvent<HTMLElement>, ids: readonly T[], current: T, select: (id: T) => void) {
+  const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+  const at = Math.max(0, ids.indexOf(current));
+  let to: number;
+  if (step) to = (at + step + ids.length) % ids.length;
+  else if (e.key === 'Home') to = 0;
+  else if (e.key === 'End') to = ids.length - 1;
+  else return;
+  e.preventDefault();
+  select(ids[to]);
+  e.currentTarget.querySelectorAll<HTMLElement>('[role="radio"]')[to]?.focus();
 }
 
 function Toggle({ label, hint, on, set }: { label: string; hint?: string; on: boolean; set: (v: boolean) => void }) {

@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ArrowRight, BrainCircuit, CalendarDays, Check, Flame, GraduationCap, Hand, Lightbulb, PartyPopper, Play, RefreshCw, Sparkles, Star, Telescope, Trophy } from 'lucide-react';
+import { ArrowRight, BarChart3, BrainCircuit, CalendarDays, Check, Flame, GraduationCap, Hand, Lightbulb, PartyPopper, Play, RefreshCw, ShieldCheck, Sparkles, Star, Telescope, Trophy } from 'lucide-react';
 import { useMemo, type CSSProperties } from 'react';
 import { goalLabel, useDailyGoal } from '../components/DailyGoal';
 import { ElementTile } from '../components/ElementTile';
@@ -35,6 +35,9 @@ export function Home() {
   const p = useProgress();
   const key = todayKey();
   const today = p.daily.results[key];
+  /** A finished daily has stars; a daily left early (0 stars) used the try but has nothing to show or share. */
+  const done = !!today && today.stars > 0;
+  const used = !!today && today.stars === 0;
   const streak = liveStreak(p.daily, key);
   const lvl = levelFromXp(p.xp);
   const mastered = masteredCount(p.mastery);
@@ -43,6 +46,7 @@ export function Home() {
   const learning = learningCount(p.mastery);
   const nextChapter = CHAPTERS.find((c) => !p.chapters[c.id]) ?? CHAPTERS[0];
   const firstChapter = FIRST_CHAPTERS.find((c) => !p.chapters[c.id]);
+  const starter = !!firstChapter;
   const firstDone = FIRST_20.filter((n) => (p.mastery[n]?.s ?? 0) >= 1).length;
   const featured = useMemo(() => ELEMENTS[hashString('eotd:' + key) % ELEMENTS.length], [key]);
   // Recomputed when mastery changes; "now" is read at render.
@@ -55,6 +59,7 @@ export function Home() {
         <div className="grid-lines pointer-events-none absolute inset-x-0 top-0 h-[520px]" />
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pb-10 pt-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:pt-16">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
+            {!firstChapter && (
             <a href="#/daily" className="group inline-flex items-center gap-2 rounded-full border border-line bg-surface py-1 pl-1 pr-3 text-sm text-ink-2 transition-colors hover:border-line-strong">
               <span className="rounded-full px-2 py-0.5 text-xs font-semibold text-bg" style={{ background: 'var(--grad)' }}>
                 Today
@@ -62,7 +67,8 @@ export function Home() {
               Daily #{dailyNumber(key)} is live
               <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
             </a>
-            <h1 className="font-display mt-6 text-[44px] font-semibold leading-[1.02] sm:text-6xl lg:text-[68px]">
+            )}
+            <h1 className={`font-display ${firstChapter ? '' : 'mt-6'} text-[44px] font-semibold leading-[1.02] sm:text-6xl lg:text-[68px]`}>
               {returning ? (
                 <>
                   {greeting()}.<br />
@@ -119,22 +125,38 @@ export function Home() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6">
         {due.length > 0 && <ReviewCard due={due} />}
         <div className="grid gap-4 lg:grid-cols-3">
-          <GoalCard lessonHref={`#/learn/${(firstChapter ?? nextChapter).id}`} />
-          <motion.a href="#/daily" className="group relative overflow-hidden rounded-[28px] p-[1.5px] lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-1" style={{ background: 'var(--grad)' }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
-            <div className="solid relative flex h-full flex-col gap-6 overflow-hidden rounded-[27px] p-6 sm:flex-row sm:items-center sm:p-8">
+          <GoalCard lessonHref={`#/learn/${(firstChapter ?? nextChapter).id}`} className={starter ? '' : 'lg:col-start-3 lg:row-start-1'} />
+          {/* While the first 20 are still new, the daily is a small bonus card at the end, not the main event. */}
+          <motion.a
+            href="#/daily"
+            className={`group relative overflow-hidden rounded-[28px] p-[1.5px] ${starter ? 'order-last' : 'lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-1'}`}
+            style={{ background: 'var(--grad)' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={spring}
+          >
+            <div className={`solid relative flex h-full flex-col gap-6 overflow-hidden rounded-[27px] p-6 ${starter ? '' : 'sm:flex-row sm:items-center sm:p-8'}`}>
               <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full opacity-30 blur-3xl" style={{ background: 'var(--accent-2)' }} />
               <div className="relative flex-1">
                 <div className="flex items-center gap-2 text-sm font-semibold text-accent-2">
                   <CalendarDays size={16} /> Daily Challenge #{dailyNumber(key)}
                 </div>
-                <h2 className="font-display mt-2 text-3xl font-semibold">{today ? 'Done for today. Nice.' : `${DAILY_SIZE} elements. One shot.`}</h2>
-                <p className="mt-2 max-w-md text-ink-2">
-                  {today ? `You scored ${today.score.toLocaleString('en-US')}. Share your grid and come back tomorrow to keep your streak.` : 'The same puzzle for every player today, scattered across the whole table. Keep your streak alive.'}
+                <h2 className={`font-display mt-2 font-semibold ${starter ? 'text-xl' : 'text-3xl'}`}>{done ? 'Done for today. Nice.' : used ? 'Attempt used today' : starter ? 'Fancy a bonus challenge?' : `${DAILY_SIZE} elements. One shot.`}</h2>
+                <p className={`mt-2 max-w-md text-ink-2 ${starter ? 'text-sm' : ''}`}>
+                  {done
+                    ? `You scored ${today!.score.toLocaleString('en-US')}. Share your grid and come back tomorrow to keep your streak.`
+                    : used
+                      ? 'You left before the end, so there is no score this time. A fresh puzzle arrives at midnight.'
+                      : starter
+                        ? `${DAILY_SIZE} elements from all over the table, the same for everyone today. Some will be new, and that's fine.`
+                        : 'The same puzzle for every player today, scattered across the whole table. Keep your streak alive.'}
                 </p>
                 <div className="mt-5 flex flex-wrap items-center gap-4">
-                  <span className="btn-primary inline-flex h-11 items-center gap-2 rounded-xl px-5 text-sm">
-                    {today ? 'See result' : 'Play now'} <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
-                  </span>
+                  {!used && (
+                    <span className={`${starter && !done ? 'btn-ghost' : 'btn-primary'} inline-flex h-11 items-center gap-2 rounded-xl px-5 text-sm font-semibold`}>
+                      {done ? 'See result' : 'Play now'} <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  )}
                   <span className="flex items-center gap-1.5 text-sm text-ink-2">
                     <Flame size={16} className={streak ? 'fill-[#ff9f43] text-[#ff9f43]' : ''} /> {streak} day streak
                   </span>
@@ -143,12 +165,12 @@ export function Home() {
                   </span>
                 </div>
               </div>
-              <div className="relative w-full sm:w-64">
+              <div className={`relative w-full sm:w-64 ${starter ? 'hidden' : ''}`}>
                 <MiniTable className="w-full" highlight={new Set()} color={() => undefined} />
-                {today && (
+                {done && (
                   <div className="absolute inset-0 grid place-items-center">
                     <div className="flex flex-wrap justify-center gap-1 rounded-xl bg-bg/80 p-2 backdrop-blur">
-                      {today.trail.map((t, i) => (
+                      {today!.trail.map((t, i) => (
                         <span key={i} className="h-4 w-4 rounded" style={{ background: t === 'hit' ? 'var(--good)' : t === 'hint' ? 'var(--gold)' : 'var(--bad)' }} />
                       ))}
                     </div>
@@ -158,7 +180,7 @@ export function Home() {
             </div>
           </motion.a>
 
-          <motion.a href="#/progress" className="card group flex flex-col justify-between p-6 transition-colors hover:bg-surface-2 lg:col-start-3 lg:row-start-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.05 }}>
+          <motion.a href="#/progress" className={`card group flex flex-col justify-between p-6 transition-colors hover:bg-surface-2 ${starter ? '' : 'lg:col-start-3 lg:row-start-2'}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.05 }}>
             <div className="flex items-center gap-4">
               <Ring value={lvl.progress} size={72} stroke={7}>
                 <span className="font-display text-xl font-bold">{lvl.level}</span>
@@ -274,8 +296,8 @@ export function Home() {
             ].map(([t, c], i) => (
               <span
                 key={t}
-                className={`font-display grid h-14 place-items-center rounded-2xl border px-3 font-semibold transition-transform duration-500 ${i ? 'min-w-24 text-base group-hover:translate-x-1' : 'w-14 text-2xl group-hover:-translate-x-1'}`}
-                style={{ borderColor: `color-mix(in oklab, var(--${c}) 50%, transparent)`, background: `color-mix(in oklab, var(--${c}) 14%, transparent)`, color: `var(--${c})` }}
+                className={`cat-chip font-display grid h-14 place-items-center rounded-2xl border px-3 font-semibold transition-transform duration-500 ${i ? 'min-w-24 text-base group-hover:translate-x-1' : 'w-14 text-2xl group-hover:-translate-x-1'}`}
+                style={{ '--c': `var(--${c})`, borderColor: `color-mix(in oklab, var(--${c}) 50%, transparent)` } as CSSProperties}
               >
                 {t}
               </span>
@@ -311,8 +333,40 @@ export function Home() {
           </div>
         </section>
       )}
+      <ForTeachers />
       <div className="h-16" />
     </div>
+  );
+}
+
+/** A short, honest note for teachers and parents deciding whether to recommend the app. */
+function ForTeachers() {
+  const points = [
+    { icon: GraduationCap, title: 'What it covers', body: 'Starts with elements 1 to 20, then the groups: alkali metals, halogens, noble gases and more, through to the whole table.' },
+    { icon: ShieldCheck, title: 'No accounts', body: 'No sign-up, no email, no names. Progress is saved only in this browser, on this device.' },
+    { icon: BarChart3, title: 'Easy to check', body: 'Students can open Progress and show you a summary of the elements they have started and mastered.' },
+  ];
+  return (
+    <section className="mx-auto mt-16 max-w-7xl px-4 sm:px-6" aria-labelledby="teachers-title">
+      <div className="card p-6 sm:p-8">
+        <p className="text-sm font-semibold text-accent-2">For teachers and parents</p>
+        <h2 id="teachers-title" className="font-display mt-1 text-2xl font-semibold">
+          Free, private, and built around short practice
+        </h2>
+        <ul className="mt-5 grid gap-5 md:grid-cols-3">
+          {points.map((pt) => (
+            <li key={pt.title} className="flex gap-3">
+              <pt.icon size={20} className="mt-0.5 shrink-0 text-accent-2" aria-hidden />
+              <div>
+                <h3 className="font-semibold">{pt.title}</h3>
+                <p className="mt-1 text-sm text-ink-2">{pt.body}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-5 text-xs text-ink-3">Element data comes from PubChem (NCBI).</p>
+      </div>
+    </section>
   );
 }
 
@@ -341,9 +395,11 @@ function HeroTable({ featured }: { featured: number }) {
             )}
           />
         </div>
-        <span aria-hidden className="solid absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full border border-line-strong py-1.5 pl-3 pr-2.5 text-xs font-semibold text-ink sm:bottom-5 sm:right-5">
-          <Telescope size={14} className="text-accent-2" /> Explore the table
-          <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+        <span aria-hidden className="mt-2 flex justify-end sm:mt-3">
+          <span className="solid flex items-center gap-1.5 rounded-full border border-line-strong py-1.5 pl-3 pr-2.5 text-xs font-semibold text-ink transition-colors group-hover:border-accent-2">
+            <Telescope size={14} className="text-accent-2" /> Explore the table
+            <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+          </span>
         </span>
       </a>
       <motion.button
@@ -394,10 +450,10 @@ function FirstTwenty({ done, mastery }: { done: number; mastery: Record<number, 
           return (
             <span
               key={n}
-              className="font-display grid aspect-square place-items-center rounded-md text-[11px] font-semibold transition-colors"
+              className={`font-display grid aspect-square place-items-center rounded-md text-[11px] font-semibold transition-colors ${on ? 'cat-chip' : ''}`}
               style={
                 on
-                  ? { background: `color-mix(in oklab, ${catVar(el.category)} 22%, transparent)`, color: catVar(el.category), boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${catVar(el.category)} 55%, transparent)` }
+                  ? ({ '--c': catVar(el.category), boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${catVar(el.category)} 55%, transparent)` } as CSSProperties)
                   : { background: 'var(--surface)', color: 'var(--ink-3)', boxShadow: 'inset 0 0 0 1px var(--line)' }
               }
             >
@@ -411,11 +467,11 @@ function FirstTwenty({ done, mastery }: { done: number; mastery: Record<number, 
   );
 }
 
-function GoalCard({ lessonHref }: { lessonHref: string }) {
+function GoalCard({ lessonHref, className = '' }: { lessonHref: string; className?: string }) {
   const { xp, goal, value, met } = useDailyGoal();
   return (
     <motion.div
-      className="card relative flex items-center gap-5 overflow-hidden p-6 lg:col-start-3 lg:row-start-1"
+      className={`card relative flex items-center gap-5 overflow-hidden p-6 ${className}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...spring, delay: 0.03 }}
@@ -492,14 +548,14 @@ function ElementOfTheDay({ n }: { n: number }) {
   const e = ELEMENTS[n - 1];
   const c = catVar(e.category);
   return (
-    <motion.article className="card relative overflow-hidden p-6 sm:p-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
+    <motion.article className="card relative overflow-hidden p-6 sm:p-8" style={{ '--c': c } as CSSProperties} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
       <div className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full opacity-25 blur-3xl" style={{ background: c }} />
       <div className="relative flex flex-col gap-6 sm:flex-row">
         <div className="h-28 w-28 shrink-0" style={{ filter: `drop-shadow(0 16px 30px color-mix(in oklab, ${c} 40%, transparent))` }}>
           <ElementTile element={e} size={112} showName={false} />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold" style={{ color: c }}>
+          <p className="cat-ink text-sm font-semibold">
             Element of the day · {categoryLabel(e.category)}
           </p>
           <h2 className="font-display mt-1 text-3xl font-semibold">{e.name}</h2>
@@ -507,7 +563,7 @@ function ElementOfTheDay({ n }: { n: number }) {
           <p className="mt-4 border-l-2 pl-4 text-[15px] italic leading-relaxed" style={{ borderColor: c }}>
             {e.fact}
           </p>
-          <button onClick={() => openDetail(e.number)} className="mt-5 inline-flex items-center gap-1.5 font-semibold" style={{ color: c }}>
+          <button onClick={() => openDetail(e.number)} className="cat-ink mt-5 inline-flex items-center gap-1.5 font-semibold">
             Open the full card <ArrowRight size={16} />
           </button>
         </div>

@@ -132,7 +132,7 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
       </header>
 
       <main className="flex flex-1 flex-col justify-center py-6">
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4" role="grid" aria-label={`${MATCH_PAIRS * 2} face-down cards`}>
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4" role="group" aria-label={`${MATCH_PAIRS * 2} cards`}>
           {deck.map((card, i) => {
             const e = byNumber(card.element);
             const isFound = found.has(card.element);
@@ -148,7 +148,8 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: i * 0.03, type: 'spring', damping: 18 }}
                 aria-label={faceUp ? `${card.face === 'symbol' ? e.symbol : e.name}${isFound ? ', matched' : ''}` : `Card ${i + 1}, face down`}
-                disabled={isFound}
+                // aria-disabled, not disabled, so a card matched from the keyboard keeps focus (WCAG 2.4.3). flip() ignores it.
+                aria-disabled={isFound || undefined}
               >
                 <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{ rotateY: faceUp ? 180 : 0 }} transition={{ type: 'spring', damping: 18, stiffness: 220 }}>
                   <div className="absolute inset-0 grid place-items-center overflow-hidden rounded-2xl border border-line shadow-[inset_0_1px_0_rgb(255_255_255/0.08)] transition-[border-color,filter] duration-200 [backface-visibility:hidden] group-hover:border-line-strong group-hover:brightness-110" style={{ background: 'linear-gradient(145deg, color-mix(in oklab, var(--accent) 22%, var(--surface-solid)), color-mix(in oklab, var(--accent-2) 14%, var(--surface-solid)))' }}>
@@ -166,7 +167,7 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
                   >
                     {card.face === 'symbol' ? (
                       <div className="aspect-square w-3/4">
-                        <ElementTile element={e} size={72} showName={false} showNumber={difficulty === 'learner'} color={isFound || difficulty === 'learner' ? undefined : 'var(--accent-2)'} />
+                        <ElementTile element={e} size={72} showName={false} quietNumber showNumber={difficulty === 'learner'} color={isFound || difficulty === 'learner' ? undefined : 'var(--accent-2)'} />
                       </div>
                     ) : (
                       <span className={`font-display text-base font-semibold leading-tight sm:text-lg ${isFound ? 'cat-ink' : ''}`} style={{ '--c': c } as CSSProperties}>
@@ -185,7 +186,7 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
         {announce}
       </div>
 
-      {result && <Results summary={result.summary} outcome={result.outcome} title="Match Pairs" total={pairs.length} onReplay={onReplay} onExit={() => go('/')} />}
+      {result && <Results summary={result.summary} outcome={result.outcome} title="Match Pairs" total={pairs.length} onReplay={onReplay} onExit={() => go('/')} exitLabel="Home" />}
     </div>
   );
 }

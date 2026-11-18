@@ -35,6 +35,8 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
 
   const q = questions[index];
   const need = q.answer.size;
+  const hits = [...picked].filter((n) => q.answer.has(n)).length;
+  const verdict = perfect[index] ? 'Spot on!' : hits > 0 ? 'Close! Here is what is inside:' : "Not quite. Here's what's inside:";
 
   const toggle = (n: number) => {
     if (checked) return;
@@ -103,9 +105,9 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
         <button onClick={() => go('/play')} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave">
           <ArrowLeft size={18} />
         </button>
-        <div className="flex flex-1 gap-1" aria-label={`Object ${index + 1} of ${LIFE_LENGTH}`}>
+        <div className="flex flex-1 gap-1" role="progressbar" aria-label="Objects" aria-valuemin={1} aria-valuemax={LIFE_LENGTH} aria-valuenow={index + 1} aria-valuetext={`Object ${index + 1} of ${LIFE_LENGTH}`}>
           {questions.map((_, i) => (
-            <span key={i} className="h-1.5 flex-1 rounded-full" style={{ background: perfect[i] === undefined ? (i === index ? 'var(--ink-2)' : 'var(--line-strong)') : perfect[i] ? 'var(--good)' : 'var(--gold)' }} />
+            <span key={i} aria-hidden className="h-1.5 flex-1 rounded-full" style={{ background: perfect[i] === undefined ? (i === index ? 'var(--ink-2)' : 'var(--line-strong)') : perfect[i] ? 'var(--good)' : 'var(--gold)' }} />
           ))}
         </div>
         <div className="font-display w-16 text-right text-lg font-semibold">
@@ -134,16 +136,24 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
                   key={e.number}
                   onClick={() => toggle(e.number)}
                   aria-pressed={on}
-                  aria-label={`${e.name}${checked ? (right ? ', correct' : on ? ', not in it' : '') : ''}`}
+                  aria-label={`${e.symbol}, ${e.name}${checked ? (right ? ', correct' : on ? ', not in it' : '') : ''}`}
                   whileTap={{ scale: 0.94 }}
                   animate={state === 'wrong' ? { x: [0, -6, 6, -4, 4, 0] } : state === 'right' ? { scale: [1, 1.08, 1] } : { scale: on ? 1.04 : 1 }}
                   className="relative aspect-square rounded-2xl"
-                  style={{
-                    opacity: state === 'dim' ? 0.35 : 1,
-                    outline: state === 'on' ? '2px solid var(--accent-2)' : state === 'right' ? '2px solid var(--good)' : state === 'missed' ? '2px dashed var(--good)' : state === 'wrong' ? '2px solid var(--bad)' : 'none',
-                    outlineOffset: 3,
-                  }}
+                  // The focus outline sits outside the state ring so both show at once.
+                  style={{ opacity: state === 'dim' ? 0.35 : 1, outlineOffset: 6 }}
                 >
+                  {/* State ring drawn with its own element, so the global :focus-visible outline still shows (WCAG 2.4.7). */}
+                  {state !== 'idle' && state !== 'dim' && (
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute -inset-[5px] rounded-[20px] border-2"
+                      style={{
+                        borderColor: state === 'on' ? 'var(--accent-2)' : state === 'wrong' ? 'var(--bad)' : 'var(--good)',
+                        borderStyle: state === 'missed' ? 'dashed' : 'solid',
+                      }}
+                    />
+                  )}
                   <ElementTile element={e} size={88} showNumber={false} color={difficulty === 'learner' ? undefined : 'var(--accent-2)'} />
                   {checked && (right || on) && (
                     <span className={`absolute -right-1.5 -top-1.5 grid h-6 w-6 place-items-center rounded-full border-2 border-bg ${right ? 'bg-good' : 'bg-bad'} text-bg`}>{right ? <Check size={13} strokeWidth={3} /> : <X size={13} strokeWidth={3} />}</span>
@@ -156,8 +166,8 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
           <div className="mt-6 min-h-24" aria-live="polite">
             {checked ? (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-line bg-surface p-4">
-                <div className="mb-2 text-sm font-semibold" style={{ color: perfect[index] ? 'var(--good)' : 'var(--gold)' }}>
-                  {perfect[index] ? 'Spot on!' : 'Close! Here is what is inside:'}
+                <div className="mb-2 text-sm font-semibold" style={{ color: perfect[index] ? 'var(--good)' : hits > 0 ? 'var(--gold)' : 'var(--bad)' }}>
+                  {verdict}
                 </div>
                 <ul className="space-y-2">
                   {q.thing.contains.map(([s, why]) => {
@@ -196,7 +206,7 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
         </motion.main>
       </AnimatePresence>
 
-      {result && <Results summary={result.summary} outcome={result.outcome} title="In Real Life" total={LIFE_LENGTH} onReplay={onReplay} onExit={() => go('/')} />}
+      {result && <Results summary={result.summary} outcome={result.outcome} title="In Real Life" total={LIFE_LENGTH} onReplay={onReplay} onExit={() => go('/')} exitLabel="Home" />}
     </div>
   );
 }

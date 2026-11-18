@@ -1,14 +1,22 @@
 import { readFileSync } from 'node:fs';
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
 
-type ElementPos = { number: number; name: string; row: number; col: number };
+type ElementPos = { number: number; name: string; symbol: string; row: number; col: number; period: number; group: number | null };
 
 const ELEMENTS: ElementPos[] = JSON.parse(readFileSync(new URL('../src/data/elements.json', import.meta.url), 'utf8'));
 const BY_NAME = new Map(ELEMENTS.map((e) => [e.name, e]));
+const BY_SYMBOL = new Map(ELEMENTS.map((e) => [e.symbol, e]));
 
 export function element(name: string): ElementPos {
   const e = BY_NAME.get(name);
   if (!e) throw new Error(`Unknown element "${name}"`);
+  return e;
+}
+
+/** Looks an element up by its name or its symbol. */
+export function elementByNameOrSymbol(text: string): ElementPos {
+  const e = BY_NAME.get(text) ?? BY_SYMBOL.get(text);
+  if (!e) throw new Error(`Unknown element name or symbol "${text}"`);
   return e;
 }
 
@@ -39,7 +47,7 @@ export class Board {
   readonly hint: Locator;
 
   constructor(readonly page: Page) {
-    this.tray = page.getByRole('listbox', { name: 'Elements to place' });
+    this.tray = page.getByRole('group', { name: 'Elements to place' });
     this.placed = page.getByRole('progressbar', { name: 'Elements placed' });
     this.hint = page.getByRole('button', { name: /^Hint/ });
   }
@@ -49,8 +57,15 @@ export class Board {
     await expect(this.hint).toBeEnabled({ timeout: 10_000 });
   }
 
+  /** Tray tiles that can still be played. A tile animating out after a placement is inert. */
+  liveTiles() {
+    return this.tray.locator('[data-tile]:not([inert])');
+  }
+
+  /** A tray tile: a toggle button whose accessible name is "<symbol>, <name>…". */
   tile(name: string) {
-    return this.tray.getByRole('option', { name: new RegExp(`^${escape(name)}(,|$)`) });
+    const e = element(name);
+    return this.tray.getByRole('button', { name: new RegExp(`^${escape(e.symbol)}, ${escape(name)}(,|$)`) }).and(this.liveTiles());
   }
 
   cell(row: number, col: number) {
@@ -67,15 +82,16 @@ export class Board {
 
   /** Name of the first tile in the tray that is not on its way out. */
   async firstTileName() {
-    const label = await this.tray.getByRole('option').first().getAttribute('aria-label');
-    return label!.split(',')[0];
+    const label = await this.liveTiles().first().getAttribute('aria-label');
+    // "<symbol>, <name>" or "<symbol>, <name>, atomic number <n>"
+    return label!.split(', ')[1];
   }
 
   async select(name: string) {
     const tile = this.tile(name);
     // Tapping a selected tile deselects it, and a missed tile stays selected.
-    if ((await tile.getAttribute('aria-selected')) !== 'true') await tile.click();
-    await expect(tile).toHaveAttribute('aria-selected', 'true');
+    if ((await tile.getAttribute('aria-pressed')) !== 'true') await tile.click();
+    await expect(tile).toHaveAttribute('aria-pressed', 'true');
   }
 
   /** Tap a tile, then tap a cell. Does not assert the outcome. */
@@ -87,11 +103,11 @@ export class Board {
   /** Place an element on its correct cell and wait until the board reflects it. */
   async placeCorrectly(name: string) {
     const before = await this.placedCount();
-    const { row, col } = element(name);
+    const { number, row, col } = element(name);
     await this.drop(name, row, col);
     await expect(this.placed).toHaveAttribute('aria-valuenow', String(before + 1));
-    // Wait for the exit animation so the next lookup never sees this tile.
-    await expect(this.tile(name)).toHaveCount(0);
+    // Wait for the exit animation to finish so the tile is really gone, not just inert.
+    await expect(this.tray.locator(`[data-tile="${number}"]`)).toHaveCount(0);
   }
 
   /** Clear the whole board by placing whatever the tray offers, in tray order. */

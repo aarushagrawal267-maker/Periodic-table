@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { formatTime } from '../lib/scoring';
 
 /** Number that tweens to its new value. */
@@ -38,14 +38,16 @@ export function Elapsed({ start, end, running }: { start: number; end: number; r
 }
 
 /** Circular progress ring. */
-export function Ring({ value, size = 56, stroke = 6, children, color = 'url(#ring-grad)' }: { value: number; size?: number; stroke?: number; children?: React.ReactNode; color?: string }) {
+export function Ring({ value, size = 56, stroke = 6, children, color }: { value: number; size?: number; stroke?: number; children?: React.ReactNode; color?: string }) {
+  // Each ring gets its own gradient id, so pages with several rings have no duplicate ids.
+  const gradId = `ring-grad-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   return (
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <defs>
-          <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1">
+          <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="var(--accent)" />
             <stop offset="0.6" stopColor="var(--accent-2)" />
             <stop offset="1" stopColor="var(--accent-3)" />
@@ -57,7 +59,7 @@ export function Ring({ value, size = 56, stroke = 6, children, color = 'url(#rin
           cy={size / 2}
           r={r}
           fill="none"
-          stroke={color}
+          stroke={color ?? `url(#${gradId})`}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={c}

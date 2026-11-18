@@ -11,6 +11,8 @@ interface SettingsState {
   reduceMotion: boolean;
   colorblind: boolean;
   difficulty: Difficulty;
+  /** Quick Quiz question timer on Standard and Expert. Learner never has one. */
+  quizTimer: boolean;
   set: (patch: Partial<Omit<SettingsState, 'set'>>) => void;
 }
 
@@ -23,6 +25,7 @@ export const useSettings = create<SettingsState>()(
       reduceMotion: typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches,
       colorblind: false,
       difficulty: 'standard',
+      quizTimer: true,
       set: (patch) => set(patch),
     }),
     { name: 'periodica-settings', version: 1 },

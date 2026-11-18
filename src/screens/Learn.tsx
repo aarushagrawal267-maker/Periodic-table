@@ -316,6 +316,7 @@ export function Lesson({ chapterId }: { chapterId: string }) {
         key={round}
         config={{ kind: 'lesson', title: plan.title, subtitle: plan.subtitle, targets: plan.numbers, difficulty: 'learner', regionId: plan.regionId }}
         onExit={() => go('/learn')}
+        exitLabel="Back to path"
         onReplay={() => setRound((r) => r + 1)}
         onNext={next ? () => go(`/learn/${next.id}`, true) : () => go('/learn')}
         nextLabel={next ? `Next chapter: ${next.title}` : 'Back to the path'}

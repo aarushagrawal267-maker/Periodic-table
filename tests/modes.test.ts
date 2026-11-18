@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import { buildDeck, matchScore, matchStars, pickPairs, MATCH_PAIRS } from '../src/lib/match';
 import { buildLifeRound, THINGS } from '../src/lib/everyday';
-import { buildQuiz, quizPool, QUIZ_STRETCH } from '../src/lib/quiz';
+import { buildQuiz, overlaps, quizPool, QUIZ_STRETCH } from '../src/lib/quiz';
 import type { Mastery } from '../src/store/progress';
-import { ELEMENTS } from '../src/lib/elements';
+import { CATEGORIES, ELEMENTS, byNumber } from '../src/lib/elements';
 
 describe('match pairs', () => {
   test('deck has one symbol card and one name card per element', () => {
@@ -93,6 +93,18 @@ describe('quick quiz is fair for beginners', () => {
       for (const d of ['learner', 'standard'] as const)
         for (const q of buildQuiz(d, mastery).filter((x) => x.kind !== 'category'))
           for (const o of q.options) expect(known.has(o), `${q.prompt}: ${o}`).toBe(true);
+  });
+
+  test('"What kind of element" never has a second true answer', () => {
+    const label = (id: string) => CATEGORIES.find((c) => c.id === id)!.label;
+    expect(overlaps('halogen', 'nonmetal')).toBe(true);
+    expect(overlaps('nonmetal', 'noble-gas')).toBe(true);
+    for (let i = 0; i < 300; i++)
+      for (const d of ['learner', 'standard', 'expert'] as const)
+        for (const q of buildQuiz(d, met(range(1, 86))).filter((x) => x.kind === 'category')) {
+          const right = byNumber(q.element).category;
+          for (const c of CATEGORIES) if (overlaps(c.id, right)) expect(q.options, q.prompt).not.toContain(label(c.id));
+        }
   });
 
   test('weaker elements come up more often', () => {

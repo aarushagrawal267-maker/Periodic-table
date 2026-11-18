@@ -16,6 +16,11 @@ interface UiState {
   /** Toasts on screen. Only one is shown at a time; the rest wait in `queue`. */
   toasts: Toast[];
   queue: Toast[];
+  /** A results dialog is open. Toasts then sit at the bottom on phones so they don't cover the headline. */
+  resultsOpen: boolean;
+  /** Achievements the open results screen already shows in its card; they get no toast. */
+  shownInResults: string[];
+  setResultsOpen: (open: boolean, shown?: string[]) => void;
   openDetail: (n: number | null) => void;
   setSettings: (open: boolean) => void;
   toast: (t: Omit<Toast, 'id'>) => void;
@@ -40,6 +45,9 @@ export const useUi = create<UiState>((set, get) => {
     settingsOpen: false,
     toasts: [],
     queue: [],
+    resultsOpen: false,
+    shownInResults: [],
+    setResultsOpen: (open, shown = []) => set({ resultsOpen: open, shownInResults: open ? shown : [] }),
     openDetail: (n) => set({ detail: n }),
     setSettings: (open) => set({ settingsOpen: open }),
     toast: (t) => {
@@ -60,6 +68,9 @@ export function announceAchievements(ids: string[]) {
   const found = ids.map((id) => ACHIEVEMENTS.find((x) => x.id === id)).filter((a) => !!a);
   if (!found.length) return;
   setTimeout(() => {
-    for (const a of found) useUi.getState().toast({ title: a.name, body: a.desc, icon: a.icon, tier: a.tier });
+    const ui = useUi.getState();
+    // The results card lists the round's achievements itself, so a toast would only cover the screen.
+    const skip = ui.resultsOpen ? ui.shownInResults : [];
+    for (const a of found) if (!skip.includes(a.id)) ui.toast({ title: a.name, body: a.desc, icon: a.icon, tier: a.tier });
   }, 1600);
 }

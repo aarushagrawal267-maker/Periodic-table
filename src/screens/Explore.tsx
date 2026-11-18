@@ -3,6 +3,7 @@ import { Search, X } from 'lucide-react';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { ElementTile } from '../components/ElementTile';
 import { PeriodicGrid } from '../components/PeriodicGrid';
+import { useGridRoving } from '../components/useGridRoving';
 import { CATEGORIES, ELEMENTS, bySymbol, catVar, categoryLabel, formatNumber, type Category, type Element } from '../lib/elements';
 import { go } from '../lib/router';
 import { useProgress } from '../store/progress';
@@ -31,6 +32,9 @@ const LENSES: Lens[] = [
   { id: 'mastery', label: 'My mastery', describe: 'How well you know each element. Play to fill the table in.' },
 ];
 
+/** US spellings students may type, so search still finds the IUPAC names. */
+const US_NAMES: Record<number, string> = { 13: 'aluminum', 55: 'cesium' };
+
 const STATE_COLORS: Record<string, string> = { Solid: 'var(--cat-transition-metal)', Liquid: 'var(--cat-nonmetal)', Gas: 'var(--cat-noble-gas)' };
 
 export function Explore({ symbol }: { symbol?: string }) {
@@ -41,6 +45,7 @@ export function Explore({ symbol }: { symbol?: string }) {
   const openDetail = useUi((s) => s.openDetail);
   const mastery = useProgress((s) => s.mastery);
   const L = LENSES.find((l) => l.id === lens)!;
+  const roving = useGridRoving();
 
   useEffect(() => {
     const e = symbol && bySymbol.get(symbol.toLowerCase());
@@ -63,7 +68,14 @@ export function Explore({ symbol }: { symbol?: string }) {
   const matches = useMemo(() => {
     if (!q) return null;
     return new Set(
-      ELEMENTS.filter((e) => e.name.toLowerCase().includes(q) || e.symbol.toLowerCase() === q || String(e.number) === q || categoryLabel(e.category).toLowerCase().includes(q)).map((e) => e.number),
+      ELEMENTS.filter(
+        (e) =>
+          e.name.toLowerCase().includes(q) ||
+          (US_NAMES[e.number]?.includes(q) ?? false) ||
+          e.symbol.toLowerCase() === q ||
+          String(e.number) === q ||
+          categoryLabel(e.category).toLowerCase().includes(q),
+      ).map((e) => e.number),
     );
   }, [q]);
 
@@ -111,7 +123,8 @@ export function Explore({ symbol }: { symbol?: string }) {
         </label>
       </div>
 
-      <div className="no-scrollbar -mx-3 mt-6 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-1" role="tablist" aria-label="Colour the table by">
+      {/* py-1 leaves room for the focus ring, which the horizontal scroller would otherwise clip. */}
+      <div className="no-scrollbar -mx-3 mt-5 flex gap-2 overflow-x-auto px-4 py-1 sm:mx-0 sm:flex-wrap sm:px-1" role="tablist" aria-label="Colour the table by">
         {LENSES.map((l) => (
           <button key={l.id} role="tab" aria-selected={lens === l.id} onClick={() => setLens(l.id)} className={`relative shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${lens === l.id ? 'text-bg' : 'border border-line bg-surface text-ink-2 hover:text-ink'}`}>
             {lens === l.id && <motion.span layoutId="lens-pill" className="absolute inset-0 rounded-full bg-ink" transition={{ type: 'spring', damping: 30, stiffness: 400 }} />}
@@ -120,10 +133,9 @@ export function Explore({ symbol }: { symbol?: string }) {
         ))}
       </div>
 
-      <p className="mt-5 flex items-center gap-1.5 text-xs font-medium text-ink-3 md:hidden" aria-hidden>
-        Swipe sideways to see the whole table <span className="animate-pulse">→</span>
-      </p>
-      <div className="relative mt-2 md:mt-6">
+      {/* PeriodicGrid shows its own "Swipe for more" cue when the table is wider than the screen. */}
+      {/* One Tab stop for the whole table; arrow keys move between elements. */}
+      <div className="relative mt-5 md:mt-6" data-roving role="group" aria-label="Periodic table. Use the arrow keys to move between elements.">
         <PeriodicGrid
           minCell={38}
           maxCell={74}
@@ -135,15 +147,20 @@ export function Explore({ symbol }: { symbol?: string }) {
             const d = dim(e);
             return (
               <button
+                {...roving.cellProps(e)}
                 onClick={() => openDetail(e.number)}
                 onMouseEnter={() => setHovered(e)}
                 onMouseLeave={() => setHovered((h) => (h === e ? null : h))}
-                onFocus={() => setHovered(e)}
+                onFocus={() => {
+                  setHovered(e);
+                  roving.setActive(e.number);
+                }}
                 className="block h-full w-full transition-[transform,opacity,filter] duration-200 hover:z-10 hover:scale-[1.18] focus-visible:z-10 focus-visible:scale-110"
-                style={{ opacity: d ? 0.14 : 1, filter: d ? 'grayscale(1)' : undefined }}
-                aria-label={`${e.name}, ${e.number}${L.value ? `, ${L.label} ${formatNumber(L.value(e))}` : ''}`}
+                // Heat-map colours start at a deep blue, so tile text leans further towards --ink there.
+                style={{ opacity: d ? 0.14 : 1, filter: d ? 'grayscale(1)' : undefined, ...(L.value ? { '--cell-ink-mix': 'var(--heat-ink-mix)' } : {}) } as CSSProperties}
+                aria-label={`${e.symbol}, ${e.name}, ${e.number}${L.value ? `, ${L.label} ${formatNumber(L.value(e))}` : ''}`}
               >
-                <ElementTile element={e} size={rect.size} color={c ?? 'var(--ink-3)'} className={c ? '' : 'opacity-50'} />
+                <ElementTile element={e} size={rect.size} quietNumber color={c ?? 'var(--ink-3)'} style={c ? undefined : { borderStyle: 'dashed' }} />
               </button>
             );
           }}
@@ -193,7 +210,7 @@ export function Explore({ symbol }: { symbol?: string }) {
               {formatNumber(scale!.min)} – {formatNumber(scale!.max)} {L.unit}
             </span>
             <span className="flex items-center gap-1.5 text-ink-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-ink-3 opacity-50" /> No data
+              <span className="h-2.5 w-2.5 rounded-full border border-dashed border-ink-3" /> No data
             </span>
           </div>
         )}
@@ -211,7 +228,7 @@ function Preview({ e, lens }: { e: Element; lens: Lens }) {
       </div>
       <div className="min-w-0">
         <div className="font-display text-lg font-semibold leading-tight">{e.name}</div>
-        <div className="text-xs" style={{ color: catVar(e.category) }}>
+        <div className="cat-ink text-xs" style={{ '--c': catVar(e.category) } as CSSProperties}>
           {categoryLabel(e.category)}
         </div>
         <div className="mt-1 text-xs text-ink-2">
