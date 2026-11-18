@@ -1,21 +1,25 @@
 import { AnimatePresence, motion, type PanInfo } from 'motion/react';
-import { ArrowLeft, ArrowRight, Check, Clock, RotateCcw, Sparkles, Star } from 'lucide-react';
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { ArrowLeft, ArrowRight, Check, Clock, Eye, EyeOff, PartyPopper, RefreshCw, RotateCcw, Sparkles, Star } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ElementTile } from '../components/ElementTile';
 import { CHAPTERS, chapterById, type Chapter } from '../lib/chapters';
 import { byNumber, catVar, categoryLabel, type Element } from '../lib/elements';
 import { sfx } from '../lib/feedback';
+import { dueForReview } from '../lib/review';
 import { go } from '../lib/router';
 import { useProgress } from '../store/progress';
 import { Game } from './Game';
 
 export function LearnPath() {
   const chapters = useProgress((s) => s.chapters);
+  const mastery = useProgress((s) => s.mastery);
+  const due = useMemo(() => dueForReview(mastery), [mastery]);
   const done = CHAPTERS.filter((c) => chapters[c.id]).length;
   const current = CHAPTERS.find((c) => !chapters[c.id]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 pb-20 pt-8 sm:px-6 sm:pt-12">
+      {due.length > 0 && <ReviewBanner due={due} />}
       <p className="text-sm font-semibold text-accent-2">Learning path</p>
       <h1 className="font-display mt-1 text-4xl font-semibold sm:text-5xl">Learn it, then play it</h1>
       <p className="mt-3 max-w-xl text-ink-2">
@@ -37,6 +41,42 @@ export function LearnPath() {
         ))}
       </ol>
     </div>
+  );
+}
+
+/** Spaced review nudge: elements you met a while ago (or slipped on) are ready to refresh. */
+function ReviewBanner({ due }: { due: number[] }) {
+  const label = `${due.length} ${due.length === 1 ? 'element' : 'elements'} ready for a quick review`;
+  return (
+    <motion.a
+      href="#/learn/review"
+      className="card card-hover group relative mb-8 flex items-center gap-4 overflow-hidden p-4 sm:p-5"
+      style={{ borderColor: 'color-mix(in oklab, var(--accent-2) 45%, transparent)', boxShadow: '0 18px 50px -26px color-mix(in oklab, var(--accent-2) 70%, transparent)' }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', damping: 22 }}
+    >
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: 'var(--grad)' }} />
+      <span aria-hidden className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-bg" style={{ background: 'var(--grad)' }}>
+        <RefreshCw size={22} strokeWidth={2.4} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold leading-snug">{label}</span>
+        <span className="mt-0.5 block text-sm text-ink-2">A few quick cards, then a mini game. Keeps them fresh.</span>
+        <span aria-hidden className="mt-2 flex flex-wrap gap-1">
+          {due.slice(0, 8).map((n) => {
+            const e = byNumber(n);
+            return (
+              <span key={n} className="cat-chip rounded-md px-1.5 py-0.5 text-[11px] font-semibold" style={{ '--c': catVar(e.category) } as CSSProperties}>
+                {e.symbol}
+              </span>
+            );
+          })}
+          {due.length > 8 && <span className="px-1 text-[11px] text-ink-3">+{due.length - 8}</span>}
+        </span>
+      </span>
+      <ArrowRight aria-hidden size={20} className="shrink-0 text-accent-2 transition-transform group-hover:translate-x-0.5" />
+    </motion.a>
   );
 }
 
@@ -123,62 +163,166 @@ function ChapterNode({ chapter: c, index, stars, current }: { chapter: Chapter; 
 
 type Card = { kind: 'mnemonic' } | { kind: 'element'; n: number };
 
+/** What a lesson teaches: a chapter of the path, or the spaced-review deck. */
+interface LessonPlan {
+  /** Saved with the round, so chapter stars land on the right chapter. */
+  regionId: string;
+  title: string;
+  kicker: string;
+  subtitle: string;
+  numbers: number[];
+  /** Chapter whose memory trick opens the deck, if it has one. */
+  trick?: Chapter;
+}
+
+/** The first sentence of a summary: enough to remember, short enough to read in a breath. */
+function firstSentence(text: string) {
+  const m = text.match(/^[\s\S]*?[.!?](?=\s+[A-Z("']|\s*$)/);
+  return (m ? m[0] : text).trim();
+}
+
+/** Spell a symbol letter by letter so screen readers say "N a", not "na". */
+const spell = (symbol: string) => symbol.split('').join(' ');
+
+/** Lesson controls that keep the arrow-key shortcuts working while focused. */
+const LESSON_KEYS = '[data-lesson-keys]';
+
 export function Lesson({ chapterId }: { chapterId: string }) {
-  const chapter = chapterById(chapterId);
+  const isReview = chapterId === 'review';
+  // The review deck is fixed when the lesson opens, so it does not reshuffle once the game updates mastery.
+  const [reviewNumbers] = useState(() => (isReview ? dueForReview(useProgress.getState().mastery) : []));
+  const chaptersDone = useProgress((s) => s.chapters);
+  const chapter = isReview ? undefined : chapterById(chapterId);
+  const idx = chapter ? CHAPTERS.indexOf(chapter) : -1;
+
+  const plan = useMemo<LessonPlan | null>(() => {
+    if (isReview)
+      return {
+        regionId: 'review',
+        title: 'Quick review',
+        kicker: `Spaced review · ${reviewNumbers.length} ${reviewNumbers.length === 1 ? 'element' : 'elements'}`,
+        subtitle: 'Quick review · put them back on the table',
+        numbers: reviewNumbers,
+      };
+    if (!chapter) return null;
+    return {
+      regionId: chapter.id,
+      title: chapter.title,
+      kicker: `Chapter ${idx + 1} · ${chapter.emoji}`,
+      subtitle: `Chapter ${idx + 1} · put them on the table`,
+      numbers: chapter.numbers,
+      trick: chapter.mnemonic ? chapter : undefined,
+    };
+  }, [isReview, reviewNumbers, chapter, idx]);
+
+  // After a chapter: the one after it. After a review: the first chapter you have not finished.
+  const next = chapter ? CHAPTERS[idx + 1] : CHAPTERS.find((c) => !chaptersDone[c.id]);
+
   const [phase, setPhase] = useState<'cards' | 'ready' | 'play'>('cards');
   const [round, setRound] = useState(0);
-  const initialDeck = useMemo<Card[]>(() => (chapter ? [...(chapter.mnemonic ? [{ kind: 'mnemonic' as const }] : []), ...chapter.numbers.map((n) => ({ kind: 'element' as const, n }))] : []), [chapter]);
+  const initialDeck = useMemo<Card[]>(() => (plan ? [...(plan.trick ? [{ kind: 'mnemonic' as const }] : []), ...plan.numbers.map((n) => ({ kind: 'element' as const, n }))] : []), [plan]);
   const [deck, setDeck] = useState(initialDeck);
   const [seen, setSeen] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [exit, setExit] = useState<1 | -1>(1);
+  /** Bumps on every answer: keys the card animation and focus moves, even when the same card comes straight back. */
+  const [turn, setTurn] = useState(0);
+  const [announce, setAnnounce] = useState('');
+  const flipRef = useRef<HTMLButtonElement>(null);
+  const startRef = useRef<HTMLButtonElement>(null);
+  const moveFocus = useRef(false);
+  const retry = useRef(new Set<number>());
 
   const card = deck[0];
   const total = initialDeck.length;
+  const position = Math.max(1, Math.min(total, total - deck.length + 1));
+
+  /** Polite announcement. Repeating the same text still gets read out. */
+  const say = (msg: string) => setAnnounce((prev) => (prev === msg ? `${msg} ` : msg));
+
+  const flip = () => {
+    if (card?.kind !== 'element') return;
+    const e = byNumber(card.n);
+    setFlipped((f) => !f);
+    say(flipped ? 'Question side.' : `Answer: ${e.name}. ${e.summary ? firstSentence(e.summary) : ''}`);
+  };
 
   const answer = (knew: boolean) => {
     if (!card) return;
+    if (!knew && card.kind === 'mnemonic') return;
     setExit(knew ? 1 : -1);
     setFlipped(false);
     sfx.pick();
     const rest = deck.slice(1);
     // "Still learning" cards come back a little later in the deck.
-    const next = knew || card.kind === 'mnemonic' ? rest : [...rest.slice(0, 2), card, ...rest.slice(2)];
+    const nextDeck = knew || card.kind === 'mnemonic' ? rest : [...rest.slice(0, 2), card, ...rest.slice(2)];
+    if (card.kind === 'element') {
+      if (knew) retry.current.delete(card.n);
+      else retry.current.add(card.n);
+    }
     if (knew) setSeen((s) => s + 1);
-    setDeck(next);
-    if (next.length === 0) setPhase('ready');
+    setDeck(nextDeck);
+    setTurn((t) => t + 1);
+    moveFocus.current = true;
+    const upcoming = nextDeck[0];
+    if (!upcoming) {
+      setPhase('ready');
+      say('All cards done. Time for the game.');
+    } else if (upcoming.kind === 'element') {
+      const e = byNumber(upcoming.n);
+      const pos = Math.max(1, Math.min(total, total - nextDeck.length + 1));
+      const again = retry.current.has(e.number) ? ', one more try' : '';
+      say(`Card ${pos} of ${total}${again}. What's this element called? Symbol ${spell(e.symbol)}, atomic number ${e.number}.`);
+    }
   };
+
+  // Keep keyboard users in place: the new card's flip button, or the start button once the deck is done.
+  useEffect(() => {
+    if (!moveFocus.current) return;
+    moveFocus.current = false;
+    const target = phase === 'ready' ? startRef.current : flipRef.current;
+    target?.focus({ preventScroll: true });
+  }, [turn, phase]);
 
   useEffect(() => {
     if (phase !== 'cards') return;
     const onKey = (e: KeyboardEvent) => {
-      // Let real buttons (Got it, Skip, Back) handle their own Enter/Space.
-      if ((e.target as HTMLElement).closest('button, a, input')) return;
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement;
+      // Never hijack typing, or anything inside an open sheet or dialog.
+      if (target.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]')) return;
+      const onControl = !!target.closest('button, a, input');
       if (e.key === ' ' || e.key === 'Enter') {
+        // Real buttons and links handle their own Enter/Space.
+        if (onControl) return;
         e.preventDefault();
-        setFlipped((f) => !f);
-      } else if (e.key === 'ArrowRight') answer(true);
-      else if (e.key === 'ArrowLeft') answer(false);
+        flip();
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        // Arrows skip buttons and links, except the card's own controls, so the shortcut keeps working after a flip.
+        if (onControl && !target.closest(LESSON_KEYS)) return;
+        e.preventDefault();
+        answer(e.key === 'ArrowRight');
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
 
-  if (!chapter) return <LearnPath />;
-  const idx = CHAPTERS.indexOf(chapter);
-  const next = CHAPTERS[idx + 1];
+  if (!plan) return <LearnPath />;
 
   if (phase === 'play')
     return (
       <Game
         key={round}
-        config={{ kind: 'lesson', title: chapter.title, subtitle: `Chapter ${idx + 1} · put them on the table`, targets: chapter.numbers, difficulty: 'learner', regionId: chapter.id }}
+        config={{ kind: 'lesson', title: plan.title, subtitle: plan.subtitle, targets: plan.numbers, difficulty: 'learner', regionId: plan.regionId }}
         onExit={() => go('/learn')}
         onReplay={() => setRound((r) => r + 1)}
         onNext={next ? () => go(`/learn/${next.id}`, true) : () => go('/learn')}
         nextLabel={next ? `Next chapter: ${next.title}` : 'Back to the path'}
       />
     );
+
+  const empty = plan.numbers.length === 0;
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-xl flex-col px-5 pb-8 pt-4">
@@ -187,38 +331,47 @@ export function Lesson({ chapterId }: { chapterId: string }) {
           <ArrowLeft size={18} />
         </button>
         <div className="min-w-0 flex-1">
-          <div className="text-xs text-ink-3">
-            Chapter {idx + 1} · {chapter.emoji}
-          </div>
-          <h1 className="font-display truncate text-lg font-semibold">{chapter.title}</h1>
+          <div className="text-xs text-ink-3">{empty ? 'Spaced review' : plan.kicker}</div>
+          <h1 className="font-display truncate text-lg font-semibold">{plan.title}</h1>
         </div>
-        {phase === 'cards' && (
-          <button onClick={() => setPhase('ready')} className="text-sm font-medium text-ink-3 hover:text-ink">
+        {phase === 'cards' && !empty && (
+          <button onClick={() => setPhase('ready')} className="min-h-10 px-1 text-sm font-medium text-ink-3 hover:text-ink">
             Skip to game
           </button>
         )}
       </header>
 
-      {phase === 'cards' && (
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow={seen} aria-valuemax={total} aria-label="Cards learned">
-          <motion.div className="h-full rounded-full" style={{ background: 'var(--grad)' }} animate={{ width: `${(seen / total) * 100}%` }} />
-        </div>
-      )}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {announce}
+      </div>
 
-      {phase === 'cards' && card ? (
+      {empty ? (
+        <ReviewEmpty next={next} />
+      ) : phase === 'cards' && card ? (
         <>
-          <div className="relative mt-8 flex flex-1 items-center justify-center" style={{ perspective: 1200 }}>
+          <div className="mt-4 flex items-center gap-3">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow={seen} aria-valuemin={0} aria-valuemax={total} aria-label="Cards learned">
+              <motion.div className="h-full rounded-full" style={{ background: 'var(--grad)' }} animate={{ width: `${(seen / total) * 100}%` }} />
+            </div>
+            <span className="text-xs font-semibold tabular-nums text-ink-3" aria-hidden>
+              {position}/{total}
+            </span>
+          </div>
+
+          <div className="relative mt-6 flex flex-1 items-center justify-center" style={{ perspective: 1200 }}>
             <AnimatePresence mode="popLayout" custom={exit}>
               <motion.div
-                key={card.kind === 'mnemonic' ? 'mnemonic' : `${card.n}-${deck.length}`}
+                key={turn}
                 custom={exit}
+                role="group"
+                aria-label={`Card ${position} of ${total}`}
                 className="w-full max-w-sm cursor-grab touch-pan-y active:cursor-grabbing"
                 drag="x"
                 dragSnapToOrigin
                 dragElastic={0.6}
                 onDragEnd={(_, info: PanInfo) => {
                   if (info.offset.x > 110) answer(true);
-                  else if (info.offset.x < -110) answer(false);
+                  else if (info.offset.x < -110 && card.kind === 'element') answer(false);
                 }}
                 initial={{ opacity: 0, scale: 0.9, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0, x: 0, rotate: 0 }}
@@ -227,44 +380,75 @@ export function Lesson({ chapterId }: { chapterId: string }) {
                 transition={{ type: 'spring', damping: 22, stiffness: 260 }}
                 whileDrag={{ rotate: 4 }}
               >
-                {card.kind === 'mnemonic' ? <MnemonicCard chapter={chapter} /> : <FlipCard e={byNumber(card.n)} flipped={flipped} onFlip={() => setFlipped((f) => !f)} />}
+                {card.kind === 'mnemonic' && plan.trick ? <MnemonicCard chapter={plan.trick} /> : card.kind === 'element' ? <FlipCard e={byNumber(card.n)} flipped={flipped} onFlip={flip} /> : null}
               </motion.div>
             </AnimatePresence>
           </div>
-          <p className="mt-6 text-balance text-center text-xs text-ink-3">{card.kind === 'mnemonic' ? 'Say it out loud three times. Seriously, it works.' : 'Tap to flip · swipe right if you knew it, left to see it again'}</p>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <button onClick={() => answer(false)} className="btn-ghost flex h-14 items-center justify-center gap-2 rounded-2xl font-medium" disabled={card.kind === 'mnemonic'} style={card.kind === 'mnemonic' ? { opacity: 0.4 } : undefined}>
-              <RotateCcw size={17} /> Still learning
+
+          {card.kind === 'element' ? (
+            <>
+              <p className="mt-5 text-balance text-center text-xs text-ink-3">
+                <span className="[@media(pointer:fine)]:hidden">Have a guess, then flip. Swipe right if you knew it, left to see it again.</span>
+                <span className="hidden [@media(pointer:fine)]:inline">
+                  Have a guess, then flip. Keys: <kbd className="font-sans font-semibold text-ink-2">Space</kbd> flip · <kbd className="font-sans font-semibold text-ink-2">→</kbd> got it · <kbd className="font-sans font-semibold text-ink-2">←</kbd> still learning
+                </span>
+              </p>
+              <button
+                ref={flipRef}
+                type="button"
+                data-lesson-keys
+                onClick={flip}
+                aria-pressed={flipped}
+               
+                className={`mt-3 flex h-12 items-center justify-center gap-2 rounded-2xl border font-semibold transition-colors ${flipped ? 'border-accent-2/60 bg-accent-2/15 text-ink' : 'btn-ghost text-ink'}`}
+              >
+                {flipped ? <EyeOff size={17} aria-hidden /> : <Eye size={17} aria-hidden />} Show answer
+              </button>
+            </>
+          ) : (
+            <p className="mt-5 text-balance text-center text-xs text-ink-3">Read it once. You'll be surprised what sticks.</p>
+          )}
+
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              data-lesson-keys
+              onClick={() => answer(false)}
+              className="btn-ghost flex h-14 items-center justify-center gap-2 rounded-2xl font-medium"
+              disabled={card.kind === 'mnemonic'}
+              style={card.kind === 'mnemonic' ? { opacity: 0.4 } : undefined}
+            >
+              <RotateCcw size={17} aria-hidden /> Still learning
             </button>
-            <button onClick={() => answer(true)} className="btn-primary flex h-14 items-center justify-center gap-2 rounded-2xl">
-              <Check size={18} /> {card.kind === 'mnemonic' ? 'Got the trick' : 'Got it'}
+            <button type="button" data-lesson-keys onClick={() => answer(true)} className="btn-primary flex h-14 items-center justify-center gap-2 rounded-2xl">
+              <Check size={18} aria-hidden /> {card.kind === 'mnemonic' ? 'Got the trick' : 'Got it'}
             </button>
           </div>
         </>
       ) : (
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-1 flex-col items-center justify-center text-center">
-          <div className="flex -space-x-3">
-            {chapter.numbers.slice(0, 6).map((n, i) => (
+          <div className="flex -space-x-3" aria-hidden>
+            {plan.numbers.slice(0, 6).map((n, i) => (
               <motion.div key={n} className="h-16 w-16" initial={{ y: 20, opacity: 0, rotate: -10 }} animate={{ y: 0, opacity: 1, rotate: (i - 2.5) * 5 }} transition={{ delay: i * 0.06, type: 'spring', damping: 14 }}>
                 <ElementTile element={byNumber(n)} size={64} showName={false} />
               </motion.div>
             ))}
           </div>
-          <h2 className="font-display mt-8 text-3xl font-semibold">Now put them on the table</h2>
+          <h2 className="font-display mt-8 text-3xl font-semibold">{isReview ? 'Now put them back' : 'Now put them on the table'}</h2>
           <p className="mt-2 max-w-sm text-ink-2">Drag each element to its home. No clock, colour hints on, and the lightbulb shows you the way if you get stuck.</p>
-          <button
-            onClick={() => setPhase('play')}
-            className="btn-primary shine mt-8 flex h-14 w-full max-w-xs items-center justify-center gap-2 rounded-2xl text-lg"
-          >
-            Let's go <ArrowRight size={20} />
+          <button ref={startRef} onClick={() => setPhase('play')} className="btn-primary shine mt-8 flex h-14 w-full max-w-xs items-center justify-center gap-2 rounded-2xl text-lg">
+            Let's go <ArrowRight size={20} aria-hidden />
           </button>
           <button
             onClick={() => {
+              retry.current.clear();
               setDeck(initialDeck);
               setSeen(0);
+              setFlipped(false);
+              setTurn((t) => t + 1);
               setPhase('cards');
             }}
-            className="mt-4 text-sm font-medium text-ink-3 hover:text-ink"
+            className="mt-4 min-h-10 text-sm font-medium text-ink-3 hover:text-ink"
           >
             Review the cards again
           </button>
@@ -274,64 +458,85 @@ export function Lesson({ chapterId }: { chapterId: string }) {
   );
 }
 
-/** Shared card height: grows with the viewport, never smaller than a comfortable read. */
-const CARD_H = 'h-[clamp(430px,calc(100dvh-300px),520px)]';
+function ReviewEmpty({ next }: { next?: Chapter }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="flex flex-1 flex-col items-center justify-center py-10 text-center">
+      <span aria-hidden className="grid h-20 w-20 place-items-center rounded-full text-bg" style={{ background: 'var(--grad)', boxShadow: '0 18px 40px -16px color-mix(in oklab, var(--accent-2) 70%, transparent)' }}>
+        <PartyPopper size={34} />
+      </span>
+      <h2 className="font-display mt-6 text-3xl font-semibold">All caught up</h2>
+      <p className="mt-2 max-w-sm text-balance text-ink-2">Nothing to review right now. Come back tomorrow, or start the next chapter.</p>
+      {next ? (
+        <a href={`#/learn/${next.id}`} className="btn-primary mt-8 flex h-14 w-full max-w-xs items-center justify-center gap-2 rounded-2xl px-4 text-base">
+          <span className="truncate">
+            <span aria-hidden>{next.emoji} </span>
+            {next.title}
+          </span>
+          <ArrowRight size={18} aria-hidden className="shrink-0" />
+        </a>
+      ) : null}
+      <a href="#/learn" className={`${next ? 'mt-4 text-sm text-ink-3 hover:text-ink' : 'btn-primary mt-8 flex h-14 w-full max-w-xs items-center justify-center rounded-2xl'} font-medium`}>
+        Back to the learning path
+      </a>
+    </motion.div>
+  );
+}
 
+/** Shared card height: grows with the viewport, never smaller than a comfortable read. */
+const CARD_H = 'h-[clamp(400px,calc(100dvh-330px),500px)]';
+
+/**
+ * A two-sided flashcard. The front asks, the back answers. Only the face you can see is
+ * exposed to assistive tech; the flip button below the card is the accessible control.
+ */
 function FlipCard({ e, flipped, onFlip }: { e: Element; flipped: boolean; onFlip: () => void }) {
   const c = catVar(e.category);
   const face = 'absolute inset-0 flex flex-col overflow-hidden rounded-[28px] border [backface-visibility:hidden]';
+  const border = `color-mix(in oklab, ${c} 35%, transparent)`;
   return (
-    <button onClick={onFlip} className={`relative block ${CARD_H} w-full text-left`} aria-label={flipped ? `${e.name} details. Tap to flip back.` : `${e.name}. Tap to flip for facts.`} style={{ '--c': c } as CSSProperties}>
+    // Tapping the card is a pointer shortcut; keyboard and screen-reader users have the "Show answer" button.
+    <div onClick={onFlip} className={`relative block ${CARD_H} w-full select-none text-left`} style={{ '--c': c } as CSSProperties}>
       <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ type: 'spring', damping: 20, stiffness: 180 }}>
-        <div className={`${face} solid items-center justify-center p-6 text-center`} style={{ borderColor: `color-mix(in oklab, ${c} 35%, transparent)`, boxShadow: `0 30px 60px -30px color-mix(in oklab, ${c} 60%, transparent)` }}>
+        <div aria-hidden={flipped} inert={flipped} className={`${face} solid items-center justify-center p-6 text-center`} style={{ borderColor: border, boxShadow: `0 30px 60px -30px color-mix(in oklab, ${c} 60%, transparent)` }}>
           <div className="pointer-events-none absolute inset-0 rounded-[28px] opacity-30" style={{ background: `radial-gradient(80% 60% at 50% 0%, ${c}, transparent 70%)` }} />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 opacity-10" style={{ background: `radial-gradient(60% 80% at 50% 100%, ${c}, transparent 70%)` }} />
           <span className="cat-chip relative mb-5 rounded-full px-3 py-1 text-xs font-semibold">{categoryLabel(e.category)}</span>
-          <div className="relative h-40 w-40 drop-shadow-[0_18px_30px_rgb(0_0_0/0.35)]">
-            <ElementTile element={e} size={160} />
+          <div className="relative h-36 w-36 drop-shadow-[0_18px_30px_rgb(0_0_0/0.35)]" aria-hidden>
+            <ElementTile element={e} size={144} showName={false} />
           </div>
-          <h2 className="font-display relative mt-6 text-4xl font-semibold">{e.name}</h2>
+          <span className="sr-only">
+            Symbol {spell(e.symbol)}, atomic number {e.number}.
+          </span>
+          <h2 className="font-display relative mt-6 text-balance text-3xl font-semibold">What's this element called?</h2>
           <p className="relative mt-1.5 text-sm font-medium text-ink-2">
             Group {e.group ?? '—'} · Period {e.period}
           </p>
-          <p className="absolute inset-x-0 bottom-5 flex items-center justify-center gap-1.5 text-xs font-medium text-ink-3">
-            <RotateCcw size={12} className="-scale-x-100" /> Tap to flip
-          </p>
         </div>
-        <div className={`${face} solid [transform:rotateY(180deg)]`} style={{ borderColor: `color-mix(in oklab, ${c} 35%, transparent)` }}>
+        <div aria-hidden={!flipped} inert={!flipped} className={`${face} solid justify-center py-6 [transform:rotateY(180deg)]`} style={{ borderColor: border }}>
           <div className="pointer-events-none absolute inset-x-0 top-0 h-32 opacity-20" style={{ background: `radial-gradient(80% 100% at 50% 0%, ${c}, transparent 70%)` }} />
-          <div className="relative flex items-center gap-3 px-6 pb-4 pt-6">
-            <div className="h-12 w-12 shrink-0">
-              <ElementTile element={e} size={48} showName={false} />
+          <div className="relative flex items-center gap-4 shrink-0 px-6 pb-5">
+            <div className="h-16 w-16 shrink-0" aria-hidden>
+              <ElementTile element={e} size={64} showName={false} />
             </div>
             <div className="min-w-0">
-              <div className="font-display truncate text-2xl font-semibold leading-tight">{e.name}</div>
-              <div className="cat-ink text-xs font-semibold">{categoryLabel(e.category)}</div>
+              <h2 className="font-display text-balance text-3xl font-semibold leading-tight">{e.name}</h2>
+              <div className="cat-ink mt-0.5 text-xs font-semibold">{categoryLabel(e.category)}</div>
             </div>
           </div>
-          {/* The facts scroll if they are long; the fade tells you there is more. */}
-          <div className="thin-scroll relative flex-1 overflow-y-auto px-6 pb-6 [mask-image:linear-gradient(to_bottom,black_calc(100%-36px),transparent)]">
-            {e.uses.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {e.uses.map((u) => (
-                  <span key={u} className="cat-chip rounded-full px-2.5 py-1 text-xs font-medium">
-                    {u}
-                  </span>
-                ))}
+          <div className="relative flex min-h-0 flex-col gap-4 overflow-y-auto px-6">
+            {e.summary && <p className="text-[17px] leading-relaxed text-ink">{firstSentence(e.summary)}</p>}
+            {e.fact && (
+              <div className="rounded-2xl border p-4 text-[15px] leading-relaxed" style={{ background: `color-mix(in oklab, ${c} 9%, transparent)`, borderColor: `color-mix(in oklab, ${c} 22%, transparent)` }}>
+                <div className="cat-ink mb-1 text-xs font-bold uppercase tracking-wider">
+                  <span aria-hidden>💡 </span>Fun fact
+                </div>
+                {e.fact}
               </div>
             )}
-            <p className="mt-4 text-[15px] leading-relaxed text-ink">{e.summary}</p>
-            <div className="mt-4 rounded-2xl border p-3.5 text-[15px] leading-relaxed" style={{ background: `color-mix(in oklab, ${c} 9%, transparent)`, borderColor: `color-mix(in oklab, ${c} 22%, transparent)` }}>
-              <div className="cat-ink mb-1 text-xs font-bold uppercase tracking-wider">
-                <span aria-hidden>💡 </span>Fun fact
-              </div>
-              {e.fact}
-            </div>
-            <div className="h-4" aria-hidden />
           </div>
         </div>
       </motion.div>
-    </button>
+    </div>
   );
 }
 

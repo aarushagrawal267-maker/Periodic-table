@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { createGame, gameReducer, hand, summarize, HAND_SIZE } from '../src/lib/game';
 import { byNumber } from '../src/lib/elements';
 import { multiplier, placementPoints, levelFromXp, xpForLevel, stars } from '../src/lib/scoring';
-import { dailyElements, dailyNumber, previousKey, DAILY_SIZE } from '../src/lib/daily';
+import { dailyElements, dailyNumber, isCommonElement, previousKey, DAILY_COMMON, DAILY_F_PICKS, DAILY_SIZE, todayKey } from '../src/lib/daily';
 import { computeLayout } from '../src/lib/layout';
 import { buildQuiz, QUIZ_LENGTH } from '../src/lib/quiz';
 
@@ -86,12 +86,38 @@ describe('scoring', () => {
 });
 
 describe('daily challenge', () => {
+  // A year of dailies, so the rules hold every day and not just by luck.
+  const year = Array.from({ length: 366 }, (_, i) => todayKey(new Date(2026, 10, 18 + i)));
+
   test('is deterministic, unique and spans every block', () => {
     const a = dailyElements('2026-11-20');
     expect(a).toEqual(dailyElements('2026-11-20'));
-    expect(new Set(a).size).toBe(DAILY_SIZE);
-    expect(new Set(a.map((n) => byNumber(n).block))).toEqual(new Set(['s', 'p', 'd', 'f']));
     expect(dailyElements('2026-11-21')).not.toEqual(a);
+    for (const key of year) {
+      const set = dailyElements(key);
+      expect(new Set(set).size, key).toBe(DAILY_SIZE);
+      expect(new Set(set.map((n) => byNumber(n).block)), key).toEqual(new Set(['s', 'p', 'd', 'f']));
+    }
+  });
+  test('is mostly common elements', () => {
+    expect([1, 26, 56, 47, 79, 92].every(isCommonElement)).toBe(true);
+    expect([57, 65, 81, 75, 118].some(isCommonElement)).toBe(false);
+    for (const key of year) {
+      const set = dailyElements(key);
+      expect(set.filter(isCommonElement).length, key).toBe(DAILY_COMMON);
+      // No superheavy surprises.
+      expect(Math.max(...set), key).toBeLessThanOrEqual(94);
+    }
+  });
+  test('f-block picks are friendly ones', () => {
+    const seen = new Set<number>();
+    for (const key of year) {
+      const f = dailyElements(key).filter((n) => byNumber(n).block === 'f');
+      expect(f, key).toHaveLength(1);
+      expect(DAILY_F_PICKS, key).toContain(f[0]);
+      seen.add(f[0]);
+    }
+    expect(seen.size).toBe(DAILY_F_PICKS.length);
   });
   test('numbering and previous day', () => {
     expect(dailyNumber('2026-11-18')).toBe(1);

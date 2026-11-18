@@ -1,5 +1,5 @@
 import { ELEMENTS } from './elements';
-import { hashString, sample, seeded } from './random';
+import { hashString, sample, seeded, shuffle } from './random';
 
 /** Day #1 of the daily challenge. */
 const EPOCH = Date.UTC(2026, 10, 18);
@@ -21,24 +21,44 @@ export function previousKey(key: string) {
   return todayKey(new Date(y, m - 1, d - 1));
 }
 
+/** Well-known elements beyond Ba (56) that most students have heard of: Ag, Sn, I, W, Pt, Au, Hg, Pb, U, Pu. */
+const FAMOUS = [47, 50, 53, 74, 78, 79, 80, 82, 92, 94];
+/** The friendliest f-block elements: La, Ce, Nd (magnets), Eu (banknote ink), U, Pu. */
+export const DAILY_F_PICKS = [57, 58, 60, 63, 92, 94];
+/** How many of the daily elements are "common" ones. */
+export const DAILY_COMMON = 10;
+/** Stretch picks stay at or below radium, so no superheavy surprises. */
+const STRETCH_MAX = 88;
+
+/** A common element: the first 56, plus a handful of famous heavier ones. */
+export const isCommonElement = (n: number) => n <= 56 || FAMOUS.includes(n);
+
 /**
- * The daily set: one element from each part of the table plus random extras,
- * so every day is a spread across the whole table rather than a cluster.
+ * The daily set, identical for everyone on the same day. It always touches the
+ * s, p, d and f blocks, but stays approachable: ten common elements, one
+ * friendly f-block pick, and a stretch element or two from further down.
  */
 export function dailyElements(key: string): number[] {
   const rand = seeded(hashString('periodica:' + key));
-  const pools = [
-    ELEMENTS.filter((e) => e.block === 's'),
-    ELEMENTS.filter((e) => e.block === 'p'),
-    ELEMENTS.filter((e) => e.block === 'd'),
-    ELEMENTS.filter((e) => e.block === 'f'),
-  ];
-  const chosen = new Set<number>();
-  for (const pool of pools) for (const e of sample(pool, 2, rand)) chosen.add(e.number);
-  const rest = sample(ELEMENTS, ELEMENTS.length, rand);
-  for (const e of rest) {
-    if (chosen.size >= DAILY_SIZE) break;
-    chosen.add(e.number);
+  const chosen: number[] = [];
+  const has = (n: number) => chosen.includes(n);
+  const commonCount = () => chosen.filter(isCommonElement).length;
+  const common = ELEMENTS.filter((e) => isCommonElement(e.number) && e.block !== 'f');
+
+  // Exactly one f-block element, always a friendly one.
+  chosen.push(sample(DAILY_F_PICKS, 1, rand)[0]);
+  // One common element from each of the other blocks.
+  for (const block of ['s', 'p', 'd'] as const) chosen.push(sample(common.filter((e) => e.block === block), 1, rand)[0].number);
+  // Top up with common elements...
+  for (const e of shuffle(common, rand)) {
+    if (commonCount() >= DAILY_COMMON) break;
+    if (!has(e.number)) chosen.push(e.number);
   }
-  return [...chosen];
+  // ...then a small stretch from the rest of the main table.
+  const stretch = ELEMENTS.filter((e) => !isCommonElement(e.number) && e.block !== 'f' && e.number <= STRETCH_MAX);
+  for (const e of shuffle(stretch, rand)) {
+    if (chosen.length >= DAILY_SIZE) break;
+    chosen.push(e.number);
+  }
+  return shuffle(chosen, rand);
 }

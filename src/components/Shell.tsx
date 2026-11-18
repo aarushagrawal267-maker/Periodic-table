@@ -6,6 +6,7 @@ import type { Route } from '../lib/router';
 import { levelFromXp } from '../lib/scoring';
 import { liveStreak, useProgress } from '../store/progress';
 import { useUi } from '../store/ui';
+import { GoalRingBadge } from './DailyGoal';
 import { Ring } from './Stats';
 
 const NAV = [
@@ -56,11 +57,12 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
               );
             })}
           </nav>
-          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
             <a href="#/daily" className="btn-ghost flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold" aria-label={`Daily streak: ${streak} days`}>
               <Flame size={17} className={streak ? 'fill-[#ff9f43] text-[#ff9f43]' : 'text-ink-3'} />
               <span className="tabular-nums">{streak}</span>
             </a>
+            <GoalRingBadge />
             <a href="#/progress" className="btn-ghost flex h-10 items-center gap-2 rounded-full pl-1 pr-3 text-sm font-semibold" aria-label={`Level ${lvl.level}, ${Math.round(lvl.progress * 100)} percent to next level`}>
               <Ring value={lvl.progress} size={32} stroke={3}>
                 <span className="text-[11px] font-bold">{lvl.level}</span>

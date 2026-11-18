@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useIsPresent } from 'motion/react';
 import { ArrowLeft, Heart, Lightbulb, Volume2, VolumeX } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react';
 import { ElementTile } from '../components/ElementTile';
@@ -47,6 +47,15 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
   const reduceMotion = useSettings((s) => s.reduceMotion);
   const openDetail = useUi((s) => s.openDetail);
   const recorded = useRef(false);
+  const [tip, setTip] = useState<{ id: number; text: string } | null>(null);
+  const boardRef = useRef<HTMLElement>(null);
+  const trayRef = useRef<HTMLElement>(null);
+  const tilesRef = useRef<HTMLDivElement>(null);
+  /** Where keyboard focus was when the last placement was attempted. */
+  const focusFrom = useRef<FocusOrigin | null>(null);
+
+  /** Polite announcement. Repeating the same text still gets read out. */
+  const say = useCallback((msg: string) => setAnnounce((prev) => (prev === msg ? `${msg} ` : msg)), []);
 
   const placed = useMemo(() => new Set(state.placed), [state.placed]);
   const tiles = hand(state);
@@ -74,14 +83,55 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
     if (ev.kind === 'hit') {
       sfx.hit(state.combo - 1);
       haptic(12);
-      setAnnounce(`${e.name} placed. Plus ${ev.points} points.${state.combo >= 3 ? ` Combo ${state.combo}.` : ''}`);
+      setTip(null);
+      say(`${e.name} placed. Plus ${ev.points} points.${state.combo >= 3 ? ` Combo ${state.combo}.` : ''}`);
     } else {
       sfx.miss();
       haptic([30, 40, 30]);
-      setAnnounce(`Not there. ${e.name} belongs somewhere else.${expert ? ` ${state.lives} lives left.` : ''}`);
+      const text = missTip(e, config.difficulty);
+      setTip({ id: ev.id, text });
+      say(`Not there. ${e.name} belongs somewhere else.${expert ? ` ${state.lives} lives left.` : ` ${text}`}`);
+    }
+
+    // Keep keyboard focus somewhere sensible (WCAG 2.4.3): the slot or tile that had it may be gone now.
+    const from = focusFrom.current;
+    focusFrom.current = null;
+    if (!from || state.phase !== 'playing') return;
+    const opts = { preventScroll: !from.visible };
+    if (ev.kind === 'hit') {
+      if (from.kind === 'slot') {
+        const slots = [...(boardRef.current?.querySelectorAll<HTMLButtonElement>('button[data-slot]') ?? [])]
+          .map((s) => ({ s, r: Number(s.dataset.row), c: Number(s.dataset.col) }))
+          .sort((a, b) => a.r - b.r || a.c - b.c);
+        const next = slots.find((x) => x.r > ev.row || (x.r === ev.row && x.c > ev.col)) ?? slots[slots.length - 1];
+        if (next) {
+          setFocusSlot(next.s.dataset.slot!);
+          next.s.focus(opts);
+          return;
+        }
+      }
+      tilesRef.current?.querySelector<HTMLElement>('[data-tile]:not([inert])')?.focus(opts);
+    } else if (from.kind === 'slot') {
+      // A missed slot re-mounts to replay its flash; put focus back on it.
+      boardRef.current?.querySelector<HTMLElement>(`[data-slot="${from.key}"]`)?.focus(opts);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.event?.id]);
+
+  // Hints are announced, not just shown (WCAG 4.1.3).
+  useEffect(() => {
+    if (state.hint) {
+      const e = byNumber(state.hint);
+      say(`Hint: ${e.name} goes ${whereIs(e)}.`);
+    }
+  }, [state.hint, say]);
+
+  // Miss bubbles fade after about 3 seconds.
+  useEffect(() => {
+    if (!tip) return;
+    const t = setTimeout(() => setTip(null), 3200);
+    return () => clearTimeout(t);
+  }, [tip]);
 
   // Record the round once it ends.
   useEffect(() => {
@@ -94,10 +144,10 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
     announceAchievements(outcome.unlocked);
   }, [state, config, recordRound]);
 
-  const placeAt = useCallback(
-    (n: number, row: number, col: number) => dispatch({ type: 'place', number: n, row, col, now: Date.now() }),
-    [],
-  );
+  const placeAt = useCallback((n: number, row: number, col: number) => {
+    focusFrom.current = currentFocusOrigin();
+    dispatch({ type: 'place', number: n, row, col, now: Date.now() });
+  }, []);
 
   // ---- Pointer drag (mouse, pen and touch share one code path) ----
   const drag = useRef<{ n: number; x0: number; y0: number; active: boolean } | null>(null);
@@ -155,17 +205,26 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
       if (state.phase !== 'playing' || e.metaKey || e.ctrlKey || e.altKey) return;
-      if ((e.target as HTMLElement).closest('[role="dialog"]')) return;
-      const i = Number(e.key) - 1;
+      const t = e.target instanceof HTMLElement ? e.target : null;
+      // Never steal keys from dialogs or text fields.
+      if (t?.closest('[role="dialog"], [role="alertdialog"], dialog')) return;
+      if (t && (t.isContentEditable || t.closest('input, textarea, select'))) return;
+      if (e.key === 'Escape') {
+        if (state.selected !== null) dispatch({ type: 'select', number: null });
+        return;
+      }
+      // Character shortcuts only apply on the page itself or inside the board and tray (WCAG 2.1.4).
+      const inGame = !t || t === document.body || t === document.documentElement || !!boardRef.current?.contains(t) || !!trayRef.current?.contains(t);
+      if (!inGame || document.querySelector('[role="dialog"][aria-modal="true"]')) return;
+      const i = /^[1-5]$/.test(e.key) ? Number(e.key) - 1 : -1;
       if (i >= 0 && i < tiles.length) {
         dispatch({ type: 'select', number: tiles[i] });
         sfx.pick();
-      } else if (e.key.toLowerCase() === 'h') dispatch({ type: 'hint' });
-      else if (e.key === 'Escape') dispatch({ type: 'select', number: null });
+      } else if (e.key === 'h' || e.key === 'H') dispatch({ type: 'hint' });
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [state.phase, tiles]);
+  }, [state.phase, state.selected, tiles]);
 
   const onSlotKey = (e: KeyboardEvent<HTMLButtonElement>) => {
     const dirs: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
@@ -261,7 +320,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
         onFocus={() => setFocusSlot(key)}
         onKeyDown={onSlotKey}
         onClick={() => state.selected && placeAt(state.selected, e.row, e.col)}
-        aria-label={`Period ${e.period}, ${e.group ? `group ${e.group}` : 'f-block'}, empty${state.selected ? `. Place ${byNumber(state.selected).name} here` : ''}`}
+        aria-label={`Period ${e.period}, ${e.group ? `group ${e.group}` : 'f-block'}, empty${isHint ? ', hint' : ''}${state.selected ? `. Place ${byNumber(state.selected).name} here` : ''}`}
         className={`slot relative h-full w-full transition-[transform,background,border-color] duration-150 ${state.selected ? 'slot-armed' : ''} ${missed ? 'flash-bad' : ''} ${isHint ? 'pulse-ring' : ''}`}
         style={{
           borderRadius: Math.max(5, rect.size * 0.14),
@@ -328,7 +387,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
       </header>
 
       {/* Board */}
-      <main className="relative z-10 flex flex-1 flex-col justify-center px-1 py-4 sm:px-6">
+      <main ref={boardRef} className="relative z-10 flex flex-1 flex-col justify-center px-1 py-4 sm:px-6">
         <div className="relative mx-auto w-full max-w-7xl">
           <ComboBadge combo={state.combo} mult={mult} />
           <PeriodicGrid
@@ -343,44 +402,52 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
       </main>
 
       {/* Tray */}
-      <footer className="glass safe-bottom sticky bottom-0 z-30 border-x-0 border-b-0">
+      <footer ref={trayRef} className="glass safe-bottom sticky bottom-0 z-30 border-x-0 border-b-0">
+        {/* Teaching bubble after a wrong drop. Screen readers get the same words from the live region. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-full flex justify-center px-3 pb-3" aria-hidden>
+          <AnimatePresence>
+            {tip && (
+              <motion.div
+                key={tip.id}
+                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98 }}
+                transition={{ type: 'spring', damping: 24, stiffness: 320 }}
+                className="solid relative max-w-[min(26rem,100%)] rounded-2xl border border-line-strong px-4 py-2.5 text-center text-sm font-medium leading-snug text-ink"
+                style={{ boxShadow: 'var(--shadow-lg)' }}
+                data-testid="miss-tip"
+              >
+                {tip.text}
+                <span
+                  className="solid absolute left-1/2 top-full -mt-[7px] h-3 w-3 -translate-x-1/2 rotate-45 border-b border-r border-line-strong"
+                  style={{ borderTop: 0, borderLeft: 0 }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         <div className="mx-auto flex max-w-3xl items-center gap-2 px-2 pt-3 sm:gap-3 sm:px-6">
-          <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 sm:gap-3" role="listbox" aria-label="Elements to place">
+          <div ref={tilesRef} className="flex min-w-0 flex-1 items-center justify-center gap-1.5 sm:gap-3" role="group" aria-label="Elements to place">
             <AnimatePresence mode="popLayout" initial={false}>
-              {tiles.map((n, i) => {
-                const e = byNumber(n);
-                const sel = state.selected === n;
-                const miss = state.event?.kind === 'miss' && state.event.number === n;
-                return (
-                  <motion.button
-                    key={n}
-                    layout
-                    role="option"
-                    aria-selected={sel}
-                    aria-label={`${e.name}${learner ? `, atomic number ${e.number}` : ''}${sel ? ', selected' : ''}`}
-                    initial={{ y: 40, opacity: 0, scale: 0.8 }}
-                    animate={{ y: sel ? -10 : 0, opacity: dragging === n ? 0.35 : 1, scale: sel ? 1.06 : 1 }}
-                    exit={{ y: -60, opacity: 0, scale: 0.6 }}
-                    transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-                    onPointerDown={(ev) => onTileDown(ev, n)}
-                    onPointerMove={onTileMove}
-                    onPointerUp={onTileUp}
-                    onPointerCancel={onTileCancel}
-                    onKeyDown={(ev) => {
-                      if (ev.key === 'Enter' || ev.key === ' ') {
-                        ev.preventDefault();
-                        dispatch({ type: 'select', number: n });
-                        sfx.pick();
-                      }
-                    }}
-                    className={`relative h-[66px] w-[57px] shrink-0 cursor-grab touch-none rounded-2xl transition-[filter] sm:h-[84px] sm:w-[74px] ${miss ? 'animate-shake' : ''}`}
-                    style={{ filter: sel ? `drop-shadow(0 10px 22px color-mix(in oklab, ${learner ? catVar(e.category) : 'var(--accent-2)'} 55%, transparent))` : undefined }}
-                  >
-                    <TrayTile e={e} difficulty={config.difficulty} selected={sel} />
-                    <kbd className="solid absolute -bottom-2 left-1/2 hidden -translate-x-1/2 rounded-md border border-line px-1.5 text-[10px] font-semibold leading-4 text-ink-3 sm:block">{i + 1}</kbd>
-                  </motion.button>
-                );
-              })}
+              {tiles.map((n, i) => (
+                <TrayButton
+                  key={n}
+                  e={byNumber(n)}
+                  index={i}
+                  difficulty={config.difficulty}
+                  selected={state.selected === n}
+                  missed={state.event?.kind === 'miss' && state.event.number === n}
+                  dimmed={dragging === n}
+                  onPointerDown={(ev) => onTileDown(ev, n)}
+                  onPointerMove={onTileMove}
+                  onPointerUp={onTileUp}
+                  onPointerCancel={onTileCancel}
+                  onActivate={() => {
+                    dispatch({ type: 'select', number: n });
+                    sfx.pick();
+                  }}
+                />
+              ))}
             </AnimatePresence>
           </div>
           <div className="flex shrink-0 flex-col items-center gap-1">
@@ -475,17 +542,131 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
 const ELEMENT_AT = new Map(ELEMENTS.map((e) => [`${e.row}-${e.col}`, e.number]));
 const slotNumber = (key: string) => ELEMENT_AT.get(key) ?? -1;
 
-function TrayTile({ e, difficulty, selected }: { e: Element; difficulty: Difficulty; selected: boolean }) {
+/** "in period 2, group 1", or the f-block row for lanthanides and actinides. */
+function whereIs(e: Element) {
+  if (e.row === 9) return 'in the lanthanide row';
+  if (e.row === 10) return 'in the actinide row';
+  return `in period ${e.period}, group ${e.group}`;
+}
+
+/** Short, friendly nudge after a wrong drop. More help on easier levels. */
+function missTip(e: Element, difficulty: Difficulty) {
+  if (difficulty === 'expert') return 'Not there.';
+  if (difficulty === 'learner') return `${e.name} is number ${e.number}, so it sits ${whereIs(e)}.`;
+  return `${e.name} is number ${e.number}. Try counting along the rows.`;
+}
+
+interface FocusOrigin {
+  kind: 'slot' | 'tile';
+  key: string;
+  /** Whether the user was moving focus with the keyboard. */
+  visible: boolean;
+}
+
+function currentFocusOrigin(): FocusOrigin | null {
+  const a = document.activeElement;
+  if (!(a instanceof HTMLElement)) return null;
+  let visible = true;
+  try {
+    visible = a.matches(':focus-visible');
+  } catch {
+    /* very old browsers: assume keyboard */
+  }
+  const slot = a.closest<HTMLElement>('[data-slot]');
+  if (slot) return { kind: 'slot', key: slot.dataset.slot!, visible };
+  const tile = a.closest<HTMLElement>('[data-tile]');
+  if (tile) return { kind: 'tile', key: tile.dataset.tile!, visible };
+  return null;
+}
+
+interface TrayButtonProps {
+  e: Element;
+  index: number;
+  difficulty: Difficulty;
+  selected: boolean;
+  missed: boolean;
+  dimmed: boolean;
+  onPointerDown: (ev: PointerEvent) => void;
+  onPointerMove: (ev: PointerEvent) => void;
+  onPointerUp: (ev: PointerEvent) => void;
+  onPointerCancel: () => void;
+  onActivate: () => void;
+}
+
+function TrayButton({ e, index, difficulty, selected, missed, dimmed, onActivate, ...pointer }: TrayButtonProps) {
+  // While a placed tile animates out it must not take clicks or focus.
+  const present = useIsPresent();
+  const onKeyDown = (ev: KeyboardEvent<HTMLButtonElement>) => {
+    if (ev.key === 'Enter' || ev.key === ' ') {
+      ev.preventDefault();
+      if (!ev.repeat) onActivate();
+      return;
+    }
+    if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
+      const all = [...(ev.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[data-tile]:not([inert])') ?? [])];
+      const i = all.indexOf(ev.currentTarget);
+      const next = all[i + (ev.key === 'ArrowRight' ? 1 : -1)];
+      if (next) {
+        ev.preventDefault();
+        next.focus();
+      }
+    }
+  };
   return (
-    <div className={`h-full w-full rounded-2xl transition-shadow ${selected ? 'ring-2 ring-accent-2 ring-offset-2 ring-offset-bg' : ''}`} style={{ '--c': catVar(e.category) } as CSSProperties}>
+    <motion.button
+      type="button"
+      layout
+      data-tile={e.number}
+      aria-pressed={selected}
+      aria-label={`${e.name}${difficulty === 'learner' ? `, atomic number ${e.number}` : ''}`}
+      aria-keyshortcuts={present ? String(index + 1) : undefined}
+      inert={!present}
+      tabIndex={present ? undefined : -1}
+      initial={{ y: 40, opacity: 0, scale: 0.8 }}
+      animate={{ y: selected ? -10 : 0, opacity: dimmed ? 0.35 : 1, scale: selected ? 1.06 : 1 }}
+      exit={{ y: -60, opacity: 0, scale: 0.6 }}
+      transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+      {...(present ? pointer : {})}
+      onKeyDown={present ? onKeyDown : undefined}
+      className={`relative h-[66px] w-[57px] shrink-0 cursor-grab touch-none rounded-2xl transition-[filter] sm:h-[84px] sm:w-[74px] ${missed ? 'animate-shake' : ''}`}
+      style={{
+        pointerEvents: present ? undefined : 'none',
+        filter: selected ? 'drop-shadow(0 10px 22px color-mix(in oklab, var(--accent-2) 55%, transparent))' : undefined,
+      }}
+    >
+      <TrayTile e={e} difficulty={difficulty} selected={selected} />
+      <kbd className="solid absolute -bottom-2 left-1/2 hidden -translate-x-1/2 rounded-md border border-line px-1.5 text-[10px] font-semibold leading-4 text-ink-3 sm:block">{index + 1}</kbd>
+    </motion.button>
+  );
+}
+
+/**
+ * Tray tiles share one neutral accent colour on every level, so the puzzle is
+ * solved by position rather than by matching category colours. Learner still
+ * shows the atomic number.
+ */
+function TrayTile({ e, difficulty, selected }: { e: Element; difficulty: Difficulty; selected: boolean }) {
+  const learner = difficulty === 'learner';
+  return (
+    <div className={`relative h-full w-full rounded-2xl transition-shadow ${selected ? 'ring-2 ring-accent-2 ring-offset-2 ring-offset-bg' : ''}`} style={{ '--c': 'var(--accent-2)' } as CSSProperties}>
       <ElementTile
         element={e}
         size={74}
-        showNumber={difficulty === 'learner'}
+        showNumber={false}
         showName={difficulty !== 'expert'}
-        color={difficulty === 'learner' ? undefined : 'var(--accent-2)'}
-        className="rounded-2xl"
+        color="var(--accent-2)"
+        // Small phone tiles: nudge the symbol down so the atomic number never overlaps it.
+        className={`rounded-2xl ${learner ? 'pt-3 sm:pt-0' : ''}`}
       />
+      {learner && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-[7px] top-[4px] text-[10px] font-semibold tabular-nums leading-none opacity-85 sm:left-[9%] sm:top-[7%] sm:text-[12.5px] sm:font-medium"
+          style={{ color: 'color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink))' }}
+        >
+          {e.number}
+        </span>
+      )}
     </div>
   );
 }

@@ -1,6 +1,9 @@
-import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { ChevronRight } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ELEMENTS, F_BLOCK_MARKERS, byNumber, catVar, type Element } from '../lib/elements';
 import { computeLayout } from '../lib/layout';
+import { useSettings } from '../store/settings';
 
 export interface CellRect {
   x: number;
@@ -26,6 +29,8 @@ interface Props {
 }
 
 const AXIS = 18;
+/** Width of the soft fade on an edge that has more table behind it. */
+const FADE = 32;
 
 /**
  * Responsive periodic table. Measures its container and sizes cells to fit,
@@ -78,8 +83,42 @@ export function PeriodicGrid({
     });
   }, [layout, inRegion, showContext]);
 
+  // ---- Sideways-scroll cue: fade the edge with more table, and a "Swipe for more" chip until the user scrolls. ----
+  const [edges, setEdges] = useState({ left: false, right: false });
+  const [scrolled, setScrolled] = useState(false);
+  const reduceSetting = useSettings((s) => s.reduceMotion);
+  const reduceMotion = useReducedMotion() || reduceSetting;
+
+  const measure = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const left = el.scrollLeft > 2;
+    const right = max > 2 && el.scrollLeft < max - 2;
+    setEdges((p) => (p.left === left && p.right === right ? p : { left, right }));
+    if (el.scrollLeft > 12) setScrolled(true);
+  }, []);
+
+  useLayoutEffect(measure, [measure, layout]);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.addEventListener('scroll', measure, { passive: true });
+    return () => el.removeEventListener('scroll', measure);
+  }, [measure]);
+
+  const overflows = edges.left || edges.right;
+  const fadeL = edges.left ? FADE : 0;
+  const fadeR = edges.right ? FADE : 0;
+  const mask = overflows ? `linear-gradient(to right, transparent 0, #000 ${fadeL}px, #000 calc(100% - ${fadeR}px), transparent 100%)` : undefined;
+
   return (
-    <div ref={ref} className={`thin-scroll w-full overflow-x-auto overflow-y-hidden ${className}`}>
+    <div className="relative w-full">
+      <div
+        ref={ref}
+        className={`thin-scroll w-full overflow-x-auto overflow-y-hidden ${className}`}
+        style={mask ? { maskImage: mask, WebkitMaskImage: mask } : undefined}
+      >
       {layout && (
         <div className="relative mx-auto" style={{ width: layout.width + axis, height: layout.height + axis }}>
           {showAxes && <Axes layout={layout} />}
@@ -122,6 +161,34 @@ export function PeriodicGrid({
           </div>
         </div>
       )}
+      </div>
+      <AnimatePresence>
+        {edges.right && !scrolled && (
+          <motion.div
+            key="swipe"
+            aria-hidden
+            className="pointer-events-none absolute right-2 top-1/2 z-20 -translate-y-1/2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.25 }}
+          >
+            <div
+              className="solid flex items-center gap-1 rounded-full border border-line-strong py-1 pl-3 pr-2 text-xs font-semibold text-ink"
+              style={{ boxShadow: '0 8px 24px -10px rgb(0 0 0 / 0.45)' }}
+            >
+              Swipe for more
+              <motion.span
+                className="grid place-items-center text-accent-2"
+                animate={reduceMotion ? undefined : { x: [0, 4, 0] }}
+                transition={reduceMotion ? undefined : { duration: 1.1, repeat: 3, repeatDelay: 0.6, ease: 'easeInOut', delay: 0.4 }}
+              >
+                <ChevronRight size={14} strokeWidth={2.5} />
+              </motion.span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
