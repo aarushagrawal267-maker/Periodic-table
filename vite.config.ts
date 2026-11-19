@@ -12,11 +12,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: 'Periodica — Master the Periodic Table',
+        name: 'Periodica · Learn the periodic table',
         short_name: 'Periodica',
-        description: 'Learn all 118 elements through fast, satisfying puzzle rounds.',
-        theme_color: '#07070d',
-        background_color: '#07070d',
+        description: 'Learn the periodic table in three-minute lessons and quick games',
+        theme_color: '#131315',
+        background_color: '#131315',
         display: 'standalone',
         start_url: './',
         icons: [

@@ -1,67 +1,120 @@
 @import 'tailwindcss';
 
+/*
+ * Periodica foundation. The contract for these values is docs/DESIGN.md.
+ * Built with the unslop process by Damir Sokolovsky (@heydamir), CC BY 4.0.
+ *
+ * Chrome is graphite and quiet. Colour lives in two moments: the element tiles
+ * (category colours, like a printed wall chart) and the round result (gold stars).
+ */
+
 @theme {
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Space Grotesk Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  /* Type: one interface family and one partner for figures and meta. */
+  --font-sans: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Weights stop at 600 (rare emphasis). Old bold/extrabold/black utilities fall back to it. */
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 600;
+  --font-weight-black: 600;
+
+  /* Colour roles, all from the theme variables below. */
   --color-bg: var(--bg);
-  --color-bg-2: var(--bg-2);
+  --color-bg-deep: var(--bg-deep);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-raised: var(--surface-2);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
+  --color-line-control: var(--line-control);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
   --color-accent: var(--accent);
-  --color-accent-2: var(--accent-2);
-  --color-accent-3: var(--accent-3);
+  --color-on-accent: var(--on-accent);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
   --color-good: var(--good);
   --color-bad: var(--bad);
   --color-gold: var(--gold);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --color-star: var(--star);
+
+  /* Radius by size. Nested: inner = outer - padding, never below 4. */
+  --radius-tag: 6px;
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
+
+  /* One easing curve for everything. `ease-out` in Tailwind now means this curve. */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @custom-variant light (&:where([data-theme='light'], [data-theme='light'] *));
 
+/* ---------------------------------------------------------------- tokens */
+
 :root {
   color-scheme: dark;
-  --bg: #07070d;
-  --bg-2: #0d0d18;
-  --surface: rgb(255 255 255 / 0.04);
-  --surface-2: rgb(255 255 255 / 0.07);
-  --surface-solid: #11111d;
-  --line: rgb(255 255 255 / 0.08);
-  --line-strong: rgb(255 255 255 / 0.16);
-  --ink: #f4f4fa;
-  --ink-2: #a9a9c2;
-  /* ink-3 is used for small captions: keep it at 4.5:1 or better on --bg and cards. */
-  --ink-3: #8282a0;
-  --accent: #8b7cff;
-  --accent-2: #4fd1ff;
-  --accent-3: #5cf2b0;
-  --good: #3ee08f;
-  --bad: #ff5470;
-  --gold: #ffc94a;
-  --cell-empty: rgb(255 255 255 / 0.035);
+  /* Graphite ramp, a hair cool, like black ink on a wall chart. */
+  --bg-deep: #0e0e10;
+  --bg: #131315;
+  --surface: #18181b;
+  --surface-2: #212124;
+  --line: rgb(237 237 240 / 0.08);
+  --line-strong: rgb(237 237 240 / 0.16);
+  /* Edge of a control that must be found at rest (switch track, field, chosen segment): 3:1 or better on every surface. */
+  --line-control: #727279;
+  --ink: #ededf0;
+  --ink-2: #a3a3aa;
+  /* Muted: meta and captions only. 4.5:1 or better on bg, surface and surface-2. */
+  --ink-3: #8b8b93;
+
+  /* The one accent: cobalt (element 27). Selection, progress, the key figure. */
+  --accent: #6ea3ff;
+  --on-accent: #0e0e10;
+  --accent-soft: rgb(110 163 255 / 0.12);
+  /* Primary action: off-white from the ramp with dark text. */
+  --primary: #ededf0;
+  --on-primary: #131315;
+
+  --good: #4cc38a;
+  --bad: #ec5d61;
+  /* Gold is part of the result moment: --star fills stars, --gold is gold used as text or ink. */
+  --gold: #f2b53a;
+  --star: #f2b53a;
+  --star-line: #c98f1e;
+
+  /* Focus ring: 3:1 or better against every surface. */
+  --focus: #6ea3ff;
+
+  --cell-empty: rgb(237 237 240 / 0.035);
   /* Empty-slot outline: 3:1 or better against the slot and the page (WCAG 1.4.11). */
-  --slot-line: rgb(255 255 255 / 0.4);
-  /* Focus ring: 3:1 or better against --bg, --bg-2 and cards in each theme. */
-  --focus: #4fd1ff;
+  --slot-line: rgb(237 237 240 / 0.4);
   /*
    * Tile, chip and .cat-ink text = category colour mixed with --ink by this amount.
-   * Tuned per palette so text stays at 4.5:1 or better on its tinted background
-   * (checked for every category colour, heat-map colour and mastery colour).
+   * Tuned per palette so text stays at 4.5:1 or better on its tinted background.
    */
   --cell-ink-mix: 66%;
-  /* Heat-map lenses in Explore use a deep blue that needs more --ink to stay readable. */
   --heat-ink-mix: 50%;
-  --on-grad: #07070d;
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
-  --shadow-md: 0 12px 32px -14px rgb(0 0 0 / 0.75);
-  --shadow-lg: 0 30px 80px -20px rgb(0 0 0 / 0.7), 0 0 0 1px var(--line);
-  --grad: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 55%, var(--accent-3) 100%);
+  /* Tile tint and border strength, per theme. */
+  --tile-tint: 16%;
+  --tile-edge: 42%;
+  /* Mini table squares: the same printed tint, a little stronger so a 10px square still reads. */
+  --mini-tint: 52%;
+  --mini-empty: rgb(237 237 240 / 0.1);
 
+  /* Depth on dark: surface steps and hairlines. Shadows only for things that float. */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 16px 48px rgb(0 0 0 / 0.5), 0 0 0 1px var(--line);
+  --highlight: inset 0 1px 0 rgb(255 255 255 / 0.06);
+
+  /* Motion durations. */
+  --dur-press: 150ms;
+  --dur-menu: 200ms;
+  --dur-enter: 360ms;
+
+  /* Category colours: the printed colours of the chart. Only tiles, chips, dots and mini tables use them. */
   --cat-alkali-metal: #ff5d73;
   --cat-alkaline-earth-metal: #ff9f43;
   --cat-transition-metal: #f7c948;
@@ -76,31 +129,43 @@
 
 [data-theme='light'] {
   color-scheme: light;
-  --bg: #f5f5fa;
-  --bg-2: #ebebf4;
-  --surface: rgb(255 255 255 / 0.75);
-  --surface-2: rgb(255 255 255 / 0.95);
-  --surface-solid: #ffffff;
-  --line: rgb(20 20 50 / 0.09);
-  --line-strong: rgb(20 20 50 / 0.18);
-  --ink: #0d0d1c;
-  --ink-2: #4b4b66;
-  --ink-3: #666680;
-  /* Darker than the dark-theme accents so accent text and white-on-gradient both pass 4.5:1. */
-  --accent: #6a56ff;
-  --accent-2: #0a74b8;
-  --accent-3: #08805a;
-  --good: #087a45;
-  --bad: #d42a45;
-  --gold: #d99a00;
-  --cell-empty: rgb(20 20 50 / 0.045);
-  --slot-line: rgb(20 20 50 / 0.55);
-  --focus: #0a74b8;
+  --bg-deep: #f1f1f3;
+  --bg: #f8f8f9;
+  --surface: #ffffff;
+  --surface-2: #f1f1f3;
+  --line: rgb(23 23 26 / 0.08);
+  --line-strong: rgb(23 23 26 / 0.16);
+  --line-control: #85858c;
+  --ink: #17171a;
+  --ink-2: #505058;
+  --ink-3: #696972;
+
+  --accent: #1f5bd6;
+  --on-accent: #ffffff;
+  --accent-soft: rgb(31 91 214 / 0.08);
+  --primary: #17171a;
+  --on-primary: #ffffff;
+
+  --good: #13773a;
+  --bad: #c92a2a;
+  --gold: #8f5f00;
+  --star: #e8a400;
+  --star-line: #8f5f00;
+
+  --focus: #1f5bd6;
+
+  --cell-empty: rgb(23 23 26 / 0.04);
+  --slot-line: rgb(23 23 26 / 0.5);
   --cell-ink-mix: 56%;
-  --on-grad: #ffffff;
-  --shadow-sm: 0 1px 2px rgb(30 30 80 / 0.08);
-  --shadow-md: 0 14px 34px -18px rgb(30 30 80 / 0.28);
-  --shadow-lg: 0 30px 70px -25px rgb(30 30 80 / 0.35), 0 0 0 1px var(--line);
+  --tile-tint: 13%;
+  --tile-edge: 50%;
+  --mini-tint: 40%;
+  --mini-empty: rgb(23 23 26 / 0.08);
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 16px 48px rgb(0 0 0 / 0.12), 0 0 0 1px var(--line);
+  --highlight: none;
 
   --cat-alkali-metal: #e5334f;
   --cat-alkaline-earth-metal: #e57a10;
@@ -135,324 +200,522 @@
   --cell-ink-mix: 46%;
 }
 
-html {
-  background: var(--bg);
-  -webkit-tap-highlight-color: transparent;
-  text-rendering: optimizeLegibility;
-}
+@layer base {
+  /* ------------------------------------------------------------------ base */
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-sans);
-  font-feature-settings: 'cv11', 'ss01', 'ss03';
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-  min-height: 100dvh;
-}
+  html {
+    background: var(--bg);
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+    /* Focused controls never scroll under the sticky header (WCAG 2.4.11). */
+    scroll-padding-top: 72px;
+  }
+  /* Phones: nor under the fixed tab bar (56px plus the safe area, plus 16px of air). */
+  @media (max-width: 767.98px) {
+    html {
+      scroll-padding-top: 64px;
+      scroll-padding-bottom: calc(56px + max(8px, env(safe-area-inset-bottom)) + 16px);
+    }
+  }
 
-::selection {
-  background: color-mix(in oklab, var(--accent) 40%, transparent);
-}
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100dvh;
+  }
 
-:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-  border-radius: 10px;
-}
-/* Headings and the main region take focus after navigation so they are read out. They are not controls, so no ring. */
-h1[tabindex='-1']:focus,
-h2[tabindex='-1']:focus,
-#main:focus {
-  outline: none;
-}
+  ::selection {
+    background: color-mix(in oklab, var(--accent) 30%, transparent);
+  }
 
-.font-display {
-  font-family: var(--font-display);
-  letter-spacing: -0.02em;
-}
-
-.text-grad {
-  background: var(--grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.glass {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  backdrop-filter: blur(18px) saturate(1.4);
-  -webkit-backdrop-filter: blur(18px) saturate(1.4);
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 24px;
-}
-[data-theme='light'] .card {
-  box-shadow: var(--shadow-sm), 0 8px 24px -16px rgb(30 30 80 / 0.18);
-}
-
-.solid {
-  background: var(--surface-solid);
-}
-
-/* Faint noise to keep large dark areas from banding. */
-.grain::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 100;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-[data-theme='light'] .grain::after {
-  opacity: 0.025;
-}
-
-.aurora {
-  position: fixed;
-  inset: -20%;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(40% 35% at 18% 12%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%),
-    radial-gradient(35% 30% at 85% 8%, color-mix(in oklab, var(--accent-2) 16%, transparent), transparent 70%),
-    radial-gradient(45% 40% at 70% 95%, color-mix(in oklab, var(--accent-3) 10%, transparent), transparent 70%);
-  filter: blur(20px);
-  animation: drift 28s ease-in-out infinite alternate;
-}
-[data-theme='light'] .aurora {
-  opacity: 0.6;
-}
-@keyframes drift {
-  to {
-    transform: translate3d(3%, 2%, 0) rotate(4deg) scale(1.05);
+  /* Outlines follow each element's own radius, so the ring never changes a shape. */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  /* Headings and the main region take focus after navigation so they are read out. They are not controls, so no ring. */
+  h1[tabindex='-1']:focus,
+  h2[tabindex='-1']:focus,
+  #main:focus {
+    outline: none;
   }
 }
 
-.grid-lines {
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black, transparent);
-}
+/* Component classes sit in the components layer, so Tailwind utilities on the same element win. */
+@layer components {
+  /* ------------------------------------------------------------------ type */
 
-/* Element tile — the visual atom of the whole app. */
-.tile {
-  --c: var(--accent);
-  position: relative;
-  background:
-    linear-gradient(160deg, color-mix(in oklab, var(--c) 26%, transparent), color-mix(in oklab, var(--c) 8%, transparent) 70%),
-    var(--surface-solid);
-  border: 1px solid color-mix(in oklab, var(--c) 45%, transparent);
-  color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
-}
-.tile::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(120% 80% at 30% 0%, rgb(255 255 255 / 0.12), transparent 55%);
-  pointer-events: none;
-}
-[data-theme='light'] .tile {
-  background:
-    linear-gradient(160deg, color-mix(in oklab, var(--c) 20%, white), color-mix(in oklab, var(--c) 6%, white) 70%);
-  border-color: color-mix(in oklab, var(--c) 50%, transparent);
-}
-/* Element name on a tile: plain --ink-2 dips just under 4.5:1 on the brightest dark tiles. */
-.tile-name {
-  color: color-mix(in oklab, var(--ink-2) 60%, var(--ink));
-}
-[data-theme='light'] .tile-name {
-  color: var(--ink-2);
-}
-
-.slot {
-  background:
-    radial-gradient(120% 90% at 50% 0%, rgb(255 255 255 / 0.035), transparent 70%),
-    var(--cell-empty);
-  border: 1px dashed var(--slot-line);
-  box-shadow: inset 0 1px 6px rgb(0 0 0 / 0.25);
-}
-[data-theme='light'] .slot {
-  box-shadow: inset 0 1px 4px rgb(30 30 80 / 0.06);
-}
-/* A tile is selected: every empty slot invites a tap. */
-.slot-armed:hover {
-  border-style: solid;
-  border-color: color-mix(in oklab, var(--accent-2) 70%, transparent);
-  background: color-mix(in oklab, var(--accent-2) 12%, var(--cell-empty));
-}
-
-.btn-primary {
-  position: relative;
-  background: var(--grad);
-  color: var(--on-grad);
-  font-weight: 650;
-  box-shadow: 0 10px 30px -10px color-mix(in oklab, var(--accent-2) 70%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.4), inset 0 -2px 0 rgb(0 0 0 / 0.12);
-  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s, filter 0.2s;
-}
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  filter: saturate(1.1) brightness(1.04);
-  box-shadow: 0 16px 40px -12px color-mix(in oklab, var(--accent-2) 80%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.4), inset 0 -2px 0 rgb(0 0 0 / 0.12);
-}
-.btn-primary:active:not(:disabled) {
-  transform: translateY(1px) scale(0.98);
-  box-shadow: 0 6px 18px -10px color-mix(in oklab, var(--accent-2) 70%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.3);
-}
-/* Disabled: a calm neutral slab instead of a washed-out gradient. */
-.btn-primary:disabled {
-  opacity: 1;
-  background: var(--surface-2);
-  color: var(--ink-3);
-  box-shadow: inset 0 0 0 1px var(--line-strong);
-  cursor: not-allowed;
-}
-.btn-primary:disabled::after {
-  display: none;
-}
-
-.btn-ghost {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  transition: background 0.2s, border-color 0.2s, transform 0.2s var(--ease-spring);
-}
-.btn-ghost:hover:not(:disabled) {
-  background: var(--surface-2);
-  border-color: var(--line-strong);
-}
-.btn-ghost:active:not(:disabled) {
-  transform: scale(0.97);
-}
-[data-theme='light'] .btn-ghost {
-  box-shadow: var(--shadow-sm);
-}
-
-/* Interactive card: lifts a little and catches light on hover. */
-.card-hover {
-  transition: transform 0.35s var(--ease-out-expo), background 0.25s, border-color 0.25s, box-shadow 0.35s var(--ease-out-expo);
-}
-.card-hover:hover {
-  transform: translateY(-3px);
-  background: var(--surface-2);
-  border-color: var(--line-strong);
-  box-shadow: var(--shadow-md);
-}
-.card-hover:active {
-  transform: translateY(-1px) scale(0.995);
-}
-
-/* Category-tinted text that stays readable in both themes. Set --c on the element. */
-.cat-ink {
-  color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
-}
-.cat-chip {
-  background: color-mix(in oklab, var(--c) 16%, transparent);
-  color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
-}
-
-.shine {
-  position: relative;
-  overflow: hidden;
-}
-.shine::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgb(255 255 255 / 0.18) 50%, transparent 60%);
-  transform: translateX(-100%);
-  animation: shine 3.6s ease-in-out infinite;
-}
-@keyframes shine {
-  60%,
-  100% {
-    transform: translateX(100%);
+  /* Figures: tabular in the interface family. */
+  .num {
+    font-variant-numeric: tabular-nums;
   }
-}
+  /* Mono figures and meta: atomic numbers, counts, units, keyboard hints. */
+  .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
 
-@keyframes shake {
-  10%,
-  90% {
-    transform: translateX(-2px);
+  /* Page title. 30px on phones, 36px from sm. */
+  .t-title {
+    font-size: 1.875rem;
+    line-height: 1.15;
+    font-weight: 500;
+    letter-spacing: -0.01em;
   }
-  20%,
-  80% {
-    transform: translateX(4px);
+  @media (min-width: 640px) {
+    .t-title {
+      font-size: 2.25rem;
+    }
   }
-  30%,
-  50%,
-  70% {
-    transform: translateX(-6px);
+  /* The one large headline a screen may have (Home, results). 36px phones, 48px from sm. */
+  .t-display {
+    font-size: 2.25rem;
+    line-height: 1.08;
+    font-weight: 500;
+    letter-spacing: -0.02em;
   }
-  40%,
-  60% {
-    transform: translateX(6px);
+  @media (min-width: 640px) {
+    .t-display {
+      font-size: 3rem;
+    }
   }
-}
-.animate-shake {
-  animation: shake 0.45s both;
-}
+  /* Section and card headings. */
+  .t-heading {
+    font-size: 1.25rem;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+  /* Section label: replaces every uppercase tracked eyebrow. Sentence case, normal tracking. */
+  .label {
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+  /* Meta: counts, units, captions with figures. */
+  .meta {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--ink-3);
+  }
 
-@keyframes flash-bad {
-  0% {
-    box-shadow: 0 0 0 0 var(--bad), inset 0 0 0 2px var(--bad);
-  }
-  100% {
-    box-shadow: 0 0 0 10px transparent, inset 0 0 0 2px transparent;
-  }
-}
-.flash-bad {
-  animation: flash-bad 0.6s ease-out;
-}
+  /* ------------------------------------------------------------- surfaces */
 
-@keyframes ripple {
-  from {
-    transform: scale(0.6);
-    opacity: 0.9;
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
   }
-  to {
-    transform: scale(2.4);
-    opacity: 0;
+  [data-theme='light'] .card {
+    box-shadow: var(--shadow-sm);
   }
-}
-
-@keyframes pulse-ring {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent-2) 60%, transparent);
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-panel);
   }
-  50% {
-    box-shadow: 0 0 0 6px transparent;
+  /* A clickable card: a surface step on hover, nothing moves. */
+  .card-link {
+    transition:
+      background-color var(--dur-press) var(--ease-out),
+      border-color var(--dur-press) var(--ease-out);
   }
-}
-.pulse-ring {
-  animation: pulse-ring 1.6s ease-in-out infinite;
-}
+  .card-link:hover {
+    background: var(--surface-2);
+    border-color: var(--line-strong);
+  }
 
-.no-scrollbar {
-  scrollbar-width: none;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
+  /* --------------------------------------------------------------- buttons */
 
-.thin-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: var(--line-strong) transparent;
-}
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: var(--radius-control);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    transition:
+      background-color var(--dur-press) var(--ease-out),
+      border-color var(--dur-press) var(--ease-out),
+      color var(--dur-press) var(--ease-out),
+      transform var(--dur-press) var(--ease-out);
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+  }
+  .btn-sm {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 0.875rem;
+  }
+  .btn-lg {
+    height: 48px;
+    padding: 0 20px;
+    font-size: 1rem;
+  }
 
-.safe-bottom {
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  /* Primary: the ramp's primary text colour as a fill. One per screen. */
+  .btn-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+    font-weight: 500;
+    box-shadow: var(--highlight);
+    transition:
+      background-color var(--dur-press) var(--ease-out),
+      color var(--dur-press) var(--ease-out),
+      transform var(--dur-press) var(--ease-out);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--primary) 88%, var(--bg));
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  .btn-primary:disabled {
+    background: var(--surface-2);
+    color: var(--ink-3);
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+    cursor: not-allowed;
+  }
+
+  /* Secondary: raised surface with a hairline. */
+  .btn-secondary {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    transition:
+      background-color var(--dur-press) var(--ease-out),
+      border-color var(--dur-press) var(--ease-out),
+      transform var(--dur-press) var(--ease-out);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--surface-2) 70%, var(--ink) 6%);
+    border-color: var(--line-strong);
+  }
+  .btn-secondary:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  .btn-secondary:disabled {
+    color: var(--ink-3);
+    cursor: not-allowed;
+  }
+
+  /* Quiet: text only, a surface appears on hover. For toolbars and tertiary actions. */
+  .btn-quiet {
+    background: transparent;
+    color: var(--ink-2);
+  }
+  .btn-quiet:hover:not(:disabled) {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+
+  .btn-danger {
+    background: color-mix(in oklab, var(--bad) 12%, transparent);
+    color: var(--bad);
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--bad) 18%, transparent);
+  }
+
+  /* Square icon button: 44px touch target on phones, 36px from md. */
+  .icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: var(--radius-control);
+    color: var(--ink-2);
+    transition:
+      background-color var(--dur-press) var(--ease-out),
+      color var(--dur-press) var(--ease-out);
+  }
+  .icon-btn:hover:not(:disabled) {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+  @media (min-width: 768px) {
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  /* -------------------------------------------------------------- controls */
+
+  /* Segmented control. Mark the chosen item with aria-checked, aria-selected or aria-current. */
+  .seg {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border-radius: var(--radius-control);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+  }
+  .seg-item {
+    height: 44px;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ink-2);
+    transition:
+      background-color var(--dur-press) var(--ease-out),
+      color var(--dur-press) var(--ease-out);
+  }
+  @media (min-width: 768px) {
+    .seg-item {
+      height: 40px;
+    }
+  }
+  .seg-item:hover {
+    color: var(--ink);
+  }
+  .seg-item[aria-checked='true'],
+  .seg-item[aria-selected='true'],
+  .seg-item[aria-current='page'],
+  .seg-item[aria-pressed='true'] {
+    background: var(--surface);
+    color: var(--ink);
+    /* The edge, not the fill step, carries the state: 3:1 against the track (WCAG 1.4.11). */
+    box-shadow:
+      0 0 0 1px var(--line-control),
+      var(--shadow-sm);
+  }
+
+  /* Text field. */
+  .field {
+    height: 44px;
+    width: 100%;
+    padding: 0 12px;
+    border-radius: var(--radius-control);
+    background: var(--surface-2);
+    border: 1px solid var(--line-control);
+    color: var(--ink);
+    font-size: 0.9375rem;
+    transition: border-color var(--dur-press) var(--ease-out);
+  }
+  .field::placeholder {
+    color: var(--ink-3);
+  }
+  .field:hover {
+    border-color: var(--ink-3);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  /* Small quiet tag. */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: var(--radius-tag);
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  /* Keyboard hint as a keycap. */
+  .kbd {
+    display: inline-grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 1px 0 var(--line-strong);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1;
+    color: var(--ink-2);
+  }
+
+  /* Progress bar: hairline track, accent fill. Size the fill with transform: scaleX(value). */
+  .meter {
+    position: relative;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: var(--line-strong);
+  }
+  .meter-fill {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--accent);
+    transform-origin: left center;
+    transition: transform var(--dur-enter) var(--ease-out);
+  }
+
+  /* List row: one height, one padding, a surface step on hover. */
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: var(--radius-control);
+    transition: background-color var(--dur-press) var(--ease-out);
+  }
+  .row:hover {
+    background: var(--surface-2);
+  }
+
+  /* Status dot for a category or tier. Set --c. */
+  .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background: var(--c, var(--ink-3));
+  }
+
+  /* Selection: a surface step with an accent edge. */
+  .is-selected {
+    background: var(--accent-soft);
+    box-shadow: inset 0 0 0 1.5px var(--accent);
+  }
+  /* The one cell to act on (hint target). Static, no pulse. */
+  .is-target {
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  /* ---------------------------------------------------------- the moment */
+
+  /*
+   * Element tile: a square printed on the chart. Flat category tint, a category edge,
+   * the atomic number in the top-left corner in mono (the signature).
+   */
+  .tile {
+    --c: var(--accent);
+    position: relative;
+    background: color-mix(in oklab, var(--c) var(--tile-tint), var(--surface));
+    border: 1px solid color-mix(in oklab, var(--c) var(--tile-edge), transparent);
+    color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+  }
+  /* Element name on a tile: plain --ink-2 dips just under 4.5:1 on the brightest dark tiles. */
+  .tile-name {
+    color: color-mix(in oklab, var(--ink-2) 60%, var(--ink));
+  }
+  [data-theme='light'] .tile-name {
+    color: var(--ink-2);
+  }
+  /* The corner number. */
+  .tile-number {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  /* An empty place on the table. */
+  .slot {
+    background: var(--cell-empty);
+    border: 1px dashed var(--slot-line);
+  }
+  /* A tile is selected: every empty slot invites a tap. */
+  .slot-armed:hover {
+    border-style: solid;
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  /* Category-tinted text that stays readable in both themes. Set --c on the element. */
+  .cat-ink {
+    color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+  }
+  .cat-chip {
+    background: color-mix(in oklab, var(--c) var(--tile-tint), var(--surface));
+    color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+  }
+
+  /* ----------------------------------------------------------------- motion */
+
+  /* Feedback that explains something: a wrong placement shakes a few pixels once. */
+  @keyframes shake {
+    20%,
+    60% {
+      transform: translateX(-4px);
+    }
+    40%,
+    80% {
+      transform: translateX(4px);
+    }
+  }
+  .animate-shake {
+    animation: shake 0.36s var(--ease-out) both;
+  }
+
+  /* A wrong drop: the slot edge turns red once and fades. */
+  @keyframes flash-bad {
+    0% {
+      box-shadow: inset 0 0 0 2px var(--bad);
+    }
+    100% {
+      box-shadow: inset 0 0 0 2px transparent;
+    }
+  }
+  .flash-bad {
+    animation: flash-bad 0.6s var(--ease-out);
+  }
+
+  /* A correct drop: one ring that opens and fades (used by the game board). */
+  @keyframes ripple {
+    from {
+      transform: scale(0.8);
+      opacity: 0.8;
+    }
+    to {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+
+  /* ------------------------------------------------------------- utilities */
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .thin-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+
+  .safe-bottom {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
 }
 
 .reduce-motion *,
@@ -462,18 +725,18 @@ h2[tabindex='-1']:focus,
   animation-iteration-count: 1 !important;
   transition-duration: 0.001ms !important;
 }
-
-.reduce-motion .card-hover:hover,
-.reduce-motion .card-hover:active,
-.reduce-motion .btn-primary:hover,
-.reduce-motion .btn-primary:active {
+.reduce-motion .btn:active,
+.reduce-motion .btn-primary:active,
+.reduce-motion .btn-secondary:active {
   transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora,
-  .shine::after,
-  .pulse-ring {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }

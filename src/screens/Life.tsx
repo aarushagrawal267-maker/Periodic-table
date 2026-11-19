@@ -1,17 +1,19 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react';
-import { useMemo, useRef, useState, type CSSProperties } from 'react';
-import { ElementTile } from '../components/ElementTile';
+import { useMemo, useRef, useState } from 'react';
+import { ElementChip, ElementTile, tileRadius } from '../components/ElementTile';
+import { DUR, tween } from '../components/motion';
 import { Results } from '../components/Results';
 import { AnimatedNumber } from '../components/Stats';
 import { buildLifeRound, el, LIFE_LENGTH } from '../lib/everyday';
-import { catVar } from '../lib/elements';
 import { haptic, sfx } from '../lib/feedback';
 import { go } from '../lib/router';
 import { stars } from '../lib/scoring';
 import { useProgress, type RoundOutcome, type RoundSummary } from '../store/progress';
 import { useSettings } from '../store/settings';
 import { announceAchievements, useUi } from '../store/ui';
+
+const TILE = 88;
 
 export function Life() {
   const [round, setRound] = useState(0);
@@ -36,7 +38,11 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
   const q = questions[index];
   const need = q.answer.size;
   const hits = [...picked].filter((n) => q.answer.has(n)).length;
-  const verdict = perfect[index] ? 'Spot on!' : hits > 0 ? 'Close! Here is what is inside:' : "Not quite. Here's what's inside:";
+  const verdict = perfect[index]
+    ? { text: 'Correct', color: 'var(--good)' }
+    : hits > 0
+      ? { text: `Almost: ${hits} of ${need} found`, color: 'var(--ink)' }
+      : { text: 'Not quite: here is what is inside', color: 'var(--bad)' };
 
   const toggle = (n: number) => {
     if (checked) return;
@@ -100,105 +106,118 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
   };
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-5 pb-8 pt-4">
-      <header className="flex items-center gap-3">
-        <button onClick={() => go('/play')} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave">
-          <ArrowLeft size={18} />
+    <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-4 pb-8 pt-2 sm:px-6">
+      <header className="flex h-14 items-center gap-3">
+        <button onClick={() => go('/play')} className="icon-btn -ml-2" aria-label="Leave">
+          <ArrowLeft size={18} strokeWidth={1.5} />
         </button>
         <div className="flex flex-1 gap-1" role="progressbar" aria-label="Objects" aria-valuemin={1} aria-valuemax={LIFE_LENGTH} aria-valuenow={index + 1} aria-valuetext={`Object ${index + 1} of ${LIFE_LENGTH}`}>
           {questions.map((_, i) => (
-            <span key={i} aria-hidden className="h-1.5 flex-1 rounded-full" style={{ background: perfect[i] === undefined ? (i === index ? 'var(--ink-2)' : 'var(--line-strong)') : perfect[i] ? 'var(--good)' : 'var(--gold)' }} />
+            <span key={i} aria-hidden className="h-1 flex-1 rounded-full transition-colors" style={{ background: perfect[i] === undefined ? (i === index ? 'var(--ink-2)' : 'var(--line-strong)') : perfect[i] ? 'var(--good)' : 'var(--bad)' }} />
           ))}
         </div>
-        <div className="font-display w-16 text-right text-lg font-semibold">
-          <AnimatedNumber value={score} />
+        <div className="min-w-12 text-right">
+          <div className="text-xs leading-4 text-ink-3">Score</div>
+          <div className="num text-base font-medium leading-6">
+            <AnimatedNumber value={score} />
+          </div>
         </div>
       </header>
 
       <AnimatePresence mode="wait">
-        <motion.main key={index} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} className="flex flex-1 flex-col justify-center py-6">
-          <p className="text-center text-xs font-semibold uppercase tracking-wider text-accent-2">In real life</p>
-          <motion.div className="mx-auto mt-4 grid h-32 w-32 place-items-center rounded-[36px] text-7xl" style={{ background: 'radial-gradient(circle at 30% 20%, var(--surface-2), var(--surface))', border: '1px solid var(--line)', boxShadow: 'var(--shadow-md), inset 0 1px 0 rgb(255 255 255 / 0.06)' }} initial={{ scale: 0.6, rotate: -8 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', damping: 10, stiffness: 180 }} aria-hidden>
-            {q.thing.emoji}
-          </motion.div>
-          <h1 className="font-display mt-5 text-center text-3xl font-semibold">{q.thing.name}</h1>
-          <p className="mt-1 text-center text-ink-2">
+        <motion.main key={index} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={tween(DUR.enter)} className="flex flex-1 flex-col justify-center py-8">
+          <p className="text-center">
+            <span className="label">In real life</span>
+            <span className="meta ml-2">
+              {index + 1} of {LIFE_LENGTH}
+            </span>
+          </p>
+          <h1 className="t-display mt-3 text-balance text-center">{q.thing.name}</h1>
+          <p className="mt-3 text-center text-ink-2">
             Which {need === 1 ? 'element is' : `${need} elements are`} the key {need === 1 ? 'ingredient' : 'ingredients'}?
           </p>
 
-          <div className="mt-7 grid grid-cols-4 gap-2.5 sm:gap-3" role="group" aria-label="Elements to choose from">
+          <div className="mx-auto mt-8 grid w-full max-w-md grid-cols-4 gap-3 sm:gap-4" role="group" aria-label="Elements to choose from">
             {q.options.map((e) => {
               const on = picked.has(e.number);
               const right = q.answer.has(e.number);
               const state = !checked ? (on ? 'on' : 'idle') : right ? (on ? 'right' : 'missed') : on ? 'wrong' : 'dim';
               return (
-                <motion.button
+                <button
                   key={e.number}
                   onClick={() => toggle(e.number)}
                   aria-pressed={on}
+                  // After Check the choice is final: say so, and toggle() ignores the press.
+                  aria-disabled={checked || undefined}
                   aria-label={`${e.symbol}, ${e.name}${checked ? (right ? ', correct' : on ? ', not in it' : '') : ''}`}
-                  whileTap={{ scale: 0.94 }}
-                  animate={state === 'wrong' ? { x: [0, -6, 6, -4, 4, 0] } : state === 'right' ? { scale: [1, 1.08, 1] } : { scale: on ? 1.04 : 1 }}
-                  className="relative aspect-square rounded-2xl"
+                  className={`relative aspect-square transition-transform duration-150 ease-out active:scale-[0.98] ${state === 'wrong' ? 'animate-shake' : ''}`}
                   // The focus outline sits outside the state ring so both show at once.
-                  style={{ opacity: state === 'dim' ? 0.35 : 1, outlineOffset: 6 }}
+                  style={{ outlineOffset: 6, borderRadius: tileRadius(TILE) }}
                 >
                   {/* State ring drawn with its own element, so the global :focus-visible outline still shows (WCAG 2.4.7). */}
                   {state !== 'idle' && state !== 'dim' && (
                     <span
                       aria-hidden
-                      className="pointer-events-none absolute -inset-[5px] rounded-[20px] border-2"
+                      className="pointer-events-none absolute -inset-1 border-2"
                       style={{
-                        borderColor: state === 'on' ? 'var(--accent-2)' : state === 'wrong' ? 'var(--bad)' : 'var(--good)',
+                        borderRadius: tileRadius(TILE) + 4,
+                        borderColor: state === 'on' ? 'var(--accent)' : state === 'wrong' ? 'var(--bad)' : 'var(--good)',
                         borderStyle: state === 'missed' ? 'dashed' : 'solid',
                       }}
                     />
                   )}
-                  <ElementTile element={e} size={88} showNumber={false} color={difficulty === 'learner' ? undefined : 'var(--accent-2)'} />
+                  {/*
+                    Standard and Expert hide the category until the answer is checked; then the answer tiles show their printed colour.
+                    The ones that are not in the object step back to plain ink, with their text still at full contrast.
+                  */}
+                  <ElementTile element={e} size={TILE} showNumber={false} color={state === 'dim' ? 'var(--ink-3)' : checked || difficulty === 'learner' ? undefined : 'var(--ink-2)'} />
                   {checked && (right || on) && (
-                    <span className={`absolute -right-1.5 -top-1.5 grid h-6 w-6 place-items-center rounded-full border-2 border-bg ${right ? 'bg-good' : 'bg-bad'} text-bg`}>{right ? <Check size={13} strokeWidth={3} /> : <X size={13} strokeWidth={3} />}</span>
+                    <span aria-hidden className={`absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full border-2 border-bg text-bg ${right ? 'bg-good' : 'bg-bad'}`}>
+                      {right ? <Check size={14} strokeWidth={2.5} /> : <X size={14} strokeWidth={2.5} />}
+                    </span>
                   )}
-                </motion.button>
+                </button>
               );
             })}
           </div>
 
-          <div className="mt-6 min-h-24" aria-live="polite">
+          <div className="mt-8 min-h-24" aria-live="polite">
             {checked ? (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-line bg-surface p-4">
-                <div className="mb-2 text-sm font-semibold" style={{ color: perfect[index] ? 'var(--good)' : hits > 0 ? 'var(--gold)' : 'var(--bad)' }}>
-                  {verdict}
-                </div>
-                <ul className="space-y-2">
+              <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={tween(DUR.menu)} className="card p-5" aria-label="What is inside">
+                <p className="text-[15px] font-medium" style={{ color: verdict.color }}>
+                  {verdict.text}
+                </p>
+                <ul className="mt-4 space-y-4">
                   {q.thing.contains.map(([s, why]) => {
                     const e = el(s);
                     return (
-                      <li key={s} className="flex items-start gap-3 text-sm">
-                        <button onClick={() => openDetail(e.number)} className="cat-chip shrink-0 rounded-md px-1.5 py-0.5 text-xs font-bold transition-transform hover:scale-110" style={{ '--c': catVar(e.category) } as CSSProperties} aria-label={`Open ${e.name}`}>
-                          {e.symbol}
+                      <li key={s} className="flex items-start gap-3">
+                        <button onClick={() => openDetail(e.number)} className="group shrink-0 rounded-control" aria-label={`Open ${e.name}`}>
+                          <ElementChip element={e} size={44} className="border border-transparent transition-colors duration-150 ease-out group-hover:border-ink-3" />
                         </button>
-                        <span className="text-ink-2">
-                          <b className="text-ink">{e.name}.</b> {why}
-                        </span>
+                        <div className="min-w-0">
+                          <p className="text-[15px] font-medium text-ink">{e.name}</p>
+                          <p className="text-sm text-ink-2">{why}</p>
+                        </div>
                       </li>
                     );
                   })}
                 </ul>
-              </motion.div>
+              </motion.section>
             ) : (
-              <p className="text-center text-sm text-ink-3">
-                {picked.size}/{need} picked
+              <p className="meta text-center">
+                {picked.size} of {need} picked
               </p>
             )}
           </div>
 
           <div className="mt-4">
             {checked ? (
-              <button onClick={next} className="btn-primary flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base">
-                {index + 1 < questions.length ? 'Next object' : 'See results'} <ArrowRight size={18} />
+              <button onClick={next} className="btn btn-lg btn-primary w-full">
+                {index + 1 < questions.length ? 'Next object' : 'See results'} <ArrowRight size={18} strokeWidth={1.5} />
               </button>
             ) : (
-              <button onClick={check} disabled={picked.size !== need} className="btn-primary flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base disabled:opacity-40 disabled:shadow-none">
+              <button onClick={check} disabled={picked.size !== need} className="btn btn-lg btn-primary w-full">
                 Check
               </button>
             )}
@@ -206,7 +225,7 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
         </motion.main>
       </AnimatePresence>
 
-      {result && <Results summary={result.summary} outcome={result.outcome} title="In Real Life" total={LIFE_LENGTH} onReplay={onReplay} onExit={() => go('/')} exitLabel="Home" />}
+      {result && <Results summary={result.summary} outcome={result.outcome} title="In real life" total={LIFE_LENGTH} onReplay={onReplay} onExit={() => go('/')} exitLabel="Home" />}
     </div>
   );
 }

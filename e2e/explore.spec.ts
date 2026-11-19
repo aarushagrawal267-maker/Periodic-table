@@ -2,7 +2,7 @@ import { expect, test } from './support';
 
 test('explore: search for gold opens its detail dialog, Escape closes it', async ({ page }) => {
   await page.goto('./#/explore');
-  await expect(page.getByRole('heading', { level: 1, name: 'The living table' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'The periodic table' })).toBeVisible();
 
   const search = page.getByRole('textbox', { name: 'Search elements' });
   await search.fill('gold');

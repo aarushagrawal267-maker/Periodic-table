@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ElementTile } from '../components/ElementTile';
+import { DUR, rise, tween } from '../components/motion';
 import { Results } from '../components/Results';
 import { Elapsed } from '../components/Stats';
 import { byNumber, catVar } from '../lib/elements';
@@ -59,14 +60,14 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
       });
       sfx.hit(f.size - 1);
       haptic(12);
-      setAnnounce(`Match! ${byNumber(a.element).name} is ${byNumber(a.element).symbol}.`);
+      setAnnounce(`Pair found: ${byNumber(a.element).name} is ${byNumber(a.element).symbol}`);
       if (f.size === pairs.length) setEndedAt(Date.now());
     } else {
       busy.current = true;
       setStreak(0);
       setSlipped((s) => new Set(s).add(a.element).add(b.element));
       sfx.miss();
-      setAnnounce(`No match: ${byNumber(a.element).name} and ${byNumber(b.element).name}.`);
+      setAnnounce(`No match: ${byNumber(a.element).name} and ${byNumber(b.element).name}`);
       setTimeout(() => {
         setOpen([]);
         busy.current = false;
@@ -102,91 +103,87 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
   }, [endedAt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-4 pb-8 pt-4 sm:px-5">
-      <header className="flex items-center gap-3">
-        <button onClick={() => go('/play')} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave">
-          <ArrowLeft size={18} />
+    <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-4 pb-8 pt-2 sm:px-6">
+      <header className="flex min-h-14 items-center gap-3 py-1">
+        <button onClick={() => go('/play')} className="icon-btn -ml-2" aria-label="Leave">
+          <ArrowLeft size={18} strokeWidth={1.5} />
         </button>
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-lg font-semibold">Match Pairs</h1>
-          <p className="text-xs text-ink-3">Pair each symbol with its name</p>
+          <h1 className="truncate text-base font-medium leading-6">Match pairs</h1>
+          <p className="text-balance text-[13px] leading-5 text-ink-3">Pair each symbol with its name</p>
         </div>
-        <div className="flex gap-4 text-right">
+        <dl className="flex gap-5 text-right">
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Pairs</div>
-            <div className="font-display font-semibold tabular-nums">
+            <dt className="text-xs leading-4 text-ink-3">Pairs</dt>
+            <dd className="num text-[17px] font-medium leading-6">
               {found.size}/{pairs.length}
-            </div>
+            </dd>
           </div>
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Moves</div>
-            <div className="font-display font-semibold tabular-nums">{moves}</div>
+            <dt className="text-xs leading-4 text-ink-3">Moves</dt>
+            <dd className="num text-[17px] font-medium leading-6">{moves}</dd>
           </div>
           <div className="hidden sm:block">
-            <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Time</div>
-            <div className="font-display font-semibold">
+            <dt className="text-xs leading-4 text-ink-3">Time</dt>
+            <dd className="num text-[17px] font-medium leading-6">
               <Elapsed start={startedAt} end={endedAt} running={!!startedAt && !endedAt} />
-            </div>
+            </dd>
           </div>
-        </div>
+        </dl>
       </header>
 
-      <main className="flex flex-1 flex-col justify-center py-6">
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4" role="group" aria-label={`${MATCH_PAIRS * 2} cards`}>
+      <main className="flex flex-1 flex-col justify-center py-8">
+        <motion.div {...rise} className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4" role="group" aria-label={`${MATCH_PAIRS * 2} cards`}>
           {deck.map((card, i) => {
             const e = byNumber(card.element);
             const isFound = found.has(card.element);
             const faceUp = isFound || open.includes(card.id);
             const c = catVar(e.category);
             return (
-              <motion.button
+              <button
                 key={card.id}
                 onClick={() => flip(card.id)}
-                className="group relative aspect-[4/5] w-full rounded-2xl"
+                className="group relative aspect-[4/5] w-full rounded-card transition-transform duration-150 ease-out active:scale-[0.98]"
                 style={{ perspective: 800 } as CSSProperties}
-                initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: i * 0.03, type: 'spring', damping: 18 }}
                 aria-label={faceUp ? `${card.face === 'symbol' ? e.symbol : e.name}${isFound ? ', matched' : ''}` : `Card ${i + 1}, face down`}
                 // aria-disabled, not disabled, so a card matched from the keyboard keeps focus (WCAG 2.4.3). flip() ignores it.
                 aria-disabled={isFound || undefined}
               >
-                <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{ rotateY: faceUp ? 180 : 0 }} transition={{ type: 'spring', damping: 18, stiffness: 220 }}>
-                  <div className="absolute inset-0 grid place-items-center overflow-hidden rounded-2xl border border-line shadow-[inset_0_1px_0_rgb(255_255_255/0.08)] transition-[border-color,filter] duration-200 [backface-visibility:hidden] group-hover:border-line-strong group-hover:brightness-110" style={{ background: 'linear-gradient(145deg, color-mix(in oklab, var(--accent) 22%, var(--surface-solid)), color-mix(in oklab, var(--accent-2) 14%, var(--surface-solid)))' }}>
-                    <div aria-hidden className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(color-mix(in oklab, var(--ink) 22%, transparent) 1px, transparent 1.5px)', backgroundSize: '12px 12px', maskImage: 'radial-gradient(circle at 50% 50%, transparent 28%, black 75%)' }} />
-                    <div aria-hidden className="absolute inset-2 rounded-xl border border-dashed border-line-strong" />
-                    <span className="font-display text-grad relative grid h-11 w-11 place-items-center rounded-full border border-line-strong bg-bg/40 text-xl font-bold transition-transform duration-300 group-hover:scale-110">?</span>
+                <motion.div className="relative h-full w-full [transform-style:preserve-3d]" initial={false} animate={{ rotateY: faceUp ? 180 : 0 }} transition={tween(DUR.enter)}>
+                  {/* Back: a plain raised card with one hairline and an empty place from the table, so it never reads as a symbol. */}
+                  <div className="absolute inset-0 grid place-items-center rounded-card border border-line bg-surface-2 transition-colors duration-150 ease-out light:bg-surface light:shadow-[var(--shadow-sm)] [backface-visibility:hidden] group-hover:border-line-strong">
+                    <span aria-hidden className="slot h-7 w-7 rounded-tag" />
                   </div>
+                  {/* Face: the brighter card stock (raised on dark, white on light); a found pair takes its element's printed colour. */}
                   <div
-                    className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border p-2 text-center [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                    className="absolute inset-0 flex flex-col items-center justify-center rounded-card border bg-surface-2 p-3 text-center light:bg-surface [backface-visibility:hidden] [transform:rotateY(180deg)]"
                     style={{
-                      background: isFound ? `color-mix(in oklab, ${c} 18%, var(--surface-solid))` : 'var(--surface-solid)',
-                      borderColor: isFound ? c : 'var(--line-strong)',
-                      boxShadow: isFound ? `0 10px 30px -12px ${c}` : undefined,
+                      background: isFound ? `color-mix(in oklab, ${c} var(--tile-tint), var(--surface))` : undefined,
+                      borderColor: isFound ? `color-mix(in oklab, ${c} var(--tile-edge), transparent)` : 'var(--line-strong)',
                     }}
                   >
                     {card.face === 'symbol' ? (
                       <div className="aspect-square w-3/4">
-                        <ElementTile element={e} size={72} showName={false} quietNumber showNumber={difficulty === 'learner'} color={isFound || difficulty === 'learner' ? undefined : 'var(--accent-2)'} />
+                        <ElementTile element={e} size={72} showName={false} quietNumber showNumber={difficulty === 'learner'} color={isFound || difficulty === 'learner' ? undefined : 'var(--ink-2)'} />
                       </div>
                     ) : (
-                      <span className={`font-display text-base font-semibold leading-tight sm:text-lg ${isFound ? 'cat-ink' : ''}`} style={{ '--c': c } as CSSProperties}>
+                      <span className={`text-base font-medium leading-tight sm:text-lg ${isFound ? 'cat-ink' : 'text-ink'}`} style={{ '--c': c } as CSSProperties}>
                         {e.name}
                       </span>
                     )}
                   </div>
                 </motion.div>
-              </motion.button>
+              </button>
             );
           })}
-        </div>
-        <p className="mt-6 text-center text-sm text-ink-3">{streak >= 2 ? `🔥 ${streak} in a row!` : 'Flip two cards. Find the symbol that goes with each name.'}</p>
+        </motion.div>
+        <p className={`mt-6 text-center text-sm ${streak >= 2 ? 'num text-ink-2' : 'text-ink-3'}`}>{streak >= 2 ? `${streak} in a row` : 'Flip two cards. Find the symbol that goes with each name.'}</p>
       </main>
       <div className="sr-only" aria-live="polite">
         {announce}
       </div>
 
-      {result && <Results summary={result.summary} outcome={result.outcome} title="Match Pairs" total={pairs.length} onReplay={onReplay} onExit={() => go('/')} exitLabel="Home" />}
+      {result && <Results summary={result.summary} outcome={result.outcome} title="Match pairs" total={pairs.length} onReplay={onReplay} onExit={() => go('/')} exitLabel="Home" />}
     </div>
   );
 }

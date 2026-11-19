@@ -1,7 +1,6 @@
-import { motion } from 'motion/react';
 import { Search, X } from 'lucide-react';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { ElementTile } from '../components/ElementTile';
+import { ElementTile, tileRadius } from '../components/ElementTile';
 import { PeriodicGrid } from '../components/PeriodicGrid';
 import { useGridRoving } from '../components/useGridRoving';
 import { CATEGORIES, ELEMENTS, bySymbol, catVar, categoryLabel, formatNumber, type Category, type Element } from '../lib/elements';
@@ -21,10 +20,10 @@ type Lens = {
 };
 
 const LENSES: Lens[] = [
-  { id: 'category', label: 'Category', describe: 'Ten families of elements that share behaviour.' },
-  { id: 'state', label: 'State', describe: 'Solid, liquid or gas at room temperature (20 °C).' },
+  { id: 'category', label: 'Category', describe: 'Ten families of elements that share behaviour' },
+  { id: 'state', label: 'State', describe: 'Solid, liquid or gas at room temperature (20 °C)' },
   { id: 'en', label: 'Electronegativity', value: (e) => e.electronegativity, unit: 'Pauling', lo: 'Gives electrons', hi: 'Grabs electrons', describe: 'How strongly an atom pulls shared electrons. Rises up and to the right.' },
-  { id: 'radius', label: 'Atomic radius', value: (e) => e.radius, unit: 'pm', lo: 'Small', hi: 'Large', describe: 'Atoms grow down a group and shrink across a period.' },
+  { id: 'radius', label: 'Atomic radius', value: (e) => e.radius, unit: 'pm', lo: 'Small', hi: 'Large', describe: 'Atoms grow down a group and shrink across a period' },
   { id: 'ie', label: 'Ionization energy', value: (e) => e.ionization, unit: 'eV', lo: 'Easy to ionize', hi: 'Hard to ionize', describe: 'Energy needed to remove one electron. Noble gases hold on hardest.' },
   { id: 'density', label: 'Density', value: (e) => e.density, log: true, unit: 'g/cm³', lo: 'Light', hi: 'Dense', describe: 'Mass per volume, on a log scale. Osmium and iridium top the chart.' },
   { id: 'melt', label: 'Melting point', value: (e) => e.melt, unit: 'K', lo: 'Cold', hi: 'Hot', describe: 'Temperature at which the solid melts. Look at the middle of the d-block.' },
@@ -36,6 +35,19 @@ const LENSES: Lens[] = [
 const US_NAMES: Record<number, string> = { 13: 'aluminum', 55: 'cesium' };
 
 const STATE_COLORS: Record<string, string> = { Solid: 'var(--cat-transition-metal)', Liquid: 'var(--cat-nonmetal)', Gas: 'var(--cat-noble-gas)' };
+
+/** Property lenses run from a cool blue to a warm orange, mixed in oklab so the middle stays neutral instead of swinging through magenta. */
+const heat = (t: number) => `color-mix(in oklab, var(--heat-hi) ${Math.round(t * 100)}%, var(--heat-lo))`;
+/** Mastery is progress, so it is drawn in the accent: one step of strength per level. */
+const masteryColor = (s: number) => `color-mix(in oklab, var(--accent) ${25 * s}%, var(--ink-3))`;
+const KEY_STEPS = [0, 0.25, 0.5, 0.75, 1];
+
+/** A lens value as text. Years are exact (never rounded to three figures), and ancient elements say so. */
+const valueText = (lens: Lens, e: Element) => {
+  const v = lens.value?.(e) ?? null;
+  if (lens.id === 'year') return e.ancient ? 'Ancient' : v === null ? '—' : String(v);
+  return formatNumber(v);
+};
 
 export function Explore({ symbol }: { symbol?: string }) {
   const [lens, setLens] = useState('category');
@@ -84,64 +96,64 @@ export function Explore({ symbol }: { symbol?: string }) {
     if (lens === 'state') return STATE_COLORS[e.state] ?? null;
     if (lens === 'mastery') {
       const s = mastery[e.number]?.s ?? 0;
-      return s === 0 ? null : `color-mix(in oklab, var(--accent-3) ${20 + s * 16}%, var(--accent))`;
+      return s === 0 ? null : masteryColor(s);
     }
     const v = L.value!(e);
     if (v === null) return null;
-    const t = scale!.t(v);
-    return `color-mix(in oklch, var(--heat-hi) ${Math.round(t * 100)}%, var(--heat-lo))`;
+    return heat(scale!.t(v));
   };
 
   const dim = (e: Element) => (matches ? !matches.has(e.number) : hoverCat ? e.category !== hoverCat : false);
   const preview = hovered ?? (matches && matches.size === 1 ? ELEMENTS[[...matches][0] - 1] : null);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-3 pb-16 pt-8 sm:px-6 sm:pt-10" style={{ '--heat-lo': '#3b4cc0', '--heat-hi': '#ff6b4a' } as CSSProperties}>
-      <div className="flex flex-col gap-5 px-1 lg:flex-row lg:items-end lg:justify-between">
+    <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12" style={{ '--heat-lo': '#3b4cc0', '--heat-hi': '#ff6b4a' } as CSSProperties}>
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-semibold text-accent-2">Explore</p>
-          <h1 className="font-display mt-1 text-4xl font-semibold sm:text-5xl">The living table</h1>
-          <p className="mt-2 max-w-xl text-ink-2">Switch lenses to see the patterns chemists see. Tap any element for its full story.</p>
+          <p className="label">Explore</p>
+          <h1 className="t-title mt-1">The periodic table</h1>
+          <p className="mt-2 max-w-xl text-ink-2">Colour the table by a property to see the patterns chemists see. Select any element to open its card.</p>
         </div>
         <label className="relative block w-full lg:w-80">
-          <Search size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-3" />
+          <Search size={16} strokeWidth={1.5} aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-3" />
           <input
             value={query}
             onChange={(ev) => setQuery(ev.target.value)}
             onKeyDown={(ev) => {
               if (ev.key === 'Enter' && matches?.size) openDetail([...matches][0]);
             }}
-            placeholder="Search name, symbol, number…"
+            placeholder="Search elements"
             aria-label="Search elements"
-            className="h-12 w-full rounded-2xl border border-line bg-surface pl-11 pr-10 text-[15px] outline-none transition-colors placeholder:text-ink-3 focus:border-accent-2"
+            className="field pl-9 pr-11"
           />
           {query && (
-            <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full hover:bg-surface-2" aria-label="Clear search">
-              <X size={15} />
+            <button onClick={() => setQuery('')} className="icon-btn absolute right-0 top-1/2 -translate-y-1/2 md:right-1" aria-label="Clear search">
+              <X size={16} strokeWidth={1.5} />
             </button>
           )}
         </label>
       </div>
 
-      {/* py-1 leaves room for the focus ring, which the horizontal scroller would otherwise clip. */}
-      <div className="no-scrollbar -mx-3 mt-5 flex gap-2 overflow-x-auto px-4 py-1 sm:mx-0 sm:flex-wrap sm:px-1" role="tablist" aria-label="Colour the table by">
-        {LENSES.map((l) => (
-          <button key={l.id} role="tab" aria-selected={lens === l.id} onClick={() => setLens(l.id)} className={`relative shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${lens === l.id ? 'text-bg' : 'border border-line bg-surface text-ink-2 hover:text-ink'}`}>
-            {lens === l.id && <motion.span layoutId="lens-pill" className="absolute inset-0 rounded-full bg-ink" transition={{ type: 'spring', damping: 30, stiffness: 400 }} />}
-            <span className="relative">{l.label}</span>
-          </button>
-        ))}
+      {/* Lenses: one quiet segmented control. On phones it scrolls sideways; py-1 leaves room for the focus ring. */}
+      <div className="no-scrollbar -mx-4 mt-6 overflow-x-auto px-4 py-1 sm:-mx-6 sm:px-6">
+        <div className="seg" role="tablist" aria-label="Colour the table by">
+          {LENSES.map((l) => (
+            <button key={l.id} role="tab" aria-selected={lens === l.id} onClick={() => setLens(l.id)} className="seg-item shrink-0 whitespace-nowrap">
+              {l.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* PeriodicGrid shows its own "Swipe for more" cue when the table is wider than the screen. */}
       {/* One Tab stop for the whole table; arrow keys move between elements. */}
-      <div className="relative mt-5 md:mt-6" data-roving role="group" aria-label="Periodic table. Use the arrow keys to move between elements.">
+      <div className="relative mt-6" data-roving role="group" aria-label="Periodic table. Use the arrow keys to move between elements.">
         <PeriodicGrid
           minCell={38}
           maxCell={74}
           gap={4}
           showAxes
-          className="pb-3 pt-1"
+          className="pb-4 pt-1"
           renderCell={(e, rect) => {
             const c = colorFor(e);
             const d = dim(e);
@@ -155,12 +167,19 @@ export function Explore({ symbol }: { symbol?: string }) {
                   setHovered(e);
                   roving.setActive(e.number);
                 }}
-                className="block h-full w-full transition-[transform,opacity,filter] duration-200 hover:z-10 hover:scale-[1.18] focus-visible:z-10 focus-visible:scale-110"
+                className="group block h-full w-full transition-opacity duration-200 ease-out focus-visible:z-10"
                 // Heat-map colours start at a deep blue, so tile text leans further towards --ink there.
-                style={{ opacity: d ? 0.14 : 1, filter: d ? 'grayscale(1)' : undefined, ...(L.value ? { '--cell-ink-mix': 'var(--heat-ink-mix)' } : {}) } as CSSProperties}
-                aria-label={`${e.symbol}, ${e.name}, ${e.number}${L.value ? `, ${L.label} ${formatNumber(L.value(e))}` : ''}`}
+                style={{ borderRadius: tileRadius(rect.size), opacity: d ? 0.14 : 1, filter: d ? 'grayscale(1)' : undefined, ...(L.value ? { '--cell-ink-mix': 'var(--heat-ink-mix)' } : {}) } as CSSProperties}
+                aria-label={`${e.symbol}, ${e.name}, ${e.number}${L.value ? `, ${L.label} ${valueText(L, e)}` : ''}`}
               >
-                <ElementTile element={e} size={rect.size} quietNumber color={c ?? 'var(--ink-3)'} style={c ? undefined : { borderStyle: 'dashed' }} />
+                <ElementTile
+                  element={e}
+                  size={rect.size}
+                  quietNumber
+                  color={c ?? 'var(--ink-3)'}
+                  className="transition-colors duration-150 ease-out group-hover:border-ink-2!"
+                  style={c ? undefined : { borderStyle: 'dashed' }}
+                />
               </button>
             );
           }}
@@ -174,70 +193,100 @@ export function Explore({ symbol }: { symbol?: string }) {
         />
       </div>
 
-      <div className="mt-4 px-1">
+      {/* The key, printed under the table like a wall chart's legend. */}
+      <div className="mt-4">
         {lens === 'category' ? (
-          <ul className="flex flex-wrap gap-2" onMouseLeave={() => setHoverCat(null)}>
+          <ul className="-mx-2 grid grid-cols-2 gap-x-4 sm:grid-cols-3 lg:grid-cols-5" aria-label="Categories" onMouseLeave={() => setHoverCat(null)}>
             {CATEGORIES.map((c) => (
               <li key={c.id}>
-                <button onMouseEnter={() => setHoverCat(c.id)} onFocus={() => setHoverCat(c.id)} onBlur={() => setHoverCat(null)} onClick={() => setQuery(c.label)} className="flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-sm transition-colors hover:bg-surface-2">
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: catVar(c.id) }} />
+                <button
+                  onMouseEnter={() => setHoverCat(c.id)}
+                  onFocus={() => setHoverCat(c.id)}
+                  onBlur={() => setHoverCat(null)}
+                  onClick={() => setQuery(c.label)}
+                  className="flex h-11 w-full items-center gap-2 rounded-control px-2 text-left text-sm text-ink-2 transition-colors duration-150 ease-out hover:bg-surface-2 hover:text-ink md:h-9"
+                >
+                  <span className="dot" style={{ '--c': catVar(c.id) } as CSSProperties} />
                   {c.label}
                 </button>
               </li>
             ))}
           </ul>
         ) : lens === 'state' ? (
-          <div className="flex flex-wrap gap-2">
+          <ul className="flex flex-wrap gap-x-6" aria-label="States">
             {Object.entries(STATE_COLORS).map(([k, v]) => (
-              <span key={k} className="flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-sm">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: v }} />
+              <li key={k} className="flex h-9 items-center gap-2 text-sm text-ink-2">
+                <span className="dot" style={{ '--c': v } as CSSProperties} />
                 {k}
-              </span>
+              </li>
             ))}
-          </div>
+          </ul>
         ) : lens === 'mastery' ? (
-          <div className="flex items-center gap-3 text-sm text-ink-2">
-            <span>New</span>
-            <div className="h-2.5 w-48 rounded-full" style={{ background: 'linear-gradient(90deg, var(--line-strong), var(--accent), var(--accent-3))' }} />
-            <span>Mastered</span>
+          <div className="flex min-h-9 flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-2">
+            <span className="flex items-center gap-3">
+              <span>Learning</span>
+              <span className="flex gap-1" aria-hidden>
+                {[1, 2, 3, 4].map((s) => (
+                  <span key={s} className="dot" style={{ '--c': masteryColor(s) } as CSSProperties} />
+                ))}
+              </span>
+              <span>Mastered</span>
+            </span>
+            <NoData label="Not started" />
           </div>
         ) : (
-          <div className="flex flex-wrap items-center gap-3 text-sm text-ink-2">
-            <span>{L.lo}</span>
-            <div className="h-2.5 w-48 rounded-full" style={{ background: 'linear-gradient(90deg, var(--heat-lo), color-mix(in oklch, var(--heat-hi) 50%, var(--heat-lo)), var(--heat-hi))' }} />
-            <span>{L.hi}</span>
-            <span className="text-ink-3">
-              {formatNumber(scale!.min)} – {formatNumber(scale!.max)} {L.unit}
+          <div className="flex min-h-9 flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-2">
+            <span className="flex items-center gap-3">
+              <span>{L.lo}</span>
+              <span className="flex gap-1" aria-hidden>
+                {KEY_STEPS.map((t) => (
+                  <span key={t} className="dot" style={{ '--c': heat(t) } as CSSProperties} />
+                ))}
+              </span>
+              <span>{L.hi}</span>
             </span>
-            <span className="flex items-center gap-1.5 text-ink-3">
-              <span className="h-2.5 w-2.5 rounded-full border border-dashed border-ink-3" /> No data
+            <span className="meta">
+              {L.id === 'year' ? `Ancient to ${scale!.max}` : `${formatNumber(scale!.min)} to ${formatNumber(scale!.max)} ${L.unit}`}
             </span>
+            <NoData label="No data" />
           </div>
         )}
-        <p className="mt-3 text-sm text-ink-3">{L.describe}</p>
+        <p className="mt-3 max-w-2xl text-sm text-ink-3">{L.describe}</p>
       </div>
     </div>
   );
 }
 
-function Preview({ e, lens }: { e: Element; lens: Lens }) {
+function NoData({ label }: { label: string }) {
   return (
-    <div className="glass flex items-center gap-4 rounded-2xl p-3 pr-5" style={{ boxShadow: 'var(--shadow-lg)' }}>
-      <div className="h-16 w-16 shrink-0">
-        <ElementTile element={e} size={64} showName={false} />
+    <span className="flex items-center gap-2 text-ink-3">
+      <span aria-hidden className="h-2 w-2 rounded-full border border-dashed border-ink-3" />
+      {label}
+    </span>
+  );
+}
+
+function Preview({ e, lens }: { e: Element; lens: Lens }) {
+  const v = lens.value?.(e) ?? null;
+  return (
+    <div className="card flex items-center gap-4 p-2 pr-5" style={{ boxShadow: 'var(--shadow-lg)' }}>
+      <div className="h-14 w-14 shrink-0">
+        <ElementTile element={e} size={56} showName={false} />
       </div>
       <div className="min-w-0">
-        <div className="font-display text-lg font-semibold leading-tight">{e.name}</div>
-        <div className="cat-ink text-xs" style={{ '--c': catVar(e.category) } as CSSProperties}>
+        <div className="text-[17px] font-medium leading-6">{e.name}</div>
+        <div className="cat-ink text-[13px] leading-5" style={{ '--c': catVar(e.category) } as CSSProperties}>
           {categoryLabel(e.category)}
         </div>
-        <div className="mt-1 text-xs text-ink-2">
+        <div className="meta mt-1">
           {lens.value ? (
             <>
-              {lens.label}: <b className="text-ink">{lens.id === 'year' && e.ancient ? 'Ancient' : formatNumber(lens.value(e))}</b> {lens.value(e) !== null && lens.id !== 'year' ? lens.unit : ''}
+              {lens.label} <span className="text-ink">{valueText(lens, e)}</span> {v !== null && lens.id !== 'year' ? lens.unit : ''}
             </>
           ) : (
-            <>Mass {formatNumber(e.mass, 5)} u · {e.state}</>
+            <>
+              Mass <span className="text-ink">{formatNumber(e.mass, 5)}</span> u · {e.state}
+            </>
           )}
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { Check, Target } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { DAILY_GOAL_XP, useProgress, xpToday } from '../store/progress';
 import { Ring } from './Stats';
 
@@ -13,15 +13,21 @@ export function goalLabel(xp: number, goal = DAILY_GOAL_XP) {
   return xp >= goal ? `Daily goal reached: ${xp} XP today` : `Daily goal: ${xp} of ${goal} XP`;
 }
 
-/** Compact ring for the header. Purely informative, so it is an image, not a control. */
+/**
+ * Compact ring for the header with its figure beside it ("95/150"), so it never reads as a spinner.
+ * Purely informative, so it is an image, not a control.
+ */
 export function GoalRingBadge() {
   const { xp, goal, value, met } = useDailyGoal();
   const label = goalLabel(xp, goal);
   return (
-    <div role="img" aria-label={label} title={label} className="grid h-10 w-10 shrink-0 place-items-center">
-      <Ring value={met ? 1 : value} size={32} stroke={3} color={met ? 'var(--good)' : undefined}>
-        {met ? <Check size={15} strokeWidth={3} className="text-good" /> : <Target size={14} className={xp ? 'text-ink' : 'text-ink-3'} />}
+    <div role="img" aria-label={label} title={label} className="flex h-11 shrink-0 items-center gap-2 px-1 md:h-9 md:px-2">
+      <Ring value={met ? 1 : value} size={20} stroke={2.5} color={met ? 'var(--good)' : undefined}>
+        {met && <Check size={12} strokeWidth={2.5} className="text-good" />}
       </Ring>
+      <span aria-hidden className="mono text-[13px] text-ink-2">
+        {xp}/{goal}
+      </span>
     </div>
   );
 }

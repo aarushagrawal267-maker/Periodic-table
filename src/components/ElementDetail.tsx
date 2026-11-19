@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ChevronLeft, ChevronRight, Lightbulb } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ELEMENTS, byNumber, catVar, categoryLabel, formatNumber, type Element } from '../lib/elements';
 import { shells } from '../lib/shells';
@@ -7,6 +7,7 @@ import { useProgress } from '../store/progress';
 import { announceAchievements, useUi } from '../store/ui';
 import { Sheet } from './Sheet';
 import { ElementTile } from './ElementTile';
+import { DUR, tween } from './motion';
 
 /**
  * Where focus should land after browsing to another element. The article is keyed by element
@@ -76,7 +77,7 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
     el?.focus({ preventScroll: target !== 'heading' });
   }, []);
   const c = catVar(e.category);
-  const toC = (k: number | null) => (k === null ? null : Math.round(k - 273.15));
+  const toC = (k: number) => `${Math.round(k - 273.15).toLocaleString('en-US')} °C`;
 
   const props: [string, string, string?][] = [
     ['Atomic mass', `${formatNumber(e.mass, 6)}`, 'u'],
@@ -85,8 +86,8 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
     ['Block', `${e.block}-block`],
     ['Electronegativity', formatNumber(e.electronegativity), e.electronegativity !== null ? 'Pauling' : undefined],
     ['Density', formatNumber(e.density), e.density !== null ? 'g/cm³' : undefined],
-    ['Melting point', e.melt === null ? '—' : `${formatNumber(e.melt, 4)} K`, e.melt === null ? undefined : `${toC(e.melt)} °C`],
-    ['Boiling point', e.boil === null ? '—' : `${formatNumber(e.boil, 4)} K`, e.boil === null ? undefined : `${toC(e.boil)} °C`],
+    ['Melting point', e.melt === null ? '—' : `${formatNumber(e.melt, 4)} K`, e.melt === null ? undefined : toC(e.melt)],
+    ['Boiling point', e.boil === null ? '—' : `${formatNumber(e.boil, 4)} K`, e.boil === null ? undefined : toC(e.boil)],
     ['Atomic radius', formatNumber(e.radius), e.radius !== null ? 'pm' : undefined],
     ['Ionization energy', formatNumber(e.ionization), e.ionization !== null ? 'eV' : undefined],
     ['Discovered', e.ancient ? 'Ancient' : (e.year?.toString() ?? '—')],
@@ -95,31 +96,21 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
 
   return (
     <article ref={root} style={{ '--c': c } as CSSProperties}>
-      <header className="relative overflow-hidden px-6 pb-6 pt-8 sm:px-8">
-        <div
-          className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[140%] -translate-x-1/2 rounded-full opacity-40 blur-3xl"
-          style={{ background: `radial-gradient(closest-side, ${c}, transparent)` }}
-        />
-        <div className="relative flex flex-col items-center gap-6 sm:flex-row sm:items-center">
-          <motion.div
-            className="h-32 w-32 shrink-0 sm:h-36 sm:w-36"
-            initial={{ rotateY: -30, scale: 0.85, opacity: 0 }}
-            animate={{ rotateY: 0, scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', damping: 16, stiffness: 180 }}
-            style={{ filter: `drop-shadow(0 18px 40px color-mix(in oklab, ${c} 45%, transparent))` }}
-          >
-            <ElementTile element={e} size={144} showName={false} />
+      <header className="px-6 pb-6 pt-8 sm:px-8 sm:pt-8">
+        <div className="flex items-center gap-5 pr-10 sm:gap-6 sm:pr-0">
+          <motion.div className="h-24 w-24 shrink-0 sm:h-32 sm:w-32" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={tween(DUR.enter)}>
+            <ElementTile element={e} size={128} showName={false} />
           </motion.div>
-          <div className="min-w-0 flex-1 text-center sm:text-left">
-            <span className="cat-chip inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold">
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: c }} />
+          <div className="min-w-0 flex-1">
+            <p className="flex items-center gap-2 text-sm text-ink-2">
+              <span className="dot" aria-hidden />
               {categoryLabel(e.category)}
-            </span>
-            <h2 tabIndex={-1} className="font-display mt-2 text-4xl font-semibold outline-none sm:text-5xl">
+            </p>
+            <h2 tabIndex={-1} className="t-title mt-1 outline-none">
               {e.name}
             </h2>
             <p className="mt-1 text-sm text-ink-2">
-              Element {e.number} · <span className="font-mono tracking-tight">{e.config}</span>
+              Element <span className="num">{e.number}</span> · <span className="mono text-ink">{e.config}</span>
               {e.configPredicted && ' (predicted)'}
             </p>
             <MasteryDots s={m?.s ?? 0} />
@@ -127,22 +118,20 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
         </div>
       </header>
 
-      <div className="grid gap-6 px-6 pb-8 sm:grid-cols-[1fr_200px] sm:px-8">
-        <div className="space-y-5">
-          <p className="text-[15px] leading-relaxed text-ink">{e.summary}</p>
+      <div className="grid gap-8 px-6 pb-8 sm:grid-cols-[1fr_200px] sm:px-8">
+        <div className="space-y-6">
+          <p className="text-base leading-relaxed text-ink">{e.summary}</p>
           {e.fact && (
-            <div className="rounded-2xl border p-4" style={{ borderColor: `color-mix(in oklab, ${c} 30%, transparent)`, background: `color-mix(in oklab, ${c} 7%, transparent)` }}>
-              <div className="cat-ink mb-1.5 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider">
-                <Lightbulb size={14} /> Did you know?
-              </div>
+            <div className="rounded-card bg-surface-2 p-4">
+              <h3 className="label mb-1">Did you know</h3>
               <p className="text-[15px] leading-relaxed">{e.fact}</p>
             </div>
           )}
           <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Where you'll find it</h3>
+            <h3 className="label mb-2">Where you'll find it</h3>
             <ul className="flex flex-wrap gap-2">
               {e.uses.map((u) => (
-                <li key={u} className="rounded-full border border-line bg-surface px-3 py-1.5 text-sm">
+                <li key={u} className="chip text-ink">
                   {u}
                 </li>
               ))}
@@ -154,21 +143,25 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
 
       <dl className="grid grid-cols-2 gap-px border-y border-line bg-line sm:grid-cols-3">
         {props.map(([k, v, unit]) => (
-          <div key={k} className="solid px-5 py-3.5">
-            <dt className="text-[11px] font-medium uppercase tracking-wider text-ink-3">{k}</dt>
-            <dd className="mt-0.5 font-display text-[17px] font-medium tabular-nums">
-              {v} {unit && <span className="text-xs font-normal text-ink-3">{unit}</span>}
+          <div key={k} className="bg-surface px-6 py-3 sm:px-8">
+            <dt className="text-[13px] text-ink-2">{k}</dt>
+            <dd className="num mt-1 text-[17px] font-medium">
+              {v} {unit && <span className="mono text-xs font-normal text-ink-3">{unit}</span>}
             </dd>
           </div>
         ))}
       </dl>
 
-      <nav className="flex items-center justify-between px-4 py-4 sm:px-6" aria-label="Neighbouring elements">
+      <nav className="flex items-center justify-between gap-2 px-4 py-4 sm:px-6" aria-label="Neighbouring elements">
         <NeighbourButton n={e.number === 1 ? 118 : e.number - 1} dir="prev" onClick={(n) => browse(n, 'prev')} />
-        <span className="hidden text-xs text-ink-3 sm:block">Use ← → to browse</span>
+        <span className="hidden items-center gap-1 text-[13px] text-ink-3 sm:flex">
+          <kbd className="kbd">←</kbd>
+          <kbd className="kbd">→</kbd>
+          <span className="ml-1">to browse</span>
+        </span>
         <NeighbourButton n={e.number === 118 ? 1 : e.number + 1} dir="next" onClick={(n) => browse(n, 'next')} />
       </nav>
-      <p className="px-6 pb-6 text-[11px] text-ink-3 sm:px-8">Property data: PubChem (NCBI). Values for superheavy elements are predictions or estimates.</p>
+      <p className="px-6 pb-6 text-xs text-ink-3 sm:px-8">Property data: PubChem (NCBI). Values for superheavy elements are predictions or estimates.</p>
     </article>
   );
 }
@@ -179,16 +172,16 @@ function NeighbourButton({ n, dir, onClick }: { n: number; dir: 'prev' | 'next';
     <button
       onClick={() => onClick(n)}
       data-neighbour={dir}
-      className="btn-ghost flex items-center gap-2 rounded-full py-2 pl-3 pr-4 text-sm"
+      className={`btn btn-secondary min-w-0 ${dir === 'prev' ? 'pl-2' : 'pr-2'}`}
       // Includes the visible symbol and name, so "click Next" and "click Co" both work (WCAG 2.5.3).
       aria-label={`${dir === 'prev' ? 'Previous' : 'Next'}: ${e.symbol}, ${e.name}`}
     >
-      {dir === 'prev' && <ChevronLeft size={16} />}
-      <span className="cat-ink font-display font-semibold" style={{ '--c': catVar(e.category) } as CSSProperties}>
+      {dir === 'prev' && <ChevronLeft size={16} strokeWidth={1.5} className="shrink-0 text-ink-3" />}
+      <span className="cat-ink font-medium" style={{ '--c': catVar(e.category) } as CSSProperties}>
         {e.symbol}
       </span>{' '}
-      <span className="text-ink-2">{e.name}</span>
-      {dir === 'next' && <ChevronRight size={16} />}
+      <span className="truncate text-ink-2">{e.name}</span>
+      {dir === 'next' && <ChevronRight size={16} strokeWidth={1.5} className="shrink-0 text-ink-3" />}
     </button>
   );
 }
@@ -196,54 +189,48 @@ function NeighbourButton({ n, dir, onClick }: { n: number; dir: 'prev' | 'next';
 export function MasteryDots({ s, className = '' }: { s: number; className?: string }) {
   const label = s >= 4 ? 'Mastered' : s === 0 ? 'Not practised yet' : 'Learning';
   return (
-    <div className={`mt-3 flex items-center justify-center gap-2 sm:justify-start ${className}`} aria-label={`Mastery ${s} of 5: ${label}`}>
-      <div className="flex gap-1">
+    <div className={`mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 ${className}`} role="img" aria-label={`Mastery ${s} of 5: ${label}`}>
+      <div className="flex gap-1" aria-hidden>
         {[0, 1, 2, 3, 4].map((i) => (
-          <span key={i} className="h-1.5 w-5 rounded-full transition-colors" style={{ background: i < s ? 'var(--c, var(--accent))' : 'var(--line-strong)' }} />
+          <span key={i} className="h-1 w-4 rounded-full" style={{ background: i < s ? 'var(--c, var(--accent))' : 'var(--line-strong)' }} />
         ))}
       </div>
-      <span className="text-xs text-ink-3">{label}</span>
+      <span className="whitespace-nowrap text-[13px] text-ink-2" aria-hidden>
+        {label}
+      </span>
     </div>
   );
 }
 
-/** Bohr-style shell diagram built from the real electron configuration. */
+/** Bohr-style shell diagram built from the real electron configuration, drawn in ink lines. Static. */
 function AtomModel({ e }: { e: Element }) {
   const sh = shells(e);
   const size = 200;
   const center = size / 2;
-  const step = (size / 2 - 14) / sh.length;
+  const nucleus = 10;
+  const step = (size / 2 - 8 - nucleus) / sh.length;
   return (
-    <figure className="flex flex-col items-center">
-      <svg viewBox={`0 0 ${size} ${size}`} className="w-full max-w-[220px]" role="img" aria-label={`Electron shells: ${sh.join(', ')}`}>
-        <defs>
-          <radialGradient id="nucleus">
-            <stop offset="0" stopColor="white" stopOpacity="0.9" />
-            <stop offset="0.4" stopColor="var(--c)" />
-            <stop offset="1" stopColor="var(--c)" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <circle cx={center} cy={center} r={14} fill="url(#nucleus)" />
+    <figure className="flex flex-col items-center sm:items-stretch">
+      <svg viewBox={`0 0 ${size} ${size}`} className="w-full max-w-[200px]" role="img" aria-label={`Electron shells: ${sh.join(', ')}`}>
+        <circle cx={center} cy={center} r={nucleus} fill="var(--c)" />
         {sh.map((count, i) => {
-          const r = 14 + step * (i + 1) - step / 3;
-          const speed = 10 + i * 6;
+          const r = nucleus + step * (i + 1);
+          // Start each shell at a different angle so the electrons do not all line up on one spoke.
+          const offset = -Math.PI / 2 + i * 0.35;
           return (
             <g key={i}>
-              <circle cx={center} cy={center} r={r} fill="none" stroke="var(--line-strong)" strokeWidth={1} />
-              <g style={{ transformOrigin: `${center}px ${center}px`, animation: `spin ${speed}s linear infinite ${i % 2 ? 'reverse' : ''}` }}>
-                {Array.from({ length: count }, (_, j) => {
-                  const a = (j / count) * Math.PI * 2;
-                  return <circle key={j} cx={center + r * Math.cos(a)} cy={center + r * Math.sin(a)} r={count > 18 ? 1.8 : 2.6} fill="var(--c)" />;
-                })}
-              </g>
+              <circle cx={center} cy={center} r={r} fill="none" stroke="var(--ink-3)" strokeWidth={1} />
+              {Array.from({ length: count }, (_, j) => {
+                const a = offset + (j / count) * Math.PI * 2;
+                return <circle key={j} cx={center + r * Math.cos(a)} cy={center + r * Math.sin(a)} r={count > 18 ? 1.75 : 2.5} fill="var(--ink)" />;
+              })}
             </g>
           );
         })}
       </svg>
-      <figcaption className="mt-2 text-center text-xs text-ink-3">
-        Shells <span className="font-mono text-ink-2">{sh.join(' · ')}</span>
+      <figcaption className="mt-3 text-center text-[13px] text-ink-2">
+        Shells <span className="mono text-ink">{sh.join(' · ')}</span>
       </figcaption>
-      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </figure>
   );
 }

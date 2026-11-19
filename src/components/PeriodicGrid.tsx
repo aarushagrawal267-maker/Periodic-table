@@ -4,6 +4,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { ELEMENTS, F_BLOCK_MARKERS, byNumber, catVar, type Element } from '../lib/elements';
 import { computeLayout } from '../lib/layout';
 import { useSettings } from '../store/settings';
+import { tileRadius } from './ElementTile';
+import { DUR, EASE } from './motion';
 
 export interface CellRect {
   x: number;
@@ -132,20 +134,22 @@ export function PeriodicGrid({
                 return (
                   <div
                     key={m.label}
-                    className="absolute flex items-center justify-center rounded-md border border-dashed text-center font-medium leading-tight"
+                    className="mono absolute flex items-center justify-center whitespace-nowrap border border-dashed text-center leading-tight"
                     style={{
                       left: c.start,
                       top: r.start,
                       width: layout.cell,
                       height: layout.cell,
+                      borderRadius: tileRadius(layout.cell),
                       borderColor: `color-mix(in oklab, ${catVar(m.category)} 50%, transparent)`,
                       // Text needs 4.5:1 in every palette, so lean the category colour towards ink, like tile text.
                       color: `color-mix(in oklab, ${catVar(m.category)} var(--cell-ink-mix), var(--ink))`,
-                      fontSize: Math.max(7, layout.cell * 0.17),
+                      fontSize: Math.max(9, Math.round(layout.cell * 0.16)),
                     }}
                     aria-hidden
                   >
-                    {m.label}
+                    {/* The range is printed only where it fits on one line at 9px or more; otherwise the dashed place stands alone. */}
+                    {layout.cell - 4 >= m.label.length * 0.6 * Math.max(9, Math.round(layout.cell * 0.16)) && m.label}
                   </div>
                 );
               })}
@@ -172,19 +176,16 @@ export function PeriodicGrid({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: reduceMotion ? 0 : 0.25 }}
+            transition={{ duration: reduceMotion ? 0 : DUR.menu, ease: EASE }}
           >
-            <div
-              className="solid flex items-center gap-1 rounded-full border border-line-strong py-1 pl-3 pr-2 text-xs font-semibold text-ink"
-              style={{ boxShadow: '0 8px 24px -10px rgb(0 0 0 / 0.45)' }}
-            >
+            <div className="flex h-8 items-center gap-1 rounded-control border border-line-strong bg-surface pl-3 pr-2 text-[13px] font-medium text-ink" style={{ boxShadow: 'var(--shadow-md)' }}>
               Swipe for more
               <motion.span
-                className="grid place-items-center text-accent-2"
-                animate={reduceMotion ? undefined : { x: [0, 4, 0] }}
-                transition={reduceMotion ? undefined : { duration: 1.1, repeat: 3, repeatDelay: 0.6, ease: 'easeInOut', delay: 0.4 }}
+                className="grid place-items-center text-ink-2"
+                animate={reduceMotion ? undefined : { x: [0, 3, 0] }}
+                transition={reduceMotion ? undefined : { duration: 0.9, repeat: 2, repeatDelay: 0.6, ease: EASE, delay: 0.4 }}
               >
-                <ChevronRight size={14} strokeWidth={2.5} />
+                <ChevronRight size={16} strokeWidth={1.5} />
               </motion.span>
             </div>
           </motion.div>
@@ -196,7 +197,7 @@ export function PeriodicGrid({
 
 function Axes({ layout }: { layout: NonNullable<ReturnType<typeof computeLayout>> }) {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 text-[10px] font-medium text-ink-3 tabular-nums">
+    <div aria-hidden className="mono pointer-events-none absolute inset-0 text-[11px] leading-none text-ink-3">
       {[...layout.cols.values()]
         .filter((c) => c.active)
         .map((c) => {

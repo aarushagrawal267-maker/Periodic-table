@@ -7,6 +7,7 @@ import { Toasts } from './components/Toasts';
 import { CHAPTERS } from './lib/chapters';
 import { REGIONS } from './lib/regions';
 import { useRoute, type Route } from './lib/router';
+import { DUR, EASE } from './components/motion';
 import { Daily } from './screens/Daily';
 import { Explore } from './screens/Explore';
 import { Home } from './screens/Home';
@@ -29,7 +30,7 @@ export function App() {
     root.dataset.theme = light ? 'light' : 'dark';
     root.dataset.colorblind = String(colorblind);
     root.classList.toggle('reduce-motion', reduceMotion);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f5f5fa' : '#07070d');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f8f8f9' : '#131315');
   }, [theme, systemLight, colorblind, reduceMotion]);
 
   const immersive = route.name === 'game' || route.name === 'daily' || route.name === 'quiz' || route.name === 'life' || route.name === 'match' || (route.name === 'learn' && !!route.chapter);
@@ -76,21 +77,20 @@ export function App() {
   }
 
   return (
-    <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
-      <div className="grain relative min-h-dvh">
-        <div className="aurora" aria-hidden />
+    <MotionConfig reducedMotion={reduceMotion ? 'always' : 'user'}>
+      <div className="relative min-h-dvh">
         {/* Moves focus without touching the URL: "#main" would otherwise be read as a route by the hash router. */}
-        <a href="#main" onClick={skipToMain} className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-surface-2 focus:px-4 focus:py-2">
+        <a href="#main" onClick={skipToMain} className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-control focus:bg-surface-2 focus:px-4 focus:py-3 focus:text-ink focus:shadow-[var(--shadow-md)]">
           Skip to content
         </a>
         <Shell immersive={immersive} route={route.name}>
           <AnimatePresence mode="wait">
             <motion.div
               key={key}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              exit={{ opacity: 0, transition: { duration: DUR.menu, ease: EASE } }}
+              transition={{ duration: DUR.enter, ease: EASE }}
             >
               {screen}
               <RouteFocus />
@@ -129,15 +129,15 @@ function titleFor(route: Route) {
   const t = (name: string) => `${name} · ${SITE}`;
   switch (route.name) {
     case 'home':
-      return `${SITE} — Master the Periodic Table`;
+      return `${SITE} · Learn the periodic table`;
     case 'play':
       return t('Play');
     case 'game':
       return t(REGIONS.find((r) => r.id === route.region)?.name ?? 'Play');
     case 'daily':
-      return t('Daily Challenge');
+      return t('Daily challenge');
     case 'quiz':
-      return t('Quick Quiz');
+      return t('Quick quiz');
     case 'explore':
       return t('Explore');
     case 'progress':
@@ -149,9 +149,9 @@ function titleFor(route: Route) {
       return t(i >= 0 ? `Chapter ${i + 1}: ${CHAPTERS[i].title}` : 'Learn');
     }
     case 'life':
-      return t('In Real Life');
+      return t('In real life');
     case 'match':
-      return t('Match Pairs');
+      return t('Match pairs');
   }
 }
 

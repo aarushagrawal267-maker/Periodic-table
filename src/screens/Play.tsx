@@ -1,10 +1,9 @@
-import { motion } from 'motion/react';
-import { ArrowRight, BrainCircuit, Star } from 'lucide-react';
-import { useMemo, useState, type CSSProperties } from 'react';
+import { ArrowRight, ChevronRight, Star } from 'lucide-react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { DifficultyPicker } from '../components/DifficultyPicker';
-import { ElementTile } from '../components/ElementTile';
+import { ElementChip, tileRadius } from '../components/ElementTile';
 import { MiniTable } from '../components/MiniTable';
-import { bySymbol, catVar } from '../lib/elements';
+import { bySymbol } from '../lib/elements';
 import { REGIONS, regionById, type Region } from '../lib/regions';
 import { go } from '../lib/router';
 import { useProgress } from '../store/progress';
@@ -12,175 +11,168 @@ import { DIFFICULTIES, useSettings } from '../store/settings';
 import { Game } from './Game';
 import { Home } from './Home';
 
-/** Decorative art for the mode cards: real objects with the element that makes them work. */
-const LIFE_ART: [string, string][] = [
-  ['📱', 'Li'],
-  ['🎆', 'Sr'],
-  ['🍌', 'K'],
-  ['🦴', 'Ca'],
-];
-const QUIZ_ART = ['Au', 'Ne', 'Fe'];
-const MATCH_ART = ['Fe', '?', 'Iron', '?'];
+const el = (sym: string) => bySymbol.get(sym.toLowerCase())!;
+
+/** A one-sentence caption ends without a period; longer copy keeps its punctuation. */
+const caption = (s: string) => (/\.\s/.test(s) ? s : s.replace(/\.$/, ''));
 
 export function PlayHub() {
+  const regions = REGIONS.filter((r) => r.id !== 'full');
+  const full = regionById('full');
   return (
     <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12">
-      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-semibold text-accent-2">Place mode</p>
-          <h1 className="font-display mt-1 text-4xl font-semibold sm:text-5xl">Choose a region</h1>
-          <p className="mt-2 max-w-xl text-ink-2">Each region is a self-contained puzzle. Clear it, then raise the difficulty — or take on all 118 at once.</p>
+          <p className="label">Place mode</p>
+          <h1 className="t-title mt-2">Choose a region</h1>
+          <p className="mt-3 max-w-xl text-ink-2">Each region is one puzzle. Clear it, then raise the difficulty, or take on all 118 at once.</p>
         </div>
         <DifficultyPicker />
-      </div>
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {REGIONS.map((r, i) => (
-          <RegionCard key={r.id} region={r} index={i} wide={i === REGIONS.length - 1 && REGIONS.length % 3 === 1} />
+      </header>
+
+      <div className="mt-8 grid gap-3 lg:grid-cols-2">
+        {regions.map((r) => (
+          <RegionRow key={r.id} region={r} />
         ))}
       </div>
+      {full && <FullTableCard region={full} />}
 
-      <div className="mt-16 flex items-end justify-between gap-4">
+      <section className="mt-16 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8" aria-labelledby="more-ways">
         <div>
-          <h2 className="font-display text-2xl font-semibold sm:text-3xl">More ways to play</h2>
-          <p className="mt-1 text-ink-2">Quick rounds for when you have five minutes.</p>
+          <h2 id="more-ways" className="t-heading">
+            More ways to play
+          </h2>
+          <p className="mt-1 text-sm text-ink-2">Quick rounds for when you have five minutes</p>
         </div>
-      </div>
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        <motion.a
-          href="#/match"
-          className="card card-hover group relative flex flex-col overflow-hidden p-6"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: REGIONS.length * 0.04 }}
-        >
-          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl transition-opacity group-hover:opacity-40" style={{ background: 'var(--accent-2)' }} />
-          <div className="relative grid aspect-[207/107] w-full grid-cols-4 items-center gap-2.5" aria-hidden>
-            {MATCH_ART.map((face, i) => {
-              const up = face !== '?';
-              const e = bySymbol.get('fe')!;
-              return (
-                <div
-                  key={i}
-                  className={`font-display grid aspect-[4/5] place-items-center rounded-2xl border text-center font-bold transition-transform duration-500 ${up ? 'tile' : 'border-line text-ink-3'} ${i % 2 ? 'group-hover:-translate-y-1' : 'group-hover:translate-y-1'}`}
-                  style={up ? ({ '--c': catVar(e.category) } as CSSProperties) : { background: 'repeating-linear-gradient(135deg, var(--surface-2) 0 6px, var(--surface) 6px 12px)' }}
-                >
-                  <span className={face.length > 2 ? 'text-xs sm:text-sm' : 'text-2xl'}>{face}</span>
-                </div>
-              );
-            })}
-          </div>
-          <div className="relative mt-5 flex flex-1 flex-col">
-            <h2 className="font-display text-xl font-semibold">Match Pairs</h2>
-            <p className="mt-1 text-sm text-ink-2">A relaxed memory game: flip cards and pair each symbol with its name.</p>
-            <span className="mt-auto inline-flex items-center gap-1 border-t border-line pt-4 text-sm font-semibold text-accent-2">
-              Play <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
-            </span>
-          </div>
-        </motion.a>
-        <motion.a
-          href="#/life"
-          className="card card-hover group relative flex flex-col overflow-hidden p-6"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: REGIONS.length * 0.04 }}
-        >
-          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl transition-opacity group-hover:opacity-40" style={{ background: 'var(--accent-3)' }} />
-          <div className="relative grid aspect-[207/107] w-full grid-cols-4 items-center gap-3" aria-hidden>
-            {LIFE_ART.map(([emoji, sym], i) => {
-              const e = bySymbol.get(sym.toLowerCase())!;
-              return (
-                <div key={sym} className="relative grid aspect-square place-items-center rounded-2xl border border-line text-3xl transition-transform duration-500 group-hover:-translate-y-1 sm:text-4xl" style={{ background: 'radial-gradient(circle at 30% 20%, var(--surface-2), var(--surface))', rotate: `${(i - 1.5) * 4}deg`, transitionDelay: `${i * 40}ms` }}>
-                  {emoji}
-                  <span className="cat-chip absolute -bottom-2 -right-1.5 rounded-md px-1.5 py-0.5 text-[11px] font-bold shadow-sm" style={{ '--c': catVar(e.category) } as CSSProperties}>
-                    {e.symbol}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          <div className="relative mt-5 flex flex-1 flex-col">
-            <h2 className="font-display text-xl font-semibold">In Real Life</h2>
-            <p className="mt-1 text-sm text-ink-2">Spot the elements inside phones, fireworks, bananas and your own bones.</p>
-            <span className="mt-auto inline-flex items-center gap-1 border-t border-line pt-4 text-sm font-semibold text-accent-3">
-              Play <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
-            </span>
-          </div>
-        </motion.a>
-        <motion.a
-          href="#/quiz"
-          className="card card-hover group relative flex flex-col overflow-hidden p-6"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: REGIONS.length * 0.04 }}
-        >
-          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl transition-opacity group-hover:opacity-40" style={{ background: 'var(--accent)' }} />
-          <div className="relative flex aspect-[207/107] w-full items-center justify-center" aria-hidden>
-            {QUIZ_ART.map((sym, i) => (
-              <div key={sym} className="-mx-2 h-[72px] w-[72px] transition-transform duration-500 sm:h-20 sm:w-20" style={{ transform: `rotate(${(i - 1) * 10}deg) translateY(${i === 1 ? -6 : 4}px)`, zIndex: i === 1 ? 0 : 1 }}>
-                <ElementTile element={bySymbol.get(sym.toLowerCase())!} size={80} showName={false} />
-              </div>
-            ))}
-            <div className="tile font-display absolute grid h-[76px] w-[76px] place-items-center rounded-[18px] text-4xl font-bold shadow-xl transition-transform duration-500 group-hover:-translate-y-1 group-hover:rotate-6 sm:h-[84px] sm:w-[84px]" style={{ '--c': 'var(--accent)', zIndex: 2 } as CSSProperties}>
-              ?
-            </div>
-          </div>
-          <div className="relative mt-5 flex flex-1 flex-col">
-            <div className="flex items-center gap-2">
-              <BrainCircuit size={18} className="text-accent" />
-              <h2 className="font-display text-xl font-semibold">Quick Quiz</h2>
-            </div>
-            <p className="mt-1 text-sm text-ink-2">Ten rapid questions, tuned to the elements you find hardest.</p>
-            <span className="mt-auto inline-flex items-center gap-1 border-t border-line pt-4 text-sm font-semibold text-accent">
-              Start quiz <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
-            </span>
-          </div>
-        </motion.a>
-      </div>
+        <div className="grid gap-3">
+          <ModeRow href="#/match" title="Match pairs" text="A relaxed memory game: flip cards and pair each symbol with its name" art={<MatchArt />} />
+          <ModeRow href="#/life" title="In real life" text="Spot the elements inside phones, fireworks, bananas and your own bones" art={<LifeArt />} />
+          <ModeRow href="#/quiz" title="Quick quiz" text="Ten questions, with extra practice on the elements you find hardest" art={<QuizArt />} />
+        </div>
+      </section>
     </div>
   );
 }
 
-function RegionCard({ region: r, index, wide = false }: { region: Region; index: number; wide?: boolean }) {
+/** Progress on a region at the current difficulty: best stars, best score, mastered and cleared counts. */
+function useRegionProgress(r: Region) {
   const difficulty = useSettings((s) => s.difficulty);
   const best = useProgress((s) => s.best);
   const mastery = useProgress((s) => s.mastery);
-  const set = useMemo(() => new Set(r.numbers), [r.numbers]);
   const b = best[`${r.id}:${difficulty}`];
   const known = r.numbers.filter((n) => (mastery[n]?.s ?? 0) >= 4).length;
   const cleared = DIFFICULTIES.filter((d) => best[`${r.id}:${d.id}`]).length;
+  return { b, known, cleared };
+}
 
+function BestStars({ stars, score }: { stars?: number; score?: number }) {
   return (
-    <motion.a
-      href={`#/play/${r.id}`}
-      className={`card card-hover group relative flex flex-col overflow-hidden p-6 ${wide ? 'sm:col-span-2 lg:col-span-3 lg:flex-row lg:items-center lg:gap-10 lg:p-8' : ''}`}
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04 }}
-    >
-      <div className={`pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl transition-opacity group-hover:opacity-40 ${wide ? 'lg:h-80 lg:w-80' : ''}`} style={{ background: r.accent }} />
-      <MiniTable highlight={set} className={`relative w-full ${wide ? 'lg:w-[44%] lg:shrink-0' : ''}`} label={`${r.name} highlighted on the periodic table`} />
-      <div className={wide ? 'relative flex flex-1 flex-col lg:self-stretch lg:justify-center' : 'contents'}>
-      {wide && <p className="relative mt-5 text-xs font-semibold uppercase tracking-wider text-accent-2 lg:mt-0">The final boss</p>}
-      <div className={`relative flex flex-1 items-start justify-between gap-3 ${wide ? 'mt-2 lg:flex-none' : 'mt-5'}`}>
-        <div>
-          <h2 className={`font-display font-semibold ${wide ? 'text-xl lg:text-3xl' : 'text-xl'}`}>{r.name}</h2>
-          <p className={`mt-1 text-ink-2 ${wide ? 'text-sm lg:text-base' : 'text-sm'}`}>{r.tagline}</p>
+    <span className="flex items-center gap-2">
+      <span className="flex items-center gap-0.5" role="img" aria-label={stars !== undefined ? `${stars} stars, best ${score}` : 'Not cleared on this difficulty'}>
+        {[0, 1, 2].map((i) => {
+          const on = stars !== undefined && i < stars;
+          return <Star key={i} size={16} strokeWidth={1.5} aria-hidden style={on ? { fill: 'var(--star)', color: 'var(--star-line)' } : { fill: 'var(--surface-2)', color: 'var(--ink-3)' }} />;
+        })}
+      </span>
+      {score !== undefined && <span className="num text-sm text-ink-2">{score.toLocaleString('en-US')}</span>}
+    </span>
+  );
+}
+
+function RegionRow({ region: r }: { region: Region }) {
+  const set = useMemo(() => new Set(r.numbers), [r.numbers]);
+  const { b, known, cleared } = useRegionProgress(r);
+  return (
+    <a href={`#/play/${r.id}`} className="card card-link flex items-center gap-4 p-4">
+      <MiniTable highlight={set} className="w-24 shrink-0 sm:w-28" label={`${r.name} highlighted on the periodic table`} />
+      <div className="min-w-0 flex-1">
+        <h2 className="text-base font-medium">{r.name}</h2>
+        <p className="mt-1 line-clamp-2 text-sm text-ink-2">{caption(r.tagline)}</p>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+          <BestStars stars={b?.stars} score={b?.score} />
+          <span className="meta">
+            {known}/{r.numbers.length} mastered{cleared > 0 && ` · ${cleared}/3 cleared`}
+          </span>
         </div>
-        <span className="shrink-0 rounded-full border border-line px-2.5 py-1 text-xs font-medium tabular-nums text-ink-2">{r.numbers.length}</span>
       </div>
-      <div className="relative mt-5 flex items-center justify-between border-t border-line pt-4 text-sm">
-        <div className="flex items-center gap-1" aria-label={b ? `${b.stars} stars, best ${b.score}` : 'Not cleared on this difficulty'}>
-          {[0, 1, 2].map((i) => (
-            <Star key={i} size={16} className={b && i < b.stars ? 'fill-gold text-gold' : 'text-line-strong'} />
-          ))}
-          {b && <span className="ml-2 tabular-nums text-ink-2">{b.score.toLocaleString('en-US')}</span>}
+    </a>
+  );
+}
+
+/** The whole table: the last and largest region, so the table itself is the bright element of the screen. */
+function FullTableCard({ region: r }: { region: Region }) {
+  const { b, known, cleared } = useRegionProgress(r);
+  return (
+    <a href={`#/play/${r.id}`} className="card card-link mt-3 grid gap-6 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-12 lg:p-8">
+      <MiniTable className="w-full" label={`${r.name} highlighted on the periodic table`} />
+      <div>
+        <h2 className="t-heading">{r.name}</h2>
+        <p className="mt-1 text-ink-2">{caption(r.tagline)}</p>
+        <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1">
+          <BestStars stars={b?.stars} score={b?.score} />
+          <span className="meta">
+            {known}/{r.numbers.length} mastered{cleared > 0 && ` · ${cleared}/3 cleared`}
+          </span>
         </div>
-        <span className="text-xs text-ink-3">
-          {known}/{r.numbers.length} mastered{cleared > 0 && ` · ${cleared}/3 cleared`}
+        <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-ink">
+          Place all {r.numbers.length} <ArrowRight size={16} strokeWidth={1.5} aria-hidden />
         </span>
       </div>
+    </a>
+  );
+}
+
+function ModeRow({ href, title, text, art }: { href: string; title: string; text: string; art: ReactNode }) {
+  return (
+    <a href={href} className="card card-link flex items-center gap-4 p-4">
+      <div className="grid h-20 w-24 shrink-0 place-items-center rounded-control bg-surface-2 sm:w-28" aria-hidden>
+        {art}
       </div>
-    </motion.a>
+      <div className="min-w-0 flex-1">
+        <h3 className="text-base font-medium">{title}</h3>
+        <p className="mt-1 text-sm text-ink-2">{text}</p>
+      </div>
+      <ChevronRight size={18} strokeWidth={1.5} className="shrink-0 text-ink-3" aria-hidden />
+    </a>
+  );
+}
+
+/** A symbol and the name it pairs with, as the two cards of a match. */
+function MatchArt() {
+  return (
+    <span className="flex items-center gap-2">
+      <ElementChip element={el('Fe')} size={36} />
+      <span className="grid h-9 place-items-center rounded-tag border border-line-strong bg-surface px-2 text-xs font-medium text-ink-2">Iron</span>
+    </span>
+  );
+}
+
+/** The elements inside a phone battery, fireworks, a banana and bones. */
+function LifeArt() {
+  return (
+    <span className="grid grid-cols-2 gap-1">
+      {['Li', 'Sr', 'K', 'Ca'].map((s) => (
+        <ElementChip key={s} element={el(s)} size={28} />
+      ))}
+    </span>
+  );
+}
+
+/** A blank square on the chart and the four answer keys. */
+function QuizArt() {
+  return (
+    <span className="flex items-center gap-2">
+      <span className="slot grid h-9 w-9 place-items-center text-sm text-ink-3" style={{ borderRadius: tileRadius(36) }}>
+        ?
+      </span>
+      <span className="grid grid-cols-2 gap-1">
+        {[1, 2, 3, 4].map((n) => (
+          <span key={n} className="kbd">
+            {n}
+          </span>
+        ))}
+      </span>
+    </span>
   );
 }
 

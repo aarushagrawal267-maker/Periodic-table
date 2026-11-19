@@ -1,15 +1,17 @@
 import { motion } from 'motion/react';
 import { ArrowRight, Check, Home, RotateCcw, Share2, Star, Trophy, X } from 'lucide-react';
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { byNumber, catVar } from '../lib/elements';
+import { useEffect, useRef, useState } from 'react';
+import { byNumber } from '../lib/elements';
 import { formatTime, levelFromXp, titleForLevel } from '../lib/scoring';
 import { dailyNumber } from '../lib/daily';
 import { useProgress, type RoundOutcome, type RoundSummary } from '../store/progress';
 import { useSettings } from '../store/settings';
 import { useUi } from '../store/ui';
 import { ACHIEVEMENTS } from '../lib/achievements';
-import { Confetti } from './Confetti';
+import { ElementChip } from './ElementTile';
+import { MiniTable } from './MiniTable';
 import { Icon, TIER_COLOR } from './Icon';
+import { DUR, STAGGER, tween } from './motion';
 import { AnimatedNumber } from './Stats';
 
 interface Props {
@@ -40,6 +42,11 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
     .filter(([, ok]) => !ok)
     .map(([n]) => byNumber(Number(n)));
   const headline = headlineFor(s, acc, attempts);
+  const played = new Set(Object.keys(s.results).map(Number));
+  const slippedSet = new Set(slipped.map((e) => e.number));
+  const primary: 'share' | 'next' | 'replay' | null = s.kind === 'daily' ? 'share' : onNext && s.completed ? 'next' : onReplay ? 'replay' : null;
+  // With a primary and a replay already on screen, the way out steps back to a text button.
+  const exitQuiet = !!primary && !!onReplay && primary !== 'replay';
   const unlocked = o.unlocked.map((id) => ACHIEVEMENTS.find((a) => a.id === id)).filter((a) => !!a);
   const overlay = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLDivElement>(null);
@@ -87,41 +94,49 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
   }, []);
 
   return (
-    <motion.div ref={overlay} className="fixed inset-0 z-50 overflow-y-auto bg-bg/85 backdrop-blur-xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      {s.stars === 3 && <Confetti fire={1} />}
-      <div ref={dialog} className="mx-auto flex min-h-full max-w-xl flex-col justify-center px-5 py-10" role="dialog" aria-modal="true" aria-labelledby="results-title">
-        <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', damping: 22, delay: 0.05 }} className="text-center">
-          <p className="text-sm font-medium text-ink-3">{s.kind === 'daily' && s.dailyKey ? `Daily Challenge #${dailyNumber(s.dailyKey)}` : title}</p>
-          <h2 ref={heading} id="results-title" tabIndex={-1} className="font-display mt-1 text-4xl font-semibold sm:text-5xl" style={{ outline: 'none' }}>
+    <motion.div ref={overlay} className="fixed inset-0 z-50 scroll-pb-40 overflow-y-auto bg-bg sm:scroll-pb-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={tween(DUR.menu)}>
+      <div ref={dialog} className="mx-auto flex min-h-full max-w-xl flex-col justify-center px-4 py-8 sm:px-6" role="dialog" aria-modal="true" aria-labelledby="results-title">
+        <motion.div className="text-center" {...enter(0)}>
+          <p className="text-sm text-ink-2">{s.kind === 'daily' && s.dailyKey ? `Daily challenge #${dailyNumber(s.dailyKey)}` : title}</p>
+          <h2 ref={heading} id="results-title" tabIndex={-1} className="t-display mt-2" style={{ outline: 'none' }}>
             {headline}
           </h2>
-          <p className="mt-2 text-ink-2">{encouragement(s, acc, attempts, slipped.length > 0)}</p>
-          <div className="mt-5 flex justify-center gap-3" role="img" aria-label={`${s.stars} of 3 stars`}>
-            {[0, 1, 2].map((i) => (
-              <motion.div
-                key={i}
-                initial={reduce ? false : { scale: 0, rotate: -90 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', damping: 10, stiffness: 200, delay: 0.3 + i * 0.18 }}
-              >
-                <Star size={i === 1 ? 54 : 42} className={i < s.stars ? 'fill-gold text-gold' : 'text-line-strong'} style={i < s.stars ? { filter: 'drop-shadow(0 0 18px color-mix(in oklab, var(--gold) 60%, transparent))' } : undefined} />
-              </motion.div>
-            ))}
-          </div>
+          <p className="mx-auto mt-3 max-w-md text-ink-2">{encouragement(s, acc, attempts, slipped.length > 0)}</p>
+          <Stars stars={s.stars} reduce={reduce} />
+          {s.kind === 'daily' && <TrailSquares trail={s.trail} className="mt-4" />}
         </motion.div>
 
-        <motion.div className="card mt-8 overflow-hidden" initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', damping: 22, delay: 0.2 }}>
-          <div className="relative p-6 text-center">
+        <motion.section className="card mt-6 overflow-hidden" {...enter(0.1)} aria-label="Round summary">
+          <div className="relative px-6 pb-5 pt-6 text-center">
             {o.newBest && (
-              <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-1 text-xs font-semibold text-gold">
-                <Trophy size={12} /> New best
+              <span className="absolute right-4 top-4 inline-flex items-center gap-1 text-[13px] font-medium text-gold">
+                <Trophy size={14} strokeWidth={1.5} aria-hidden /> New best
               </span>
             )}
-            <div className="text-xs font-medium uppercase tracking-wider text-ink-3">Score</div>
-            <div className="font-display text-grad mt-1 text-6xl font-bold">
-              <AnimatedNumber value={s.score} duration={1200} />
+            <div className="text-sm text-ink-2">Score</div>
+            <div className="num mt-1 text-[56px] font-medium leading-none tracking-[-0.02em]">
+              <AnimatedNumber value={s.score} duration={900} />
             </div>
-            {o.previousBest !== null && !o.newBest && <div className="mt-1 text-xs text-ink-3">Best {o.previousBest.toLocaleString('en-US')}</div>}
+            {o.previousBest !== null && !o.newBest && <div className="meta mt-2">Best {o.previousBest.toLocaleString('en-US')}</div>}
+            {played.size > 0 && (
+              <figure className="mx-auto mt-5 max-w-[320px]">
+                <MiniTable
+                  highlight={played}
+                  flagged={slippedSet}
+                  className="w-full"
+                  label={`${placedWord(s.kind)} on the periodic table: ${played.size} elements${slipped.length ? `, ${slipped.length} worth another look` : ''}`}
+                />
+                <figcaption className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[13px] text-ink-2">
+                  <span>{placedWord(s.kind)}</span>
+                  {slipped.length > 0 && (
+                    <span className="inline-flex items-center gap-2">
+                      <span aria-hidden className="h-2.5 w-2.5 rounded-[3px] border-2 border-bad" />
+                      Worth another look
+                    </span>
+                  )}
+                </figcaption>
+              </figure>
+            )}
           </div>
           <dl className="grid grid-cols-2 gap-px border-t border-line bg-line sm:grid-cols-4">
             {[
@@ -130,73 +145,69 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
               ['Time', formatTime(s.timeMs)],
               ['Best combo', `${s.maxCombo}`],
             ].map(([k, v]) => (
-              <div key={k} className="solid px-4 py-3.5 text-center">
-                <dt className="text-[11px] uppercase tracking-wider text-ink-3">{k}</dt>
-                <dd className="font-display mt-0.5 text-xl font-semibold tabular-nums">{v}</dd>
+              <div key={k} className="bg-surface px-4 py-3 text-center">
+                <dt className="text-[13px] text-ink-2">{k}</dt>
+                <dd className="num mt-1 text-xl font-medium">{v}</dd>
               </div>
             ))}
           </dl>
-          <div className="border-t border-line p-5">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">
+          <div className="border-t border-line px-6 py-4">
+            <div className="flex items-baseline justify-between gap-4 text-sm">
+              <span>
                 {levelledUp ? (
-                  <span className="text-grad font-semibold">Level up! Level {lvl.level}</span>
+                  <span className="font-medium">Level {lvl.level} reached</span>
                 ) : (
                   <>
-                    Level {lvl.level} <span className="text-ink-3">· {titleForLevel(lvl.level)}</span>
+                    Level {lvl.level} <span className="text-ink-2">· {titleForLevel(lvl.level)}</span>
                   </>
                 )}
               </span>
-              <span className="font-semibold text-accent-3">+{o.xpGained} XP</span>
+              <span className="num font-medium text-accent">+{o.xpGained} XP</span>
             </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-line">
-              <motion.div className="h-full rounded-full" style={{ background: 'var(--grad)' }} initial={{ width: `${(levelledUp ? 0 : before.progress) * 100}%` }} animate={{ width: `${lvl.progress * 100}%` }} transition={{ duration: 1.2, delay: 0.6, ease: [0.16, 1, 0.3, 1] }} />
+            <div className="meter mt-3">
+              <motion.div
+                className="meter-fill"
+                style={{ transition: 'none' }}
+                initial={{ scaleX: levelledUp ? 0 : before.progress }}
+                animate={{ scaleX: lvl.progress }}
+                transition={tween(0.9, reduce ? 0 : 0.4)}
+              />
             </div>
-            {unlocked.length > 0 && (
-              <div className="mt-4">
-                <p className="text-sm font-medium text-ink-2">{unlocked.length === 1 ? 'Achievement unlocked' : `${unlocked.length} achievements unlocked`}</p>
-                <ul className="mt-2 flex flex-wrap gap-2">
-                  {unlocked.map((a) => {
-                    const color = TIER_COLOR[a.tier];
-                    return (
-                      <motion.li
-                        key={a.id}
-                        title={a.desc}
-                        className="flex items-center gap-2 rounded-full bg-surface py-1 pl-1 pr-3 text-sm font-semibold"
-                        initial={reduce ? false : { scale: 0.85, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: 'spring', damping: 16, delay: 0.9 }}
-                      >
-                        <span aria-hidden className="grid h-7 w-7 place-items-center rounded-full" style={{ background: `color-mix(in oklab, ${color} 20%, transparent)`, color }}>
-                          <Icon name={a.icon} size={15} />
-                        </span>
-                        {a.name}
-                      </motion.li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
-            {o.masteryUp.length > 0 && (
-              <p className="mt-3 text-sm text-ink-2">
-                <span className="font-semibold text-accent-3">{o.masteryUp.length}</span> new element{o.masteryUp.length > 1 ? 's' : ''} mastered:{' '}
-                {o.masteryUp.map((n) => byNumber(n).symbol).join(', ')}
-              </p>
-            )}
           </div>
+        </motion.section>
+
+        {/*
+          One primary, at most one secondary; the way out is a quiet text button.
+          Phones: the actions stay pinned to the bottom edge, so they are on the first screen whatever the round shows.
+        */}
+        <motion.div
+          className="sticky bottom-0 z-10 -mx-4 mt-6 grid grid-cols-2 gap-3 border-t border-line bg-bg px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 sm:static sm:mx-0 sm:flex sm:items-center sm:border-0 sm:bg-transparent sm:p-0"
+          {...enter(0.15)}
+        >
+          {primary === 'share' && <ShareButton summary={s} total={total} />}
+          {primary === 'next' && (
+            <button onClick={onNext} className="btn btn-lg btn-primary col-span-2 sm:flex-1">
+              {nextLabel ?? 'Next'} <ArrowRight size={18} strokeWidth={1.5} />
+            </button>
+          )}
+          {onReplay && (
+            <button onClick={onReplay} className={`btn btn-lg sm:flex-1 ${primary === 'replay' ? 'btn-primary col-span-2' : 'btn-secondary'} ${exitQuiet ? '' : 'col-span-2'}`}>
+              <RotateCcw size={18} strokeWidth={1.5} /> Play again
+            </button>
+          )}
+          <button onClick={onExit} className={`btn btn-lg ${exitQuiet ? 'btn-quiet' : 'btn-secondary col-span-2 sm:flex-1'}`}>
+            {exitLabel === 'Home' && <Home size={18} strokeWidth={1.5} aria-hidden />}
+            {exitLabel}
+          </button>
         </motion.div>
 
-        {s.kind === 'daily' && <Trail trail={s.trail} />}
-
         {slipped.length > 0 && (
-          <motion.div className="mt-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Worth another look</h3>
+          <motion.div className="mt-10" {...enter(0.2)}>
+            <h3 className="label mb-2">Worth another look</h3>
             <div className="flex flex-wrap gap-2">
               {slipped.map((e) => (
-                <button key={e.number} onClick={() => openDetail(e.number)} className="btn-ghost flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3 text-sm">
-                  <span className="cat-chip grid h-7 w-7 place-items-center rounded-full text-xs font-bold" style={{ '--c': catVar(e.category) } as CSSProperties}>
-                    {e.symbol}
-                  </span>
+                <button key={e.number} onClick={() => openDetail(e.number)} className="btn btn-secondary pl-1.5">
+                  <ElementChip element={e} size={32} />
                   {e.name}
                 </button>
               ))}
@@ -204,32 +215,83 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
           </motion.div>
         )}
 
-        <motion.div className="mt-8 flex flex-col gap-3 sm:flex-row" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.45 }}>
-          {s.kind === 'daily' ? (
-            <ShareButton summary={s} total={total} />
-          ) : onNext && s.completed ? (
-            <button onClick={onNext} className="btn-primary flex h-14 items-center sm:flex-1 justify-center gap-2 rounded-2xl text-base">
-              {nextLabel ?? 'Next'} <ArrowRight size={18} />
-            </button>
-          ) : null}
-          {onReplay && (
-            <button onClick={onReplay} className={`${s.kind !== 'daily' && !(onNext && s.completed) ? 'btn-primary' : 'btn-ghost'} flex h-14 items-center justify-center gap-2 rounded-2xl text-base font-medium sm:flex-1`}>
-              <RotateCcw size={18} /> Play again
-            </button>
-          )}
-          <button onClick={onExit} className="btn-ghost flex h-14 items-center justify-center gap-2 rounded-2xl px-6 text-base font-medium">
-            {exitLabel === 'Home' && <Home size={18} aria-hidden />}
-            {exitLabel}
-          </button>
-        </motion.div>
+        {(unlocked.length > 0 || o.masteryUp.length > 0) && (
+          <motion.div className="mt-10" {...enter(0.2)}>
+            {unlocked.length > 0 && (
+              <>
+                <h3 className="label mb-2">{unlocked.length === 1 ? 'Achievement unlocked' : `${unlocked.length} achievements unlocked`}</h3>
+                <ul className="space-y-1">
+                  {unlocked.map((a) => (
+                    <li key={a.id} title={a.desc} className="flex items-center gap-3 rounded-control bg-surface-2 py-2 pl-2 pr-3 text-sm">
+                      <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-tag bg-surface text-ink-2">
+                        <Icon name={a.icon} size={16} />
+                      </span>
+                      <span className="min-w-0 flex-1 font-medium">{a.name}</span>
+                      <span className="flex items-center gap-2 text-[13px] capitalize text-ink-2">
+                        <span className="dot" style={{ background: TIER_COLOR[a.tier] }} aria-hidden />
+                        {a.tier}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {o.masteryUp.length > 0 && (
+              <p className={`text-sm text-ink-2 ${unlocked.length > 0 ? 'mt-4' : ''}`}>
+                <span className="num font-medium text-ink">{o.masteryUp.length}</span> new element{o.masteryUp.length > 1 ? 's' : ''} mastered:{' '}
+                <span className="text-ink">{o.masteryUp.map((n) => byNumber(n).symbol).join(', ')}</span>
+              </p>
+            )}
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );
 }
 
+/** What the map under the score shows: the elements you placed, or the ones the round asked about. */
+function placedWord(kind: RoundSummary['kind']) {
+  return kind === 'place' || kind === 'lesson' || kind === 'daily' ? 'What you placed' : 'The elements in this round';
+}
+
+/** The one entrance on the results screen: a short fade and rise, staggered by block. */
+function enter(delay: number) {
+  return { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 }, transition: tween(DUR.enter, delay) };
+}
+
+/**
+ * Three stars, the middle one larger: gold fill with a darker gold edge, so they read as objects in both themes.
+ * They come in one after another with a small scale, the only celebration on the screen.
+ */
+function Stars({ stars, reduce }: { stars: number; reduce: boolean }) {
+  return (
+    <div className="mt-6 flex items-end justify-center gap-3" role="img" aria-label={`${stars} of 3 stars`}>
+      {[0, 1, 2].map((i) => {
+        const on = i < stars;
+        return (
+          <motion.span
+            key={i}
+            aria-hidden
+            initial={reduce ? false : { opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={tween(DUR.enter, 0.2 + i * STAGGER * 2)}
+          >
+            <Star
+              size={i === 1 ? 52 : 40}
+              strokeWidth={1.5}
+              strokeLinejoin="round"
+              style={on ? { fill: 'var(--star)', color: 'var(--star-line)' } : { fill: 'var(--surface-2)', color: 'var(--ink-3)' }}
+            />
+          </motion.span>
+        );
+      })}
+    </div>
+  );
+}
+
 /** Picks the headline from accuracy as well as stars, so a 3/10 never reads "Nicely done". */
 function headlineFor(s: RoundSummary, acc: number, attempts: number) {
-  if (!s.completed) return 'Good try!';
+  if (!s.completed) return 'Good try';
   if (attempts > 0 && acc < 50) return 'Keep going';
   if (s.stars >= 3) return acc === 100 ? 'Flawless' : 'Brilliant';
   if (s.stars === 2) return 'Great run';
@@ -278,31 +340,31 @@ export function trailLabel(trail: RoundSummary['trail']) {
 /** Coloured squares that also carry a symbol, so the result does not rely on colour alone (WCAG 1.4.1). */
 export function TrailSquares({ trail, animate = true, className = '' }: { trail: RoundSummary['trail']; animate?: boolean; className?: string }) {
   return (
-    <div className={`flex flex-wrap justify-center gap-1.5 ${className}`} role="img" aria-label={trailLabel(trail)}>
+    <motion.div
+      className={`flex flex-wrap justify-center gap-1 ${className}`}
+      role="img"
+      aria-label={trailLabel(trail)}
+      initial={animate ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
+      transition={tween(DUR.enter, 0.3)}
+    >
       {trail.map((t, i) => (
-        <motion.span
+        <span
           key={i}
-          initial={animate ? { scale: 0 } : false}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.6 + i * 0.05, type: 'spring', damping: 12 }}
-          className="grid h-6 w-6 place-items-center rounded-md text-bg"
-          style={{ background: t === 'hit' ? 'var(--good)' : t === 'hint' ? 'var(--gold)' : 'var(--bad)' }}
+          className="grid h-6 w-6 place-items-center rounded-tag text-bg"
+          style={{ background: t === 'hit' ? 'var(--good)' : t === 'hint' ? 'var(--star)' : 'var(--bad)' }}
           aria-hidden
         >
-          {t === 'hit' ? <Check size={14} strokeWidth={3} /> : t === 'hint' ? <span className="h-1.5 w-1.5 rounded-full bg-current" /> : <X size={14} strokeWidth={3} />}
-        </motion.span>
+          {t === 'hit' ? <Check size={14} strokeWidth={2.5} /> : t === 'hint' ? <span className="h-1.5 w-1.5 rounded-full bg-current" /> : <X size={14} strokeWidth={2.5} />}
+        </span>
       ))}
-    </div>
+    </motion.div>
   );
-}
-
-function Trail({ trail }: { trail: RoundSummary['trail'] }) {
-  return <TrailSquares trail={trail} className="mt-6" />;
 }
 
 export function shareText(s: RoundSummary, total: number) {
   const n = s.dailyKey ? dailyNumber(s.dailyKey) : 0;
-  return `Periodica Daily #${n} ⚗️\n${s.correct}/${total} · ${formatTime(s.timeMs)} · ${s.score.toLocaleString('en-US')} pts\n${s.trail.map((t) => TRAIL[t]).join('')}\n${location.origin}${location.pathname}#/daily`;
+  return `Periodica Daily #${n}\n${s.correct}/${total} · ${formatTime(s.timeMs)} · ${s.score.toLocaleString('en-US')} pts\n${s.trail.map((t) => TRAIL[t]).join('')}\n${location.origin}${location.pathname}#/daily`;
 }
 
 export function ShareButton({ summary, total }: { summary: RoundSummary; total: number }) {
@@ -321,8 +383,8 @@ export function ShareButton({ summary, total }: { summary: RoundSummary; total: 
     }
   };
   return (
-    <button onClick={share} className="btn-primary flex h-14 w-full items-center sm:w-auto sm:flex-1 justify-center gap-2 rounded-2xl text-base">
-      <Share2 size={18} /> {copied ? 'Copied to clipboard' : 'Share result'}
+    <button onClick={share} className="btn btn-lg btn-primary col-span-2 w-full sm:w-auto sm:flex-1">
+      <Share2 size={18} strokeWidth={1.5} /> {copied ? 'Copied to clipboard' : 'Share result'}
     </button>
   );
 }

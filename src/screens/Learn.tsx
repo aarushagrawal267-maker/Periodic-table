@@ -1,7 +1,9 @@
 import { AnimatePresence, motion, type PanInfo } from 'motion/react';
-import { ArrowLeft, ArrowRight, Check, Clock, Eye, EyeOff, PartyPopper, RefreshCw, RotateCcw, Sparkles, Star } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ChevronRight, Eye, EyeOff, RotateCcw, Star } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { ElementTile } from '../components/ElementTile';
+import { ElementChip, ElementTile } from '../components/ElementTile';
+import { MiniTable } from '../components/MiniTable';
+import { DUR, rise, tween } from '../components/motion';
 import { CHAPTERS, chapterById, type Chapter } from '../lib/chapters';
 import { byNumber, catVar, categoryLabel, type Element } from '../lib/elements';
 import { sfx } from '../lib/feedback';
@@ -18,146 +20,160 @@ export function LearnPath() {
   const current = CHAPTERS.find((c) => !chapters[c.id]);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pb-20 pt-8 sm:px-6 sm:pt-12">
-      {due.length > 0 && <ReviewBanner due={due} />}
-      <p className="text-sm font-semibold text-accent-2">Learning path</p>
-      <h1 className="font-display mt-1 text-4xl font-semibold sm:text-5xl">Learn it, then play it</h1>
-      <p className="mt-3 max-w-xl text-ink-2">
-        {CHAPTERS.length} short chapters, about three minutes each. Flip through a few friendly cards, then drop those same elements onto the table. No timer, no pressure.
-      </p>
-      <div className="mt-6 flex items-center gap-3">
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-line">
-          <motion.div className="h-full rounded-full" style={{ background: 'var(--grad)' }} initial={{ width: 0 }} animate={{ width: `${(done / CHAPTERS.length) * 100}%` }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }} />
+    <div className="mx-auto max-w-7xl px-4 pb-24 pt-8 sm:px-6 sm:pt-12 lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16">
+      <header className="lg:sticky lg:top-28 lg:self-start">
+        <h1 className="t-title">Learn it, then play it</h1>
+        <p className="mt-3 max-w-xl text-ink-2">
+          {CHAPTERS.length} short chapters, about three minutes each. Flip through a few cards, then place those same elements on the table. No timer, no pressure.
+        </p>
+        <div className="mt-6 max-w-xl">
+          <div className="flex items-baseline justify-between gap-4">
+            <span className="label">Chapters done</span>
+            <span className="meta">
+              {done} of {CHAPTERS.length}
+            </span>
+          </div>
+          <div className="meter mt-2" role="progressbar" aria-label="Chapters done" aria-valuenow={done} aria-valuemin={0} aria-valuemax={CHAPTERS.length}>
+            <div className="meter-fill" style={{ transform: `scaleX(${done / CHAPTERS.length})` }} />
+          </div>
         </div>
-        <span className="text-sm font-semibold tabular-nums">
-          {done}/{CHAPTERS.length}
-        </span>
-      </div>
+      </header>
 
-      <ol className="relative mt-12">
-        <div aria-hidden className="absolute bottom-10 left-[38px] top-10 w-[3px] rounded-full sm:left-1/2 sm:-translate-x-1/2" style={{ background: 'linear-gradient(var(--accent), var(--accent-2), var(--accent-3))', opacity: 0.25 }} />
-        {CHAPTERS.map((c, i) => (
-          <ChapterNode key={c.id} chapter={c} index={i} stars={chapters[c.id] ?? 0} current={c === current} />
-        ))}
-      </ol>
+      <div className="mt-8 lg:mt-0">
+        {current && <UpNext chapter={current} index={CHAPTERS.indexOf(current)} />}
+        {due.length > 0 && <ReviewBanner due={due} />}
+        <h2 className="label mb-2">All chapters</h2>
+        <ol className="border-b border-line">
+          {CHAPTERS.map((c, i) =>
+            chapters[c.id] || c === current ? (
+              <CompactRow key={c.id} chapter={c} index={i} stars={chapters[c.id] ?? 0} current={c === current} />
+            ) : (
+              <ChapterRow key={c.id} chapter={c} index={i} />
+            ),
+          )}
+        </ol>
+      </div>
     </div>
   );
 }
 
-/** Spaced review nudge: elements you met a while ago (or slipped on) are ready to refresh. */
+/** Spaced review: elements you met a while ago (or slipped on) are ready to refresh. */
 function ReviewBanner({ due }: { due: number[] }) {
   const label = `${due.length} ${due.length === 1 ? 'element' : 'elements'} ready for a quick review`;
   return (
-    <motion.a
-      href="#/learn/review"
-      className="card card-hover group relative mb-8 flex items-center gap-4 overflow-hidden p-4 sm:p-5"
-      style={{ borderColor: 'color-mix(in oklab, var(--accent-2) 45%, transparent)', boxShadow: '0 18px 50px -26px color-mix(in oklab, var(--accent-2) 70%, transparent)' }}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', damping: 22 }}
-    >
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: 'var(--grad)' }} />
-      <span aria-hidden className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-bg" style={{ background: 'var(--grad)' }}>
-        <RefreshCw size={22} strokeWidth={2.4} />
-      </span>
+    <a href="#/learn/review" className="card card-link group mb-10 flex items-center gap-4 p-5">
       <span className="min-w-0 flex-1">
-        <span className="block font-semibold leading-snug">{label}</span>
-        <span className="mt-0.5 block text-sm text-ink-2">A few quick cards, then a mini game. Keeps them fresh.</span>
-        <span aria-hidden className="mt-2 flex flex-wrap gap-1">
-          {due.slice(0, 8).map((n) => {
-            const e = byNumber(n);
-            return (
-              <span key={n} className="cat-chip rounded-md px-1.5 py-0.5 text-[11px] font-semibold" style={{ '--c': catVar(e.category) } as CSSProperties}>
-                {e.symbol}
-              </span>
-            );
-          })}
-          {due.length > 8 && <span className="px-1 text-[11px] text-ink-3">+{due.length - 8}</span>}
+        <span className="block font-medium">{label}</span>
+        <span className="mt-1 block text-sm text-ink-2">A few cards, then a short game on the table</span>
+        <span aria-hidden className="mt-3 flex flex-wrap items-center gap-1">
+          {due.slice(0, 8).map((n) => (
+            <ElementChip key={n} element={byNumber(n)} size={28} />
+          ))}
+          {due.length > 8 && <span className="meta pl-1">+{due.length - 8}</span>}
         </span>
       </span>
-      <ArrowRight aria-hidden size={20} className="shrink-0 text-accent-2 transition-transform group-hover:translate-x-0.5" />
-    </motion.a>
+      <ArrowRight aria-hidden size={18} strokeWidth={1.5} className="shrink-0 text-ink-3 transition-colors group-hover:text-ink" />
+    </a>
   );
 }
 
-function ChapterNode({ chapter: c, index, stars, current }: { chapter: Chapter; index: number; stars: number; current: boolean }) {
-  const right = index % 2 === 1;
-  const done = stars > 0;
+/** Minutes a chapter takes: about four elements a minute, never less than two. */
+const minutes = (c: Chapter) => Math.max(2, Math.round(c.numbers.length / 4));
+
+/** The chapter to do next, lifted out of the list: its elements, its length and one clear way in. */
+function UpNext({ chapter: c, index }: { chapter: Chapter; index: number }) {
+  const shown = c.numbers.slice(0, 8);
   return (
-    <motion.li
-      className={`relative mb-6 flex items-center gap-5 sm:mb-10 sm:gap-8 ${right ? 'sm:flex-row-reverse' : ''}`}
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', damping: 22, delay: Math.min(index, 8) * 0.05 }}
+    <a
+      href={`#/learn/${c.id}`}
+      className="card card-link mb-6 block p-5 sm:p-6"
+      aria-label={`Start chapter ${index + 1}: ${c.title}, up next`}
     >
+      <p className="label">Up next · chapter {index + 1}</p>
+      <h2 className="t-heading mt-1">{c.title}</h2>
+      <p className="mt-1 max-w-2xl text-[15px] leading-6 text-ink-2">{c.blurb}</p>
+      <span aria-hidden className="mt-4 flex flex-wrap items-center gap-1">
+        {shown.map((n) => (
+          <ElementChip key={n} element={byNumber(n)} size={32} />
+        ))}
+        {c.numbers.length > shown.length && <span className="meta pl-1">+{c.numbers.length - shown.length}</span>}
+      </span>
+      <span aria-hidden className="meta mt-4 block">
+        {c.numbers.length} elements · {minutes(c)} min{c.mnemonic ? ' · memory trick' : ''}
+      </span>
+      <span aria-hidden className="btn btn-primary mt-5 w-full sm:w-auto">
+        Start chapter {index + 1} <ArrowRight size={18} strokeWidth={1.5} />
+      </span>
+    </a>
+  );
+}
+
+/** A chapter you have done (or the one lifted above): number, title and its stars, one line. */
+function CompactRow({ chapter: c, index, stars, current }: { chapter: Chapter; index: number; stars: number; current: boolean }) {
+  return (
+    <li className="border-t border-line">
       <a
         href={`#/learn/${c.id}`}
-        className={`group relative z-10 grid h-[78px] w-[78px] shrink-0 place-items-center rounded-full text-3xl transition-transform hover:scale-105 sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:hover:scale-105 ${current ? 'pulse-ring' : ''}`}
-        style={{
-          background: done ? 'var(--grad)' : current ? 'radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--accent-2) 22%, var(--surface-solid)), var(--surface-solid))' : 'radial-gradient(circle at 30% 25%, var(--surface-2), var(--surface-solid))',
-          border: done ? 'none' : `2px solid ${current ? 'var(--accent-2)' : 'var(--line-strong)'}`,
-          boxShadow: done ? '0 12px 30px -10px color-mix(in oklab, var(--accent-2) 70%, transparent)' : current ? '0 0 0 6px color-mix(in oklab, var(--accent-2) 12%, transparent), 0 14px 34px -12px color-mix(in oklab, var(--accent-2) 60%, transparent)' : 'var(--shadow-md)',
-        }}
-        aria-label={`Chapter ${index + 1}: ${c.title}${done ? `, completed with ${stars} stars` : current ? ', up next' : ''}`}
+        className="group -mx-4 flex min-h-12 items-center gap-4 px-4 py-3 transition-colors hover:bg-surface sm:mx-0 sm:gap-6 sm:rounded-control sm:px-5"
+        aria-label={`Chapter ${index + 1}: ${c.title}${stars ? `, completed with ${stars} stars` : ''}`}
       >
-        <span aria-hidden className={done ? 'drop-shadow' : ''}>
-          {c.emoji}
+        <span aria-hidden className={`mono w-6 shrink-0 text-[15px] leading-6 ${current ? 'text-accent' : 'text-ink-3'}`}>
+          {index + 1}
         </span>
-        {done && (
-          <span className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full border-2 border-bg bg-good text-bg">
-            <Check size={15} strokeWidth={3} />
-          </span>
-        )}
+        <span className="min-w-0 flex-1 text-[15px] font-medium leading-6">{c.title}</span>
+        {current ? <span className="text-sm text-ink-2">Up next</span> : <ChapterStars stars={stars} />}
       </a>
+    </li>
+  );
+}
+
+/** One entry on the contents page still to come: number, title, what it covers. */
+function ChapterRow({ chapter: c, index }: { chapter: Chapter; index: number }) {
+  const shown = c.numbers.slice(0, 8);
+  return (
+    <li className="border-t border-line">
       <a
         href={`#/learn/${c.id}`}
-        className={`card card-hover group relative block flex-1 overflow-hidden p-5 sm:w-[calc(50%-64px)] sm:flex-none ${right ? 'sm:mr-auto' : 'sm:ml-auto'} ${current ? '!border-accent-2/50' : ''}`}
-        style={current ? { boxShadow: '0 18px 50px -24px color-mix(in oklab, var(--accent-2) 70%, transparent)' } : undefined}
-        tabIndex={-1}
+        className="group -mx-4 flex gap-4 px-4 py-5 transition-colors hover:bg-surface sm:mx-0 sm:gap-6 sm:rounded-card sm:px-5"
+        aria-label={`Chapter ${index + 1}: ${c.title}`}
       >
-        {current && <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: 'var(--grad)' }} />}
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-ink-3">Chapter {index + 1}</span>
-          {done ? (
-            <span className="flex gap-0.5">
-              {[0, 1, 2].map((s) => (
-                <Star key={s} size={13} className={s < stars ? 'fill-gold text-gold' : 'text-line-strong'} />
-              ))}
-            </span>
-          ) : current ? (
-            <span className="rounded-full px-2 py-0.5 text-[11px] font-bold text-bg" style={{ background: 'var(--grad)' }}>
-              UP NEXT
-            </span>
-          ) : null}
-        </div>
-        <h2 className="font-display mt-1.5 text-xl font-semibold transition-colors group-hover:text-ink">{c.title}</h2>
-        <p className="mt-1 text-sm text-ink-2">{c.blurb}</p>
-        <div className="mt-3 flex flex-wrap gap-1">
-          {c.numbers.slice(0, 10).map((n) => {
-            const e = byNumber(n);
-            return (
-              <span key={n} className="cat-chip rounded-md px-1.5 py-0.5 text-[11px] font-semibold" style={{ '--c': catVar(e.category) } as CSSProperties}>
-                {e.symbol}
-              </span>
-            );
-          })}
-          {c.numbers.length > 10 && <span className="px-1 text-[11px] text-ink-3">+{c.numbers.length - 10}</span>}
-        </div>
-        <div className="mt-4 flex items-center gap-3 whitespace-nowrap border-t border-line pt-3 text-xs text-ink-3">
-          <span className="flex items-center gap-1">
-            <Clock size={12} /> ~{Math.max(2, Math.round(c.numbers.length / 4))} min
+        <span aria-hidden className="mono w-6 shrink-0 text-[15px] leading-6 text-ink-3">
+          {index + 1}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-4">
+            <h3 className="text-[17px] font-medium leading-6">{c.title}</h3>
+            <ChevronRight aria-hidden size={18} strokeWidth={1.5} className="my-[3px] shrink-0 text-ink-3 transition-colors group-hover:text-ink" />
+          </div>
+          <p className="mt-1 max-w-2xl text-sm text-ink-2">{c.blurb}</p>
+          <span aria-hidden className="mt-3 flex flex-wrap items-center gap-1">
+            {shown.map((n) => (
+              <ElementChip key={n} element={byNumber(n)} size={28} />
+            ))}
+            {c.numbers.length > shown.length && <span className="meta pl-1">+{c.numbers.length - shown.length}</span>}
           </span>
-          {c.mnemonic && (
-            <span className="flex items-center gap-1">
-              <Sparkles size={12} /> Memory trick
-            </span>
-          )}
-          <span className="ml-auto flex items-center gap-1 font-semibold text-ink-2 transition-colors group-hover:text-accent-2">
-            {done ? 'Replay' : current ? 'Start' : 'Open'} <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+          <span aria-hidden className="meta mt-3 block">
+            {c.numbers.length} elements · {minutes(c)} min{c.mnemonic ? ' · memory trick' : ''}
           </span>
         </div>
       </a>
-    </motion.li>
+    </li>
+  );
+}
+
+/** Three small stars for a chapter you have done. */
+function ChapterStars({ stars }: { stars: number }) {
+  return (
+    <span aria-hidden className="flex h-6 shrink-0 items-center gap-0.5">
+      {[0, 1, 2].map((s) => (
+        <Star
+          key={s}
+          size={14}
+          strokeWidth={1.5}
+          style={s < stars ? { fill: 'var(--star)', color: 'var(--star-line)' } : { fill: 'none', color: 'var(--ink-3)' }}
+        />
+      ))}
+    </span>
   );
 }
 
@@ -208,7 +224,7 @@ export function Lesson({ chapterId }: { chapterId: string }) {
     return {
       regionId: chapter.id,
       title: chapter.title,
-      kicker: `Chapter ${idx + 1} · ${chapter.emoji}`,
+      kicker: `Chapter ${idx + 1} · ${chapter.numbers.length} elements`,
       subtitle: `Chapter ${idx + 1} · put them on the table`,
       numbers: chapter.numbers,
       trick: chapter.mnemonic ? chapter : undefined,
@@ -244,7 +260,7 @@ export function Lesson({ chapterId }: { chapterId: string }) {
     if (card?.kind !== 'element') return;
     const e = byNumber(card.n);
     setFlipped((f) => !f);
-    say(flipped ? 'Question side.' : `Answer: ${e.name}. ${e.summary ? firstSentence(e.summary) : ''}`);
+    say(flipped ? 'Question side' : `Answer: ${e.name}. ${e.summary ? firstSentence(e.summary) : ''}`);
   };
 
   const answer = (knew: boolean) => {
@@ -326,17 +342,17 @@ export function Lesson({ chapterId }: { chapterId: string }) {
   const empty = plan.numbers.length === 0;
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-xl flex-col px-5 pb-8 pt-4">
-      <header className="flex items-center gap-3">
-        <button onClick={() => go('/learn')} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Back to learning path">
-          <ArrowLeft size={18} />
+    <div className="mx-auto flex min-h-dvh max-w-xl flex-col px-4 pb-6 sm:px-6">
+      <header className="flex min-h-14 items-center gap-2 py-1">
+        <button onClick={() => go('/learn')} className="icon-btn -ml-3" aria-label="Back to learning path">
+          <ArrowLeft size={18} strokeWidth={1.5} />
         </button>
         <div className="min-w-0 flex-1">
-          <div className="text-xs text-ink-3">{empty ? 'Spaced review' : plan.kicker}</div>
-          <h1 className="font-display truncate text-lg font-semibold">{plan.title}</h1>
+          <div className="meta">{empty ? 'Spaced review' : plan.kicker}</div>
+          <h1 className="text-balance text-base font-medium leading-6">{plan.title}</h1>
         </div>
         {phase === 'cards' && !empty && (
-          <button onClick={() => setPhase('ready')} className="min-h-10 px-1 text-sm font-medium text-ink-3 hover:text-ink">
+          <button onClick={() => setPhase('ready')} className="btn btn-quiet -mr-3 px-3">
             Skip to game
           </button>
         )}
@@ -346,15 +362,16 @@ export function Lesson({ chapterId }: { chapterId: string }) {
         {announce}
       </div>
 
+      <main className="flex flex-1 flex-col">
       {empty ? (
         <ReviewEmpty next={next} />
       ) : phase === 'cards' && card ? (
         <>
-          <div className="mt-4 flex items-center gap-3">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow={seen} aria-valuemin={0} aria-valuemax={total} aria-label="Cards learned">
-              <motion.div className="h-full rounded-full" style={{ background: 'var(--grad)' }} animate={{ width: `${(seen / total) * 100}%` }} />
+          <div className="mt-2 flex items-center gap-3">
+            <div className="meter flex-1" role="progressbar" aria-valuenow={seen} aria-valuemin={0} aria-valuemax={total} aria-label="Cards learned">
+              <div className="meter-fill" style={{ transform: `scaleX(${seen / total})` }} />
             </div>
-            <span className="text-xs font-semibold tabular-nums text-ink-3" aria-hidden>
+            <span className="meta" aria-hidden>
               {position}/{total}
             </span>
           </div>
@@ -366,20 +383,21 @@ export function Lesson({ chapterId }: { chapterId: string }) {
                 custom={exit}
                 role="group"
                 aria-label={`Card ${position} of ${total}`}
-                className="w-full max-w-sm cursor-grab touch-pan-y active:cursor-grabbing"
+                className="w-full cursor-grab touch-pan-y active:cursor-grabbing"
                 drag="x"
                 dragSnapToOrigin
                 dragElastic={0.6}
+                dragTransition={{ bounceStiffness: 500, bounceDamping: 50 }}
                 onDragEnd={(_, info: PanInfo) => {
                   if (info.offset.x > 110) answer(true);
                   else if (info.offset.x < -110 && card.kind === 'element') answer(false);
                 }}
-                initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                animate={{ opacity: 1, scale: 1, y: 0, x: 0, rotate: 0 }}
-                variants={{ out: (d: number) => ({ opacity: 0, x: d * 320, rotate: d * 12, transition: { duration: 0.3 } }) }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0, x: 0, rotate: 0 }}
+                variants={{ out: (d: number) => ({ opacity: 0, x: d * 96, rotate: d * 3, transition: tween(DUR.menu) }) }}
                 exit="out"
-                transition={{ type: 'spring', damping: 22, stiffness: 260 }}
-                whileDrag={{ rotate: 4 }}
+                transition={tween(DUR.enter)}
+                whileDrag={{ rotate: 2 }}
               >
                 {card.kind === 'mnemonic' && plan.trick ? <MnemonicCard chapter={plan.trick} /> : card.kind === 'element' ? <FlipCard e={byNumber(card.n)} flipped={flipped} onFlip={flip} /> : null}
               </motion.div>
@@ -388,10 +406,10 @@ export function Lesson({ chapterId }: { chapterId: string }) {
 
           {card.kind === 'element' ? (
             <>
-              <p className="mt-5 text-balance text-center text-xs text-ink-3">
-                <span className="[@media(pointer:fine)]:hidden">Have a guess, then flip. Swipe right if you knew it, left to see it again.</span>
-                <span className="hidden [@media(pointer:fine)]:inline">
-                  Have a guess, then flip. Keys: <kbd className="font-sans font-semibold text-ink-2">Space</kbd> flip · <kbd className="font-sans font-semibold text-ink-2">→</kbd> got it · <kbd className="font-sans font-semibold text-ink-2">←</kbd> still learning
+              <p className="mt-4 text-balance text-center text-[13px] leading-5 text-ink-3">
+                <span className="md:[@media(pointer:fine)]:hidden">Have a guess, then flip. Swipe right if you knew it, left to see it again.</span>
+                <span className="hidden items-center justify-center gap-1 md:[@media(pointer:fine)]:flex">
+                  <kbd className="kbd">Space</kbd> flip <span className="px-1">·</span> <kbd className="kbd">→</kbd> got it <span className="px-1">·</span> <kbd className="kbd">←</kbd> still learning
                 </span>
               </p>
               <button
@@ -400,45 +418,34 @@ export function Lesson({ chapterId }: { chapterId: string }) {
                 data-lesson-keys
                 onClick={flip}
                 aria-pressed={flipped}
-               
-                className={`mt-3 flex h-12 items-center justify-center gap-2 rounded-2xl border font-semibold transition-colors ${flipped ? 'border-accent-2/60 bg-accent-2/15 text-ink' : 'btn-ghost text-ink'}`}
+                className={`btn btn-secondary mt-3 w-full ${flipped ? 'is-selected' : ''}`}
               >
-                {flipped ? <EyeOff size={17} aria-hidden /> : <Eye size={17} aria-hidden />} Show answer
+                {flipped ? <EyeOff size={18} strokeWidth={1.5} aria-hidden /> : <Eye size={18} strokeWidth={1.5} aria-hidden />} Show answer
               </button>
             </>
           ) : (
-            <p className="mt-5 text-balance text-center text-xs text-ink-3">Read it once. You'll be surprised what sticks.</p>
+            <p className="mt-4 text-balance text-center text-[13px] leading-5 text-ink-3">Read it once, out loud if you can</p>
           )}
 
           <div className="mt-3 grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              data-lesson-keys
-              onClick={() => answer(false)}
-              className="btn-ghost flex h-14 items-center justify-center gap-2 rounded-2xl font-medium"
-              disabled={card.kind === 'mnemonic'}
-              style={card.kind === 'mnemonic' ? { opacity: 0.4 } : undefined}
-            >
-              <RotateCcw size={17} aria-hidden /> Still learning
+            <button type="button" data-lesson-keys onClick={() => answer(false)} className="btn btn-secondary btn-lg" disabled={card.kind === 'mnemonic'}>
+              <RotateCcw size={18} strokeWidth={1.5} aria-hidden /> Still learning
             </button>
-            <button type="button" data-lesson-keys onClick={() => answer(true)} className="btn-primary flex h-14 items-center justify-center gap-2 rounded-2xl">
-              <Check size={18} aria-hidden /> {card.kind === 'mnemonic' ? 'Got the trick' : 'Got it'}
+            <button type="button" data-lesson-keys onClick={() => answer(true)} className="btn btn-primary btn-lg">
+              <Check size={18} strokeWidth={1.5} aria-hidden /> {card.kind === 'mnemonic' ? 'Got the trick' : 'Got it'}
             </button>
           </div>
         </>
       ) : (
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-1 flex-col items-center justify-center text-center">
-          <div className="flex -space-x-3" aria-hidden>
-            {plan.numbers.slice(0, 6).map((n, i) => (
-              <motion.div key={n} className="h-16 w-16" initial={{ y: 20, opacity: 0, rotate: -10 }} animate={{ y: 0, opacity: 1, rotate: (i - 2.5) * 5 }} transition={{ delay: i * 0.06, type: 'spring', damping: 14 }}>
-                <ElementTile element={byNumber(n)} size={64} showName={false} />
-              </motion.div>
-            ))}
-          </div>
-          <h2 className="font-display mt-8 text-3xl font-semibold">{isReview ? 'Now put them back' : 'Now put them on the table'}</h2>
-          <p className="mt-2 max-w-sm text-ink-2">Drag each element to its home. No clock, colour hints on, and the lightbulb shows you the way if you get stuck.</p>
-          <button ref={startRef} onClick={() => setPhase('play')} className="btn-primary shine mt-8 flex h-14 w-full max-w-xs items-center justify-center gap-2 rounded-2xl text-lg">
-            Let's go <ArrowRight size={20} aria-hidden />
+        <motion.div {...rise} className="flex flex-1 flex-col items-center justify-center py-8 text-center">
+          <MiniTable highlight={new Set(plan.numbers)} className="w-full max-w-[280px]" />
+          <p className="meta mt-4">
+            {plan.numbers.length} {plan.numbers.length === 1 ? 'element' : 'elements'} to place
+          </p>
+          <h2 className="t-title mt-6">{isReview ? 'Now put them back' : 'Now put them on the table'}</h2>
+          <p className="mt-3 max-w-sm text-ink-2">Drag each element to its place. There is no clock, the colour hints are on, and the hint button shows the right cell if you get stuck.</p>
+          <button ref={startRef} onClick={() => setPhase('play')} className="btn btn-primary btn-lg mt-8 w-full max-w-xs">
+            Let's go <ArrowRight size={18} strokeWidth={1.5} aria-hidden />
           </button>
           <button
             onClick={() => {
@@ -449,34 +456,30 @@ export function Lesson({ chapterId }: { chapterId: string }) {
               setTurn((t) => t + 1);
               setPhase('cards');
             }}
-            className="mt-4 min-h-10 text-sm font-medium text-ink-3 hover:text-ink"
+            className="btn btn-quiet mt-2"
           >
             Review the cards again
           </button>
         </motion.div>
       )}
+      </main>
     </div>
   );
 }
 
 function ReviewEmpty({ next }: { next?: Chapter }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="flex flex-1 flex-col items-center justify-center py-10 text-center">
-      <span aria-hidden className="grid h-20 w-20 place-items-center rounded-full text-bg" style={{ background: 'var(--grad)', boxShadow: '0 18px 40px -16px color-mix(in oklab, var(--accent-2) 70%, transparent)' }}>
-        <PartyPopper size={34} />
-      </span>
-      <h2 className="font-display mt-6 text-3xl font-semibold">All caught up</h2>
-      <p className="mt-2 max-w-sm text-balance text-ink-2">Nothing to review right now. Come back tomorrow, or start the next chapter.</p>
+    <motion.div {...rise} className="flex flex-1 flex-col items-center justify-center py-12 text-center">
+      <p className="meta">0 elements due</p>
+      <h2 className="t-title mt-3">All caught up</h2>
+      <p className="mt-3 max-w-sm text-balance text-ink-2">Nothing to review right now. Come back tomorrow, or start the next chapter.</p>
       {next ? (
-        <a href={`#/learn/${next.id}`} className="btn-primary mt-8 flex h-14 w-full max-w-xs items-center justify-center gap-2 rounded-2xl px-4 text-base">
-          <span className="truncate">
-            <span aria-hidden>{next.emoji} </span>
-            {next.title}
-          </span>
-          <ArrowRight size={18} aria-hidden className="shrink-0" />
+        <a href={`#/learn/${next.id}`} className="btn btn-primary btn-lg mt-8 w-full max-w-xs">
+          <span className="truncate">{next.title}</span>
+          <ArrowRight size={18} strokeWidth={1.5} aria-hidden className="shrink-0" />
         </a>
       ) : null}
-      <a href="#/learn" className={`${next ? 'mt-4 text-sm text-ink-3 hover:text-ink' : 'btn-primary mt-8 flex h-14 w-full max-w-xs items-center justify-center rounded-2xl'} font-medium`}>
+      <a href="#/learn" className={`btn ${next ? 'btn-quiet mt-2' : 'btn-primary btn-lg mt-8 w-full max-w-xs'}`}>
         Back to the learning path
       </a>
     </motion.div>
@@ -484,54 +487,59 @@ function ReviewEmpty({ next }: { next?: Chapter }) {
 }
 
 /** Shared card height: grows with the viewport, never smaller than a comfortable read. */
-const CARD_H = 'h-[clamp(400px,calc(100dvh-330px),500px)]';
+const CARD_H = 'h-[clamp(380px,calc(100dvh-288px),560px)]';
+
+/** The ruled head of an index card: the category on the left, where it sits on the table on the right. */
+function CardHead({ e }: { e: Element }) {
+  return (
+    <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-line px-5">
+      <span className="flex min-w-0 items-center gap-2 text-[13px] font-medium text-ink-2">
+        <span className="dot" style={{ '--c': catVar(e.category) } as CSSProperties} />
+        <span className="truncate">{categoryLabel(e.category)}</span>
+      </span>
+      <span className="meta shrink-0">
+        Group {e.group ?? '–'} · Period {e.period}
+      </span>
+    </div>
+  );
+}
 
 /**
- * A two-sided flashcard. The front asks, the back answers. Only the face you can see is
+ * A two-sided index card. The front asks, the back answers. Only the face you can see is
  * exposed to assistive tech; the flip button below the card is the accessible control.
  */
 function FlipCard({ e, flipped, onFlip }: { e: Element; flipped: boolean; onFlip: () => void }) {
-  const c = catVar(e.category);
-  const face = 'absolute inset-0 flex flex-col overflow-hidden rounded-[28px] border [backface-visibility:hidden]';
-  const border = `color-mix(in oklab, ${c} 35%, transparent)`;
+  const face = 'card absolute inset-0 flex flex-col overflow-hidden [backface-visibility:hidden]';
   return (
     // Tapping the card is a pointer shortcut; keyboard and screen-reader users have the "Show answer" button.
-    <div onClick={onFlip} className={`relative block ${CARD_H} w-full select-none text-left`} style={{ '--c': c } as CSSProperties}>
-      <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{ rotateY: flipped ? 180 : 0 }} transition={{ type: 'spring', damping: 20, stiffness: 180 }}>
-        <div aria-hidden={flipped} inert={flipped} className={`${face} solid items-center justify-center p-6 text-center`} style={{ borderColor: border, boxShadow: `0 30px 60px -30px color-mix(in oklab, ${c} 60%, transparent)` }}>
-          <div className="pointer-events-none absolute inset-0 rounded-[28px] opacity-30" style={{ background: `radial-gradient(80% 60% at 50% 0%, ${c}, transparent 70%)` }} />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 opacity-10" style={{ background: `radial-gradient(60% 80% at 50% 100%, ${c}, transparent 70%)` }} />
-          <span className="cat-chip relative mb-5 rounded-full px-3 py-1 text-xs font-semibold">{categoryLabel(e.category)}</span>
-          <div className="relative h-36 w-36 drop-shadow-[0_18px_30px_rgb(0_0_0/0.35)]" aria-hidden>
-            <ElementTile element={e} size={144} showName={false} />
+    <div onClick={onFlip} className={`relative block ${CARD_H} w-full select-none text-left`}>
+      <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{ rotateY: flipped ? 180 : 0 }} transition={tween(DUR.enter)}>
+        <div aria-hidden={flipped} inert={flipped} className={face}>
+          <CardHead e={e} />
+          <div className="flex flex-1 flex-col items-center justify-center px-6 pb-4 text-center">
+            <div className="h-36 w-36" aria-hidden>
+              <ElementTile element={e} size={144} showName={false} />
+            </div>
+            <span className="sr-only">
+              Symbol {spell(e.symbol)}, atomic number {e.number}.
+            </span>
+            <h2 className="mt-8 text-balance text-2xl font-medium leading-tight">What's this element called?</h2>
           </div>
-          <span className="sr-only">
-            Symbol {spell(e.symbol)}, atomic number {e.number}.
-          </span>
-          <h2 className="font-display relative mt-6 text-balance text-3xl font-semibold">What's this element called?</h2>
-          <p className="relative mt-1.5 text-sm font-medium text-ink-2">
-            Group {e.group ?? '—'} · Period {e.period}
-          </p>
         </div>
-        <div aria-hidden={!flipped} inert={!flipped} className={`${face} solid justify-center py-6 [transform:rotateY(180deg)]`} style={{ borderColor: border }}>
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-32 opacity-20" style={{ background: `radial-gradient(80% 100% at 50% 0%, ${c}, transparent 70%)` }} />
-          <div className="relative flex items-center gap-4 shrink-0 px-6 pb-5">
-            <div className="h-16 w-16 shrink-0" aria-hidden>
-              <ElementTile element={e} size={64} showName={false} />
+        <div aria-hidden={!flipped} inert={!flipped} className={`${face} [transform:rotateY(180deg)]`}>
+          <CardHead e={e} />
+          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-6 thin-scroll">
+            <div className="flex shrink-0 items-center gap-4">
+              <div className="h-16 w-16 shrink-0" aria-hidden>
+                <ElementTile element={e} size={64} showName={false} />
+              </div>
+              <h2 className="t-title min-w-0 text-balance">{e.name}</h2>
             </div>
-            <div className="min-w-0">
-              <h2 className="font-display text-balance text-3xl font-semibold leading-tight">{e.name}</h2>
-              <div className="cat-ink mt-0.5 text-xs font-semibold">{categoryLabel(e.category)}</div>
-            </div>
-          </div>
-          <div className="relative flex min-h-0 flex-col gap-4 overflow-y-auto px-6">
-            {e.summary && <p className="text-[17px] leading-relaxed text-ink">{firstSentence(e.summary)}</p>}
+            {e.summary && <p className="text-[17px] leading-7 text-ink">{firstSentence(e.summary)}</p>}
             {e.fact && (
-              <div className="rounded-2xl border p-4 text-[15px] leading-relaxed" style={{ background: `color-mix(in oklab, ${c} 9%, transparent)`, borderColor: `color-mix(in oklab, ${c} 22%, transparent)` }}>
-                <div className="cat-ink mb-1 text-xs font-bold uppercase tracking-wider">
-                  <span aria-hidden>💡 </span>Fun fact
-                </div>
-                {e.fact}
+              <div className="rounded-control bg-surface-2 p-4">
+                <div className="label">Fun fact</div>
+                <p className="mt-1 text-[15px] leading-6 text-ink">{e.fact}</p>
               </div>
             )}
           </div>
@@ -546,42 +554,40 @@ function MnemonicCard({ chapter }: { chapter: Chapter }) {
   // Long rhymes get tighter rows; the card also grows rather than clipping.
   const dense = words.length > 7;
   return (
-    <div className={`solid relative flex min-h-[clamp(430px,calc(100dvh-300px),520px)] flex-col overflow-hidden rounded-[28px] border border-line p-5 sm:p-6`} style={{ boxShadow: 'var(--shadow-lg)' }}>
-      <div className="pointer-events-none absolute inset-0 opacity-25" style={{ background: 'radial-gradient(80% 50% at 50% 0%, var(--accent), transparent 70%)' }} />
-      <div className="relative flex items-center gap-2 text-sm font-semibold text-accent-2">
-        <span className="grid h-7 w-7 place-items-center rounded-lg bg-accent-2/15">
-          <Sparkles size={15} />
-        </span>
-        Memory trick
+    <div className="card flex min-h-[clamp(380px,calc(100dvh-288px),560px)] flex-col overflow-hidden">
+      <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-line px-5">
+        <span className="text-[13px] font-medium text-ink-2">Memory trick</span>
+        <span className="meta">{words.length} words</span>
       </div>
-      <p className="relative mt-2 text-sm text-ink-2">The first letters spell the elements in order.</p>
-      <ol className={`relative mt-4 flex flex-1 flex-col justify-center ${dense ? 'gap-1.5' : 'gap-2.5'}`}>
-        {words.map(([word, symbol], i) => {
-          const e = byNumber(chapter.numbers[i]);
-          return (
-            <motion.li key={word + i} className="flex items-center gap-3" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.07 }}>
-              <span className={`cat-chip grid shrink-0 place-items-center rounded-lg font-bold h-8 w-11 text-sm`} style={{ '--c': catVar(e.category) } as CSSProperties}>
-                {symbol}
-              </span>
-              <span className="font-display text-xl font-semibold leading-tight">
-                <Highlight word={word} symbol={symbol} />
-              </span>
-            </motion.li>
-          );
-        })}
-      </ol>
+      <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
+        <p className="text-sm text-ink-2">The first letters spell the elements in order</p>
+        <ol className={`mt-4 flex flex-1 flex-col justify-center ${dense ? 'gap-2' : 'gap-3'}`}>
+          {words.map(([word, symbol], i) => {
+            const e = byNumber(chapter.numbers[i]);
+            return (
+              <li key={word + i} className="flex items-center gap-3" style={{ '--c': catVar(e.category) } as CSSProperties}>
+                <ElementChip element={e} size={dense ? 32 : 36} />
+                <span className="text-xl leading-tight text-ink-2">
+                  <Highlight word={word} symbol={symbol} />
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
     </div>
   );
 }
 
-/** Highlights the letters of the word that match the symbol. */
+/** The letters of the word that match the symbol, printed in the element's ink. */
 function Highlight({ word, symbol }: { word: string; symbol: string }) {
   const lower = word.toLowerCase();
   const s = symbol.toLowerCase();
+  const mark = (t: string) => <span className="cat-ink font-medium">{t}</span>;
   if (lower.startsWith(s)) {
     return (
       <>
-        <span className="text-grad">{word.slice(0, s.length)}</span>
+        {mark(word.slice(0, s.length))}
         {word.slice(s.length)}
       </>
     );
@@ -591,13 +597,13 @@ function Highlight({ word, symbol }: { word: string; symbol: string }) {
     return (
       <>
         {word.slice(0, i)}
-        <span className="text-grad">{word.slice(i, i + s.length)}</span>
+        {mark(word.slice(i, i + s.length))}
         {word.slice(i + s.length)}
       </>
     );
   return (
     <>
-      <span className="text-grad">{word[0]}</span>
+      {mark(word[0])}
       {word.slice(1)}
     </>
   );

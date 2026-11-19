@@ -23,7 +23,7 @@ test.describe('home and navigation', { tag: '@phone' }, () => {
     const sections = [
       { link: 'Learn', hash: '#/learn', heading: 'Learn it, then play it' },
       { link: 'Play', hash: '#/play', heading: 'Choose a region' },
-      { link: 'Explore', hash: '#/explore', heading: 'The living table' },
+      { link: 'Explore', hash: '#/explore', heading: 'The periodic table' },
       ...(phone ? [] : [{ link: 'Progress', hash: '#/progress', heading: 'Your progress' }]),
       { link: 'Home', hash: '#/', heading: undefined },
     ];

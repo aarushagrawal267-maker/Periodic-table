@@ -12,11 +12,11 @@ test('review: a new player has nothing due and is pointed to the first chapter',
   await expect(page.getByRole('progressbar', { name: 'Cards learned' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Skip to game' })).toHaveCount(0);
 
-  const next = page.getByRole('link', { name: 'The Lightest Ten' });
+  const next = page.getByRole('link', { name: 'The lightest ten' });
   await expect(next).toHaveAttribute('href', '#/learn/lightest-ten');
   await expect(page.getByRole('link', { name: 'Back to the learning path' })).toHaveAttribute('href', '#/learn');
 
   await next.click();
-  await expect(page.getByRole('heading', { level: 1, name: 'The Lightest Ten' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'The lightest ten' })).toBeVisible();
   expect(consoleErrors).toEqual([]);
 });

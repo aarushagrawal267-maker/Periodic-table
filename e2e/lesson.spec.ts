@@ -2,7 +2,7 @@ import { Board, expect, test } from './support';
 
 test('lesson: flashcards, place all ten, and the chapter is marked complete', async ({ page }) => {
   await page.goto('./#/learn/lightest-ten');
-  await expect(page.getByRole('heading', { level: 1, name: 'The Lightest Ten' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'The lightest ten' })).toBeVisible();
 
   // Mnemonic card + 10 element cards.
   const learned = page.getByRole('progressbar', { name: 'Cards learned' });
@@ -48,14 +48,14 @@ test('lesson: flashcards, place all ten, and the chapter is marked complete', as
   await expect(results.getByRole('heading', { name: 'Flawless' })).toBeVisible();
   await expect(results.getByRole('img', { name: '3 of 3 stars' })).toBeVisible();
   await expect(results.getByText('10/10')).toBeVisible();
-  await expect(results.getByRole('button', { name: 'Next chapter: The Next Ten' })).toBeVisible();
+  await expect(results.getByRole('button', { name: 'Next chapter: The next ten' })).toBeVisible();
 
   // The results exit button returns a lesson to the learning path.
   await results.getByRole('button', { name: 'Back to path' }).click();
   await expect(page).toHaveURL(/#\/learn$/);
-  const chapter = page.getByRole('link', { name: 'Chapter 1: The Lightest Ten, completed with 3 stars' });
+  const chapter = page.getByRole('link', { name: 'Chapter 1: The lightest ten, completed with 3 stars' });
   await expect(chapter).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Chapter 2: The Next Ten, up next' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Chapter 2: The next ten, up next' })).toBeVisible();
 
   // Completion is persisted, not just held in memory.
   await page.reload();
@@ -64,5 +64,5 @@ test('lesson: flashcards, place all ten, and the chapter is marked complete', as
   // Home now shows ten of the first twenty met, and points to the next chapter.
   await page.goto('./#/');
   await expect(page.getByRole('progressbar', { name: 'Your first 20 elements' })).toHaveAttribute('aria-valuenow', '10');
-  await expect(page.getByRole('link', { name: 'Continue: The Next Ten' })).toHaveAttribute('href', '#/learn/next-ten');
+  await expect(page.getByRole('link', { name: 'Continue: The next ten' })).toHaveAttribute('href', '#/learn/next-ten');
 });

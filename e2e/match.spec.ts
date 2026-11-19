@@ -2,7 +2,7 @@ import { elementByNameOrSymbol, expect, test } from './support';
 
 test('match: the board loads face down, and pairing every symbol with its name finishes the round', async ({ page, consoleErrors }) => {
   await page.goto('./#/match');
-  await expect(page.getByRole('heading', { level: 1, name: 'Match Pairs' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Match pairs' })).toBeVisible();
 
   const board = page.getByRole('group', { name: /^\d+ cards$/ });
   const cards = board.getByRole('button');

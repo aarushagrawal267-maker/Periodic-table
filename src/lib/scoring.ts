@@ -47,13 +47,13 @@ export function levelFromXp(xp: number) {
 const TITLES = [
   'Novice',
   'Apprentice',
-  'Lab Assistant',
+  'Lab assistant',
   'Chemist',
   'Alchemist',
   'Researcher',
   'Professor',
   'Grandmaster',
-  'Nobel Laureate',
+  'Nobel laureate',
 ];
 export const titleForLevel = (level: number) => TITLES[Math.min(TITLES.length - 1, Math.floor((level - 1) / 4))];
 

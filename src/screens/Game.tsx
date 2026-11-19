@@ -1,7 +1,8 @@
 import { AnimatePresence, motion, useIsPresent } from 'motion/react';
-import { ArrowLeft, Heart, Lightbulb, Volume2, VolumeX } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react';
-import { ElementTile } from '../components/ElementTile';
+import { ArrowLeft, Lightbulb, Volume2, VolumeX } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { ElementTile, tileRadius } from '../components/ElementTile';
+import { DUR, EASE, tween } from '../components/motion';
 import { PeriodicGrid, type CellRect } from '../components/PeriodicGrid';
 import { AnimatedNumber, Elapsed } from '../components/Stats';
 import { Sheet } from '../components/Sheet';
@@ -290,25 +291,24 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
         >
           <motion.div
             className="h-full w-full"
-            initial={fresh ? { scale: 1.5, opacity: 0, rotate: -6 } : false}
-            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            transition={{ type: 'spring', damping: 14, stiffness: 260 }}
+            initial={fresh ? { scale: 1.12, opacity: 0 } : false}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={tween(DUR.enter)}
           >
             <ElementTile element={e} size={rect.size} showNumber={rect.size >= 44} quietNumber />
           </motion.div>
           {fresh && (
             <>
               <span
-                className="pointer-events-none absolute inset-0 rounded-lg"
-                style={{ border: `2px solid ${catVar(e.category)}`, animation: 'ripple 0.7s var(--ease-out-expo) forwards' }}
+                className="pointer-events-none absolute inset-0"
+                style={{ borderRadius: tileRadius(rect.size), border: `2px solid ${catVar(e.category)}`, animation: 'ripple 0.7s var(--ease-out) forwards' }}
               />
               <motion.span
                 key={state.event!.id}
-                className="font-display pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2 whitespace-nowrap text-sm font-bold text-good"
-                initial={{ y: 0, opacity: 1 }}
-                animate={{ y: -34, opacity: 0 }}
-                transition={{ duration: 0.9, ease: 'easeOut' }}
-                style={{ textShadow: '0 2px 10px rgb(0 0 0 / 0.6)' }}
+                className="num pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2 whitespace-nowrap rounded-tag bg-bg px-1 text-sm font-medium text-good"
+                initial={{ y: -4, opacity: 1 }}
+                animate={{ y: -24, opacity: 0 }}
+                transition={{ duration: 0.8, ease: EASE, opacity: { duration: 0.8, delay: 0.3, ease: EASE } }}
               >
                 +{state.event!.points}
               </motion.span>
@@ -318,7 +318,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
       );
     }
     if (!targetSet.has(e.number)) {
-      return <div className="h-full w-full rounded-md bg-surface opacity-50" style={{ borderRadius: Math.max(5, rect.size * 0.14) }} aria-hidden />;
+      return <div className="h-full w-full bg-[var(--cell-empty)]" style={{ borderRadius: tileRadius(rect.size) }} aria-hidden />;
     }
     const missed = state.event?.kind === 'miss' && state.event.row === e.row && state.event.col === e.col;
     const isOver = over === key;
@@ -335,13 +335,13 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
         onKeyDown={onSlotKey}
         onClick={() => state.selected && placeAt(state.selected, e.row, e.col)}
         aria-label={`Period ${e.period}, ${e.group ? `group ${e.group}` : 'f-block'}, empty${isHint ? ', hint' : ''}${state.selected ? `. Place ${byNumber(state.selected).name} here` : ''}`}
-        className={`slot relative h-full w-full transition-[transform,background,border-color] duration-150 ${state.selected ? 'slot-armed' : ''} ${missed ? 'flash-bad' : ''} ${isHint ? 'pulse-ring' : ''}`}
+        className={`slot relative h-full w-full transition-[transform,background-color,border-color] duration-[var(--dur-press)] ease-out ${state.selected ? 'slot-armed' : ''} ${missed ? 'flash-bad' : ''} ${isHint ? 'is-target' : ''}`}
         style={{
-          borderRadius: Math.max(5, rect.size * 0.14),
-          background: isOver ? 'color-mix(in oklab, var(--accent-2) 22%, transparent)' : isHint ? 'color-mix(in oklab, var(--accent-2) 14%, transparent)' : tint,
-          borderColor: isOver || isHint ? 'var(--accent-2)' : undefined,
+          borderRadius: tileRadius(rect.size),
+          background: isOver || isHint ? 'var(--accent-soft)' : tint,
+          borderColor: isOver || isHint ? 'var(--accent)' : undefined,
           borderStyle: isOver || isHint ? 'solid' : undefined,
-          transform: isOver ? 'scale(1.08)' : undefined,
+          transform: isOver ? 'scale(1.04)' : undefined,
           cursor: state.selected ? 'pointer' : 'default',
         }}
       />
@@ -349,59 +349,71 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
   };
 
   const progress = state.placed.length / config.targets.length;
+  const guide = state.selected ? (
+    <>
+      Tap where <span className="font-medium text-ink">{byNumber(state.selected).name}</span> belongs
+    </>
+  ) : (
+    <>Drag a tile onto the table, or tap a tile, then its cell</>
+  );
   const mult = multiplier(state.combo);
 
   return (
     <div className="relative flex min-h-dvh flex-col">
-      {/* HUD */}
-      <header className="glass sticky top-0 z-30 border-x-0 border-t-0">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-3 py-2.5 sm:px-6">
-          <button onClick={() => (state.phase === 'playing' && moved ? setConfirmLeave(true) : onExit())} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave round">
-            <ArrowLeft size={18} />
+      {/* HUD: quiet figures with labels. */}
+      <header className="sticky top-0 z-30 border-b border-line bg-bg">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:gap-4 sm:px-6">
+          <button onClick={() => (state.phase === 'playing' && moved ? setConfirmLeave(true) : onExit())} className="icon-btn -ml-3 md:-ml-2" aria-label="Leave round">
+            <ArrowLeft size={18} strokeWidth={1.5} />
           </button>
           <div className="min-w-0 flex-1">
-            <div className="flex items-baseline gap-2">
-              <h1 className="font-display truncate text-base font-semibold sm:text-lg">{config.title}</h1>
-              <span className="hidden truncate text-xs text-ink-3 sm:inline">{config.subtitle}</span>
+            <div className="flex items-baseline gap-3">
+              <h1 className="truncate text-base font-medium leading-6">{config.title}</h1>
+              <span className="meta hidden truncate sm:inline">{config.subtitle}</span>
             </div>
-            <div className="mt-1.5 flex items-center gap-2">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow={state.placed.length} aria-valuemin={0} aria-valuemax={config.targets.length} aria-label="Elements placed">
-                <motion.div className="h-full rounded-full" style={{ background: 'var(--grad)' }} animate={{ width: `${progress * 100}%` }} transition={{ type: 'spring', damping: 30, stiffness: 200 }} />
+            <div className="mt-1 flex items-center gap-3">
+              <div className="meter flex-1" role="progressbar" aria-valuenow={state.placed.length} aria-valuemin={0} aria-valuemax={config.targets.length} aria-label="Elements placed">
+                <div className="meter-fill" style={{ transform: `scaleX(${progress})` }} />
               </div>
-              <span className="text-xs tabular-nums text-ink-2">
+              <span className="meta">
                 {state.placed.length}/{config.targets.length}
               </span>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+          <div className="flex shrink-0 items-center gap-4 sm:gap-6">
             {expert && (
-              <div className="flex gap-0.5" aria-label={`${state.lives} lives left`}>
-                {Array.from({ length: EXPERT_LIVES }, (_, i) => (
-                  <Heart key={i} size={16} className={i < state.lives ? 'fill-bad text-bad' : 'text-ink-3'} />
-                ))}
+              <div className="text-right" aria-label={`${state.lives} lives left`} role="img">
+                <div className="text-xs leading-4 text-ink-3">Lives</div>
+                <div className="num text-base font-medium leading-6">
+                  <span className={state.lives <= 1 ? 'text-bad' : undefined}>{state.lives}</span>
+                  <span className="text-ink-3">/{EXPERT_LIVES}</span>
+                </div>
               </div>
             )}
             <div className={`hidden text-right ${learner ? '' : 'sm:block'}`}>
-              <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Time</div>
-              <div className="font-display text-sm font-semibold">
+              <div className="text-xs leading-4 text-ink-3">Time</div>
+              <div className="num text-base font-medium leading-6">
                 <Elapsed start={state.startedAt} end={state.endedAt} running={state.phase === 'playing'} />
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Score</div>
-              <div className="font-display text-sm font-semibold sm:text-base">
+            <div className="min-w-12 text-right">
+              <div className="text-xs leading-4 text-ink-3">Score</div>
+              <div className="num text-base font-medium leading-6">
                 <AnimatedNumber value={state.score} />
               </div>
             </div>
-            <button onClick={() => setSettings({ sound: !sound })} className="btn-ghost hidden h-10 w-10 place-items-center rounded-full sm:grid" aria-label={sound ? 'Mute sounds' : 'Unmute sounds'}>
-              {sound ? <Volume2 size={17} /> : <VolumeX size={17} />}
+            <button onClick={() => setSettings({ sound: !sound })} className="icon-btn -mr-2 hidden sm:inline-grid" aria-label={sound ? 'Mute sounds' : 'Unmute sounds'}>
+              {sound ? <Volume2 size={18} strokeWidth={1.5} /> : <VolumeX size={18} strokeWidth={1.5} />}
             </button>
           </div>
         </div>
       </header>
 
       {/* Board */}
-      <main ref={boardRef} className="relative z-10 flex flex-1 flex-col justify-center px-1 py-4 sm:px-6">
+      <main ref={boardRef} className="relative z-10 flex flex-1 flex-col px-1 pb-6 pt-4 sm:px-6 sm:py-8">
+        {/* On phones the board sits right under the header, like the chart at the top of the wall, and the spare
+            height falls above the hand where feedback appears. From sm it sits centred between header and hand. */}
+        <div aria-hidden className="hidden flex-1 sm:block" />
         <div className="relative mx-auto w-full max-w-7xl">
           <ComboBadge combo={state.combo} mult={mult} />
           <PeriodicGrid
@@ -410,38 +422,44 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
             minCell={config.targets.length > 40 || config.view ? 34 : 38}
             maxCell={72}
             showAxes
-            className="pb-2 pt-6"
+            className="pb-2 pt-8"
           />
+          {/* On phones the guide sits under the table it talks about; from sm it sits under the tray. */}
+          <p className="mt-4 px-4 text-center text-[13px] leading-5 text-ink-3 sm:hidden">{guide}</p>
         </div>
+        <div aria-hidden className="flex-1" />
       </main>
 
       {/* Tray */}
-      <footer ref={trayRef} className="glass safe-bottom sticky bottom-0 z-30 border-x-0 border-b-0">
-        {/* Teaching bubble after a wrong drop. Screen readers get the same words from the live region. */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-full flex justify-center px-3 pb-3" aria-hidden>
+      <footer ref={trayRef} className="safe-bottom sticky bottom-0 z-30 border-t border-line bg-bg">
+        {/* Teaching note after a wrong drop. Screen readers get the same words from the live region. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-full flex justify-center px-4 pb-3" aria-hidden>
           <AnimatePresence>
             {tip && (
               <motion.div
                 key={tip.id}
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98 }}
-                transition={{ type: 'spring', damping: 24, stiffness: 320 }}
-                className="solid relative max-w-[min(26rem,100%)] rounded-2xl border border-line-strong px-4 py-2.5 text-center text-sm font-medium leading-snug text-ink"
-                style={{ boxShadow: 'var(--shadow-lg)' }}
-                data-testid="miss-tip"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={tween(DUR.menu)}
+                className="flex max-w-[min(28rem,100%)] flex-wrap items-start gap-x-3 gap-y-1 rounded-control border border-line-strong bg-surface py-2 pl-3 pr-4 text-sm leading-5"
+                style={{ boxShadow: 'var(--shadow-md)' }}
               >
-                {tip.text}
-                <span
-                  className="solid absolute left-1/2 top-full -mt-[7px] h-3 w-3 -translate-x-1/2 rotate-45 border-b border-r border-line-strong"
-                  style={{ borderTop: 0, borderLeft: 0 }}
-                />
+                <span className="flex shrink-0 items-center gap-2 font-medium text-bad">
+                  <span className="dot" style={{ background: 'var(--bad)' }} />
+                  Not there
+                </span>
+                {tip.text && (
+                  <span className="text-ink" data-testid="miss-tip">
+                    {tip.text}
+                  </span>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-        <div className="mx-auto flex max-w-3xl items-center gap-2 px-2 pt-3 sm:gap-3 sm:px-6">
-          <div ref={tilesRef} className="flex min-w-0 flex-1 items-center justify-center gap-1.5 sm:gap-3" role="group" aria-label="Elements to place">
+        <div className="mx-auto flex max-w-3xl items-center justify-center gap-2 px-2 pt-3 sm:gap-6 sm:px-6">
+          <div ref={tilesRef} className="flex min-w-0 flex-1 items-center justify-center gap-1 sm:flex-none sm:gap-3" role="group" aria-label="Elements to place">
             <AnimatePresence mode="popLayout" initial={false}>
               {tiles.map((n, i) => (
                 <TrayButton
@@ -468,29 +486,21 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
             <button
               onClick={() => dispatch({ type: 'hint' })}
               disabled={state.phase !== 'playing'}
-              className="btn-ghost grid h-11 w-11 place-items-center rounded-2xl disabled:opacity-40 sm:h-12 sm:w-12"
+              className="btn btn-secondary w-11 px-0 text-ink-2 disabled:text-ink-3 sm:h-12 sm:w-12"
               aria-label="Hint: show where the selected element goes (H)"
               title="Hint (H)"
             >
-              <Lightbulb size={20} className="text-gold" />
+              <Lightbulb size={18} strokeWidth={1.5} />
             </button>
-            <span className="text-[10px] tabular-nums text-ink-3">{state.queue.length} left</span>
+            <span className="meta">{state.queue.length} left</span>
           </div>
         </div>
-        <p className="mx-auto mt-2.5 max-w-3xl px-4 text-center text-xs text-ink-3">
-          {state.selected ? (
-            <>
-              Tap where <b className="text-ink-2">{byNumber(state.selected).name}</b> belongs
-            </>
-          ) : (
-            <>Drag a tile onto the table, or tap a tile then tap its cell</>
-          )}
-        </p>
+        <p className="mx-auto mt-5 hidden max-w-3xl px-4 text-center text-[13px] leading-5 text-ink-3 sm:block">{guide}</p>
       </footer>
 
       {/* Drag ghost */}
       {dragging && (
-        <div ref={ghost} className="pointer-events-none fixed left-0 top-0 z-[70] h-[86px] w-[74px]" style={{ filter: 'drop-shadow(0 20px 30px rgb(0 0 0 / 0.5))' }} aria-hidden>
+        <div ref={ghost} className="pointer-events-none fixed left-0 top-0 z-[70] h-[84px] w-[72px]" style={{ filter: 'drop-shadow(0 8px 24px rgb(0 0 0 / 0.35))' }} aria-hidden>
           <TrayTile e={byNumber(dragging)} difficulty={config.difficulty} selected />
         </div>
       )}
@@ -498,21 +508,23 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
       {/* Countdown */}
       <AnimatePresence>
         {state.phase === 'countdown' && count > 0 && (
-          <motion.div className="fixed inset-0 z-40 grid place-items-center bg-bg/70 backdrop-blur-md" exit={{ opacity: 0 }}>
+          <motion.div className="fixed inset-0 z-40 grid place-items-center bg-bg" exit={{ opacity: 0 }} transition={tween(DUR.menu)}>
             <div className="text-center">
-              <AnimatePresence mode="popLayout">
-                <motion.div
-                  key={count}
-                  className="font-display text-grad text-[140px] font-bold leading-none"
-                  initial={{ scale: 2, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.4, opacity: 0 }}
-                  transition={{ type: 'spring', damping: 14, stiffness: 200 }}
-                >
-                  {count}
-                </motion.div>
-              </AnimatePresence>
-              <p className="mt-4 text-ink-2">{config.title}</p>
+              <p className="text-ink-2">{config.title}</p>
+              <div className="relative mt-2 h-28 w-40">
+                <AnimatePresence initial={false}>
+                  <motion.div
+                    key={count}
+                    className="num absolute inset-0 grid place-items-center text-[112px] font-medium leading-none tracking-[-0.03em]"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={tween(DUR.menu)}
+                  >
+                    {count}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
           </motion.div>
         )}
@@ -523,16 +535,16 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
       </div>
 
       <Sheet open={confirmLeave} onClose={() => setConfirmLeave(false)} label="Leave round">
-        <div className="p-7 pt-9">
-          <h2 className="font-display text-2xl font-semibold">{isDaily ? "Leave today's daily?" : 'Leave this round?'}</h2>
+        <div className="p-6 pt-8 sm:pt-6">
+          <h2 className="t-heading pr-12">{isDaily ? "Leave today's daily?" : 'Leave this round?'}</h2>
           <p className="mt-2 text-ink-2">
             {isDaily ? "Leaving now uses today's only try, and an unfinished daily has no score. A new puzzle comes at midnight." : "Your progress in this round won't be saved."}
           </p>
           <div className="mt-6 flex gap-3">
-            <button className="btn-ghost h-12 flex-1 rounded-2xl font-medium" onClick={() => setConfirmLeave(false)}>
+            <button className="btn btn-secondary flex-1" onClick={() => setConfirmLeave(false)}>
               Keep playing
             </button>
-            <button className="h-12 flex-1 rounded-2xl bg-bad/15 font-medium text-bad" onClick={onExit}>
+            <button className="btn btn-danger flex-1" onClick={onExit}>
               Leave
             </button>
           </div>
@@ -568,9 +580,10 @@ function whereIs(e: Element) {
   return `in period ${e.period}, group ${e.group}`;
 }
 
-/** Short, friendly nudge after a wrong drop. More help on easier levels. */
+/** Short nudge after a wrong drop: what the element's number tells you. More help on easier levels. */
 function missTip(e: Element, difficulty: Difficulty) {
-  if (difficulty === 'expert') return 'Not there.';
+  // Expert gets no teaching note: the miss costs a life, shown in the figures above.
+  if (difficulty === 'expert') return '';
   if (difficulty === 'learner') return `${e.name} is number ${e.number}, so it sits ${whereIs(e)}.`;
   return `${e.name} is number ${e.number}. Try counting along the rows.`;
 }
@@ -642,48 +655,43 @@ function TrayButton({ e, index, difficulty, selected, missed, dimmed, onActivate
       aria-keyshortcuts={present ? String(index + 1) : undefined}
       inert={!present}
       tabIndex={present ? undefined : -1}
-      initial={{ y: 40, opacity: 0, scale: 0.8 }}
-      animate={{ y: selected ? -10 : 0, opacity: dimmed ? 0.35 : 1, scale: selected ? 1.06 : 1 }}
-      exit={{ y: -60, opacity: 0, scale: 0.6 }}
-      transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+      initial={{ y: 8, opacity: 0 }}
+      animate={{ y: selected ? -8 : 0, opacity: dimmed ? 0.35 : 1 }}
+      exit={{ y: -8, opacity: 0, scale: 0.92 }}
+      transition={tween(DUR.menu)}
       {...(present ? pointer : {})}
       onKeyDown={present ? onKeyDown : undefined}
-      className={`relative h-[66px] w-[57px] shrink-0 cursor-grab touch-none rounded-2xl transition-[filter] sm:h-[84px] sm:w-[74px] ${missed ? 'animate-shake' : ''}`}
-      style={{
-        pointerEvents: present ? undefined : 'none',
-        filter: selected ? 'drop-shadow(0 10px 22px color-mix(in oklab, var(--accent-2) 55%, transparent))' : undefined,
-      }}
+      className={`relative h-[68px] w-[60px] shrink-0 cursor-grab touch-none rounded-control sm:h-[84px] sm:w-[72px] ${missed ? 'animate-shake' : ''}`}
+      style={{ pointerEvents: present ? undefined : 'none' }}
     >
       <TrayTile e={e} difficulty={difficulty} selected={selected} />
-      <kbd aria-hidden className="solid absolute -bottom-2 left-1/2 hidden -translate-x-1/2 rounded-md border border-line px-1.5 text-[10px] font-semibold leading-4 text-ink-3 sm:block">{index + 1}</kbd>
+      <kbd aria-hidden className="kbd absolute -bottom-3 left-1/2 hidden -translate-x-1/2 sm:inline-grid">
+        {index + 1}
+      </kbd>
     </motion.button>
   );
 }
 
 /**
- * Tray tiles share one neutral accent colour on every level, so the puzzle is
- * solved by position rather than by matching category colours. Learner still
- * shows the atomic number.
+ * Tray tiles are printed in plain ink on every level, so the puzzle is solved by position rather than by
+ * matching category colours. A tile takes its category colour once it lands on the table.
+ * Learner still shows the atomic number in the corner.
  */
 function TrayTile({ e, difficulty, selected }: { e: Element; difficulty: Difficulty; selected: boolean }) {
   const learner = difficulty === 'learner';
   return (
-    <div className={`relative h-full w-full rounded-2xl transition-shadow ${selected ? 'ring-2 ring-accent-2 ring-offset-2 ring-offset-bg' : ''}`} style={{ '--c': 'var(--accent-2)' } as CSSProperties}>
+    <div className={`relative h-full w-full rounded-control ${selected ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg' : ''}`}>
       <ElementTile
         element={e}
-        size={74}
+        size={80}
         showNumber={false}
         showName={difficulty !== 'expert'}
-        color="var(--accent-2)"
+        color="var(--ink-2)"
         // Small phone tiles: nudge the symbol down so the atomic number never overlaps it.
-        className={`rounded-2xl ${learner ? 'pt-3 sm:pt-0' : ''}`}
+        className={`rounded-control ${learner ? 'pt-3 sm:pt-0' : ''}`}
       />
       {learner && (
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-[7px] top-[4px] text-[10px] font-semibold tabular-nums leading-none sm:left-[9%] sm:top-[7%] sm:text-[12.5px] sm:font-medium"
-          style={{ color: 'color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink))' }}
-        >
+        <span aria-hidden className="tile-number pointer-events-none absolute left-1.5 top-1.5 text-[11px] text-ink sm:left-2 sm:top-2 sm:text-xs">
           {e.number}
         </span>
       )}
@@ -691,28 +699,25 @@ function TrayTile({ e, difficulty, selected }: { e: Element; difficulty: Difficu
   );
 }
 
+/** The combo, as a quiet annotation centred above the board: how many in a row, and the multiplier it earns. */
 function ComboBadge({ combo, mult }: { combo: number; mult: number }) {
   return (
-    <div className="pointer-events-none absolute right-2 top-0 z-20 sm:right-4">
+    <div className="pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2">
       <AnimatePresence>
         {combo >= 3 && (
           <motion.div
-            key={mult}
-            initial={{ scale: 0.5, opacity: 0, y: -6 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.6, opacity: 0 }}
-            transition={{ type: 'spring', damping: 12, stiffness: 300 }}
-            className="flex items-center gap-2 rounded-full border border-line-strong bg-surface-2 px-3 py-1 backdrop-blur"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={tween(DUR.menu)}
+            className="flex h-6 items-baseline gap-2 text-sm leading-6"
           >
-            <span className="text-xs text-ink-2">Combo</span>
-            <motion.span key={combo} initial={{ scale: 1.6 }} animate={{ scale: 1 }} className="font-display text-sm font-bold tabular-nums">
-              {combo}
-            </motion.span>
-            <span className="text-grad font-display text-sm font-bold">×{mult}</span>
+            <span className="text-xs text-ink-3">Combo</span>
+            <span className="num font-medium text-ink">{combo}</span>
+            <span className="num font-medium text-accent">×{mult}</span>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   );
 }
-

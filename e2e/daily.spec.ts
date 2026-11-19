@@ -14,7 +14,7 @@ test('daily: complete today\'s challenge once, then the page shows it as done', 
 
   const results = board.results();
   await expect(results).toBeVisible();
-  await expect(results.getByText(/^Daily Challenge #\d+$/)).toBeVisible();
+  await expect(results.getByText(/^Daily challenge #\d+$/)).toBeVisible();
   await expect(results.getByText('12/12')).toBeVisible();
   await results.getByRole('button', { name: 'Back to daily' }).click();
 
@@ -67,7 +67,7 @@ test('daily: leaving after the first move warns, then uses the attempt with no s
 
   // Home says the same thing: no score, no "keep your streak".
   await page.goto('./#/');
-  const card = page.getByRole('link', { name: /Daily Challenge #\d+/ });
+  const card = page.getByRole('link', { name: /Daily challenge #\d+/ });
   await expect(card.getByText('Attempt used today')).toBeVisible();
   await expect(card.getByText('See result')).toHaveCount(0);
 });

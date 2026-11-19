@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { formatTime } from '../lib/scoring';
 
 /** Number that tweens to its new value. */
@@ -37,34 +37,25 @@ export function Elapsed({ start, end, running }: { start: number; end: number; r
   return <span className="tabular-nums">{formatTime(Math.max(0, ms))}</span>;
 }
 
-/** Circular progress ring. */
+/** Circular progress ring: a hairline track and one arc, in the accent unless a colour is given. */
 export function Ring({ value, size = 56, stroke = 6, children, color }: { value: number; size?: number; stroke?: number; children?: React.ReactNode; color?: string }) {
-  // Each ring gets its own gradient id, so pages with several rings have no duplicate ids.
-  const gradId = `ring-grad-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   return (
-    <div className="relative grid place-items-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <defs>
-          <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="var(--accent)" />
-            <stop offset="0.6" stopColor="var(--accent-2)" />
-            <stop offset="1" stopColor="var(--accent-3)" />
-          </linearGradient>
-        </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--line)" strokeWidth={stroke} />
+    <div className="relative grid shrink-0 place-items-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90" aria-hidden>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--line-strong)" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
           fill="none"
-          stroke={color ?? `url(#${gradId})`}
+          stroke={color ?? 'var(--accent)'}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={c}
           strokeDashoffset={c * (1 - Math.min(1, Math.max(0, value)))}
-          style={{ transition: 'stroke-dashoffset 1s var(--ease-out-expo)' }}
+          style={{ transition: 'stroke-dashoffset var(--dur-enter) var(--ease-out)' }}
         />
       </svg>
       <div className="absolute inset-0 grid place-items-center">{children}</div>

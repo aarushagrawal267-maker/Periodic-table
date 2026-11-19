@@ -1,23 +1,25 @@
 import { motion } from 'motion/react';
-import { ArrowRight, BarChart3, BrainCircuit, CalendarDays, Check, Flame, GraduationCap, Hand, Lightbulb, PartyPopper, Play, RefreshCw, ShieldCheck, Sparkles, Star, Telescope, Trophy } from 'lucide-react';
-import { useMemo, type CSSProperties } from 'react';
+import { ArrowRight, BarChart3, CalendarDays, ChevronRight, GraduationCap, ListChecks, RefreshCw, Shuffle, Star } from 'lucide-react';
+import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { goalLabel, useDailyGoal } from '../components/DailyGoal';
-import { ElementTile } from '../components/ElementTile';
+import { ElementChip, ElementTile } from '../components/ElementTile';
 import { MiniTable } from '../components/MiniTable';
 import { PeriodicGrid } from '../components/PeriodicGrid';
+import { TrailSquares } from '../components/Results';
 import { Ring } from '../components/Stats';
+import { DUR, STAGGER, rise, tween } from '../components/motion';
 import { DAILY_SIZE, dailyNumber, todayKey } from '../lib/daily';
-import { ELEMENTS, byNumber, catVar, categoryLabel } from '../lib/elements';
+import { formatDate } from '../lib/date';
+import { ELEMENTS, byNumber, bySymbol, catVar, categoryLabel, formatNumber, type Element } from '../lib/elements';
+import { THINGS } from '../lib/everyday';
 import { hashString } from '../lib/random';
 import { REGIONS } from '../lib/regions';
-import { CHAPTERS } from '../lib/chapters';
+import { CHAPTERS, type Chapter } from '../lib/chapters';
 import { dueForReview } from '../lib/review';
 import { levelFromXp, titleForLevel } from '../lib/scoring';
 import { liveStreak, masteredCount, useProgress, type Mastery } from '../store/progress';
 import { useUi } from '../store/ui';
 import { Countdown } from './Daily';
-
-const spring = { type: 'spring', damping: 24, stiffness: 220 } as const;
 
 /** Hydrogen to calcium: the first two chapters of the learning path. */
 const FIRST_CHAPTERS = CHAPTERS.slice(0, 2);
@@ -25,13 +27,292 @@ const FIRST_20 = FIRST_CHAPTERS.flatMap((c) => c.numbers);
 
 /** Elements you have started (strength 1 to 3) but not yet mastered. */
 const learningCount = (m: Record<number, Mastery>) => Object.values(m).filter((x) => x.s >= 1 && x.s < 4).length;
+/** Met: right at least once (strength 1 or more). The same rule lights up the first 20 and the table map. */
+const isMet = (m: Record<number, Mastery>, n: number) => (m[n]?.s ?? 0) >= 1;
 
-function greeting() {
-  const h = new Date().getHours();
-  return h < 5 ? 'Up late' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-}
+/** Two everyday objects from In real life, shown with the elements inside them. */
+const LIFE_SAMPLES = ['phone', 'fireworks'].map((id) => THINGS.find((t) => t.id === id)!).filter(Boolean);
+
+const PAGE = 'mx-auto max-w-7xl px-4 sm:px-6';
 
 export function Home() {
+  const p = useProgress();
+  const key = todayKey();
+  const lvl = levelFromXp(p.xp);
+  const mastered = masteredCount(p.mastery);
+  const learning = learningCount(p.mastery);
+  const returning = p.stats.rounds > 0 || p.stats.quizzes > 0;
+  const next = REGIONS.find((r) => !Object.keys(p.best).some((k) => k.startsWith(r.id + ':'))) ?? REGIONS[REGIONS.length - 1];
+  const nextChapter = CHAPTERS.find((c) => !p.chapters[c.id]) ?? CHAPTERS[0];
+  const firstChapter = FIRST_CHAPTERS.find((c) => !p.chapters[c.id]);
+  const starter = !!firstChapter;
+  const firstDone = FIRST_20.filter((n) => isMet(p.mastery, n)).length;
+  const featured = useMemo(() => ELEMENTS[hashString('eotd:' + key) % ELEMENTS.length], [key]);
+  // Recomputed when mastery changes; "now" is read at render.
+  const due = useMemo(() => dueForReview(p.mastery), [p.mastery]);
+  const lessonHref = `#/learn/${(firstChapter ?? nextChapter).id}`;
+  const achievements = Object.keys(p.achievements).length;
+
+  const today = (
+    <TodayList
+      layout="strip"
+      due={due}
+      lessonHref={lessonHref}
+      nextChapter={starter ? undefined : nextChapter}
+      level={starter ? { level: lvl.level, learning, mastered, achievements } : undefined}
+    />
+  );
+
+  return (
+    <div className="overflow-x-clip">
+      {/* Hero: one first step for a new student, today's round for a returning one. The table is the visual. */}
+      <section aria-labelledby="home-title" className={`${PAGE} grid gap-10 pt-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16 lg:items-center lg:pt-16`}>
+        <motion.div {...rise}>
+          {starter ? (
+            <>
+              <h1 id="home-title" className="t-display max-w-xl">
+                Learn the first 20 elements. Three minutes at a time
+              </h1>
+              <p className="mt-4 max-w-lg text-lg leading-7 text-ink-2">
+                {returning
+                  ? 'Pick up where you left off. Periodica remembers what you find hard and brings it back until it sticks.'
+                  : 'Short lessons with memory tricks, then quick games to make them stick. Start with hydrogen to calcium: the elements in air, water, salt and you.'}
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <a href={`#/learn/${firstChapter.id}`} className="btn btn-primary btn-lg">
+                  {firstChapter === FIRST_CHAPTERS[0] && !p.mastery[1] ? 'Start the first lesson' : `Continue: ${firstChapter.title}`}
+                </a>
+                <a href="#/match" className="btn btn-secondary btn-lg">
+                  Try a quick game
+                </a>
+              </div>
+            </>
+          ) : (
+            <>
+              <h1 id="home-title" className="t-display">
+                Next: {next.name}
+              </h1>
+              <p className="mt-4 max-w-lg text-lg leading-7 text-ink-2">Pick up where you left off. Periodica remembers what you find hard and brings it back until it sticks.</p>
+              <a href={`#/play/${next.id}`} className="btn btn-primary btn-lg mt-8 w-full sm:w-auto">
+                Play {next.name}
+              </a>
+            </>
+          )}
+        </motion.div>
+
+        <motion.div initial={rise.initial} animate={rise.animate} transition={tween(DUR.enter, STAGGER)}>
+          {starter ? (
+            <FirstTwenty done={firstDone} mastery={p.mastery} />
+          ) : (
+            <>
+              <TableMap mastery={p.mastery} met={learning + mastered} />
+              <LevelStrip level={lvl.level} progress={lvl.progress} toNext={lvl.toNext} learning={learning} mastered={mastered} achievements={achievements} />
+            </>
+          )}
+        </motion.div>
+      </section>
+
+      {/* Today: the goal, a review if one is due, the next lesson and the daily, as one strip below the hero. */}
+      <section aria-labelledby="today-title" className={`${PAGE} mt-16`}>
+        <TodayHeading id="today-title" />
+        <div className="mt-3">{today}</div>
+      </section>
+
+      {/* Regions */}
+      <section aria-labelledby="regions-title" className={`${PAGE} mt-16`}>
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h2 id="regions-title" className="t-heading">
+              Pick a region
+            </h2>
+            <p className="mt-1 text-sm text-ink-2">Start small, then take on the whole table</p>
+          </div>
+          <a href="#/play" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-medium text-ink-2 transition-colors hover:text-ink">
+            All modes <ArrowRight size={16} strokeWidth={1.5} aria-hidden />
+          </a>
+        </div>
+        {/* A sideways row on phones and tablets; all seven in a 4 + 3 grid from lg, nothing hidden. */}
+        <div className="no-scrollbar -mx-4 mt-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-1 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-48px),transparent)] sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0 lg:pb-0 lg:[mask-image:none]">
+          {REGIONS.map((r) => {
+            const bestStars = Math.max(0, ...Object.entries(p.best).filter(([k]) => k.startsWith(r.id + ':')).map(([, v]) => v.stars));
+            return (
+              <a key={r.id} href={`#/play/${r.id}`} className="card card-link relative w-64 shrink-0 snap-start p-4 lg:w-auto">
+                <MiniTable highlight={new Set(r.numbers)} className="w-full" />
+                <span className="mt-4 flex items-baseline justify-between gap-3">
+                  <span className="text-balance text-[15px] font-medium">{r.name}</span>
+                  <span className="meta shrink-0">{r.short}</span>
+                </span>
+                <span className="mt-2 flex gap-1" aria-hidden>
+                  {[0, 1, 2].map((s) => (
+                    <Star
+                      key={s}
+                      size={16}
+                      strokeWidth={1.5}
+                      style={s < bestStars ? { fill: 'var(--star)', color: 'var(--star-line)' } : { color: 'var(--ink-3)' }}
+                    />
+                  ))}
+                </span>
+                <span className="sr-only">{bestStars ? `, best ${bestStars} of 3 stars` : ', not played yet'}</span>
+              </a>
+            );
+          })}
+        </div>
+      </section>
+
+      <section aria-labelledby="eotd-title" className={`${PAGE} mt-16`}>
+        <ElementOfTheDay e={featured} />
+      </section>
+
+      {/* More ways to practise: one wide card with real objects, two compact ones beside it. */}
+      <section aria-label="More ways to practise" className={`${PAGE} mt-16 grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]`}>
+        <a href="#/life" className="card card-link flex flex-col p-5 sm:p-6">
+          <h2 className="t-heading">In real life</h2>
+          <p className="mt-1 max-w-lg text-[15px] leading-6 text-ink-2">What&rsquo;s inside your phone? Why are fireworks red? Spot the elements hiding in everyday things.</p>
+          <ul className="mt-6 divide-y divide-line border-y border-line" aria-hidden>
+            {LIFE_SAMPLES.map((t) => (
+              <li key={t.id} className="flex items-center justify-between gap-4 py-3">
+                <span className="text-sm text-ink-2">{t.name}</span>
+                <span className="flex gap-1">
+                  {t.contains.map(([s]) => (
+                    <ElementChip key={s} element={bySymbol.get(s.toLowerCase())!} size={32} />
+                  ))}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <ActionLine className="mt-6">Spot the elements</ActionLine>
+        </a>
+        <div className="grid gap-4">
+          <PracticeCard href="#/quiz" icon={<ListChecks size={18} strokeWidth={1.5} />} title="Quick quiz" action="Take a quiz">
+            Ten fast questions on symbols, numbers, families and facts, weighted towards the elements you haven&rsquo;t nailed yet.
+          </PracticeCard>
+          <PracticeCard href="#/match" icon={<Shuffle size={18} strokeWidth={1.5} />} title="Match pairs" action="Find the pairs">
+            A relaxed memory game. Flip the cards and pair each symbol with its name. No rush.
+          </PracticeCard>
+        </div>
+      </section>
+
+      {!returning && <HowItWorks />}
+      <ForTeachers />
+      <div className="h-16" />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ today */
+
+function TodayHeading({ id, className = '' }: { id?: string; className?: string }) {
+  const date = formatDate();
+  return (
+    <div className={`flex items-baseline justify-between gap-4 ${className}`}>
+      <h2 id={id} className={id ? 't-heading' : 'text-[15px] font-medium'}>
+        Today
+      </h2>
+      <span className="meta">{date}</span>
+    </div>
+  );
+}
+
+interface LevelInfo {
+  level: number;
+  learning: number;
+  mastered: number;
+  achievements: number;
+}
+
+/**
+ * What to do today as one list: the goal, a review if one is due, the next lesson and the daily.
+ * Stacked in the hero for a returning student; a single strip under the first step for a new one.
+ */
+function TodayList({ layout, due, lessonHref, nextChapter, level }: { layout: 'stack' | 'strip'; due: number[]; lessonHref: string; nextChapter?: Chapter; level?: LevelInfo }) {
+  const rows: ReactNode[] = [<GoalRow key="goal" lessonHref={lessonHref} />];
+  if (due.length > 0) rows.push(<ReviewRow key="review" due={due} />);
+  if (nextChapter)
+    rows.push(
+      <Row key="lesson" href={`#/learn/${nextChapter.id}`} icon={<GraduationCap size={18} strokeWidth={1.5} />} title="Next lesson">
+        {nextChapter.title}
+      </Row>,
+    );
+  rows.push(<DailyRow key="daily" bonus={!!level} />);
+  if (level) rows.push(<LevelRow key="level" {...level} />);
+
+  const cols = { 2: 'lg:grid-cols-2', 3: 'lg:grid-cols-3', 4: 'lg:grid-cols-4' }[rows.length] ?? 'lg:grid-cols-4';
+  return (
+    <ul className={`card grid overflow-hidden divide-y divide-line ${layout === 'strip' ? `${cols} lg:divide-x lg:divide-y-0` : ''}`}>
+      {rows.map((r, i) => (
+        <li key={i} className="flex min-w-0">
+          {r}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** One row of the today list: icon column, title and detail, a quiet meta, a chevron when it goes somewhere. */
+function Row({ href, icon, title, children, meta, extra }: { href?: string; icon: ReactNode; title: ReactNode; children?: ReactNode; meta?: ReactNode; extra?: ReactNode }) {
+  const body = (
+    <>
+      <span aria-hidden className="grid h-[22px] w-6 shrink-0 place-items-center text-ink-2">
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-medium leading-[22px] text-ink">{title}</span>
+        {children && <span className="mt-1 block text-sm text-ink-2">{children}</span>}
+        {extra}
+      </span>
+      {meta && <span className="meta shrink-0 leading-[22px]">{meta}</span>}
+      {href && <ChevronRight aria-hidden size={16} strokeWidth={1.5} className="mt-[3px] shrink-0 text-ink-3" />}
+    </>
+  );
+  const cls = 'flex w-full min-w-0 items-start gap-3 px-4 py-4';
+  return href ? (
+    <a href={href} className={`${cls} transition-colors hover:bg-surface-2 focus-visible:-outline-offset-2`}>
+      {body}
+    </a>
+  ) : (
+    <div className={cls}>{body}</div>
+  );
+}
+
+function GoalRow({ lessonHref }: { lessonHref: string }) {
+  const { xp, goal, value, met } = useDailyGoal();
+  const ring = (
+    <span role="img" aria-label={goalLabel(xp, goal)}>
+      <Ring value={met ? 1 : value} size={22} stroke={2.5} color={met ? 'var(--good)' : undefined} />
+    </span>
+  );
+  return met ? (
+    <Row icon={ring} title="Goal reached for today" meta={`${xp} XP`}>
+      Anything extra is a bonus
+    </Row>
+  ) : (
+    <Row href={lessonHref} icon={ring} title="Today’s goal: two quick activities" meta={`${xp}/${goal} XP`}>
+      {xp === 0 ? 'Any two short lessons or games should get you there' : `${goal - xp} XP to go`}
+    </Row>
+  );
+}
+
+function ReviewRow({ due }: { due: number[] }) {
+  return (
+    <Row
+      href="#/learn/review"
+      icon={<RefreshCw size={18} strokeWidth={1.5} />}
+      title={`${due.length} ${due.length === 1 ? 'element' : 'elements'} ready for a quick review`}
+      extra={
+        <span aria-hidden className="mt-2 flex flex-wrap items-center gap-1">
+          {/* Six chips fit one line on phones, eight from sm. */}
+          {due.slice(0, 8).map((n, i) => (
+            <ElementChip key={n} element={byNumber(n)} size={28} className={i >= 6 ? 'max-sm:hidden' : ''} />
+          ))}
+          {due.length > 6 && <span className="meta px-1 sm:hidden">+{due.length - 6}</span>}
+          {due.length > 8 && <span className="meta px-1 max-sm:hidden">+{due.length - 8}</span>}
+        </span>
+      }
+    />
+  );
+}
+
+function DailyRow({ bonus }: { bonus: boolean }) {
   const p = useProgress();
   const key = todayKey();
   const today = p.daily.results[key];
@@ -39,535 +320,342 @@ export function Home() {
   const done = !!today && today.stars > 0;
   const used = !!today && today.stars === 0;
   const streak = liveStreak(p.daily, key);
-  const lvl = levelFromXp(p.xp);
-  const mastered = masteredCount(p.mastery);
-  const returning = p.stats.rounds > 0 || p.stats.quizzes > 0;
-  const next = REGIONS.find((r) => !Object.keys(p.best).some((k) => k.startsWith(r.id + ':'))) ?? REGIONS[REGIONS.length - 1];
-  const learning = learningCount(p.mastery);
-  const nextChapter = CHAPTERS.find((c) => !p.chapters[c.id]) ?? CHAPTERS[0];
-  const firstChapter = FIRST_CHAPTERS.find((c) => !p.chapters[c.id]);
-  const starter = !!firstChapter;
-  const firstDone = FIRST_20.filter((n) => (p.mastery[n]?.s ?? 0) >= 1).length;
-  const featured = useMemo(() => ELEMENTS[hashString('eotd:' + key) % ELEMENTS.length], [key]);
-  // Recomputed when mastery changes; "now" is read at render.
-  const due = useMemo(() => dueForReview(p.mastery), [p.mastery]);
-
   return (
-    <div className="overflow-x-clip">
-      {/* Hero */}
-      <section className="relative">
-        <div className="grid-lines pointer-events-none absolute inset-x-0 top-0 h-[520px]" />
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pb-10 pt-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:pt-16">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
-            {!firstChapter && (
-            <a href="#/daily" className="group inline-flex items-center gap-2 rounded-full border border-line bg-surface py-1 pl-1 pr-3 text-sm text-ink-2 transition-colors hover:border-line-strong">
-              <span className="rounded-full px-2 py-0.5 text-xs font-semibold text-bg" style={{ background: 'var(--grad)' }}>
-                Today
-              </span>
-              Daily #{dailyNumber(key)} is live
-              <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
-            </a>
-            )}
-            <h1 className={`font-display ${firstChapter ? '' : 'mt-6'} text-[44px] font-semibold leading-[1.02] sm:text-6xl lg:text-[68px]`}>
-              {returning ? (
-                <>
-                  {greeting()}.<br />
-                  <span className="text-grad">Ready for round {p.stats.rounds + 1}?</span>
-                </>
-              ) : (
-                <>
-                  Learn the first 20 elements.
-                  <br />
-                  <span className="text-grad">Three minutes at a time.</span>
-                </>
-              )}
-            </h1>
-            <p className="mt-5 max-w-lg text-lg leading-relaxed text-ink-2">
-              {returning
-                ? 'Pick up where you left off. Periodica remembers what you find hard and brings it back until it sticks.'
-                : 'Short lessons with memory tricks, then quick games to make them stick. Start with hydrogen to calcium: the elements in air, water, salt and you.'}
-            </p>
-            {firstChapter && <FirstTwenty done={firstDone} mastery={p.mastery} />}
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              {firstChapter ? (
-                <a href={`#/learn/${firstChapter.id}`} className="btn-primary shine flex h-14 items-center justify-center gap-2 rounded-2xl px-7 text-base">
-                  <GraduationCap size={19} /> {firstChapter === FIRST_CHAPTERS[0] && !p.mastery[1] ? 'Start the first lesson' : `Continue: ${firstChapter.title}`}
-                </a>
-              ) : (
-                <a href={`#/play/${next.id}`} className="btn-primary shine flex h-14 items-center justify-center gap-2 rounded-2xl px-7 text-base">
-                  <Play size={18} className="fill-current" /> Play {next.name}
-                </a>
-              )}
-              {firstChapter ? (
-                <a href="#/match" className="btn-ghost flex h-14 items-center justify-center gap-2 rounded-2xl px-7 text-base font-medium">
-                  <Sparkles size={17} /> Try a quick game
-                </a>
-              ) : (
-                <a href={`#/learn/${nextChapter.id}`} className="btn-ghost flex h-14 items-center justify-center gap-2 rounded-2xl px-7 text-base font-medium">
-                  <GraduationCap size={18} /> Next lesson
-                </a>
-              )}
-            </div>
-            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-3">
-              {['3-minute lessons', 'Works offline', 'No sign-up', 'Free'].map((t) => (
-                <li key={t} className="flex items-center gap-1.5">
-                  <Check size={15} className="text-accent-3" /> {t}
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          <HeroTable featured={featured.number} />
-        </div>
-      </section>
-
-      {/* Dashboard */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6">
-        {due.length > 0 && <ReviewCard due={due} />}
-        <div className="grid gap-4 lg:grid-cols-3">
-          <GoalCard lessonHref={`#/learn/${(firstChapter ?? nextChapter).id}`} className={starter ? '' : 'lg:col-start-3 lg:row-start-1'} />
-          {/* While the first 20 are still new, the daily is a small bonus card at the end, not the main event. */}
-          <motion.a
-            href="#/daily"
-            className={`group relative overflow-hidden rounded-[28px] p-[1.5px] ${starter ? 'order-last' : 'lg:col-span-2 lg:col-start-1 lg:row-span-2 lg:row-start-1'}`}
-            style={{ background: 'var(--grad)' }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={spring}
-          >
-            <div className={`solid relative flex h-full flex-col gap-6 overflow-hidden rounded-[27px] p-6 ${starter ? '' : 'sm:flex-row sm:items-center sm:p-8'}`}>
-              <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full opacity-30 blur-3xl" style={{ background: 'var(--accent-2)' }} />
-              <div className="relative flex-1">
-                <div className="flex items-center gap-2 text-sm font-semibold text-accent-2">
-                  <CalendarDays size={16} /> Daily Challenge #{dailyNumber(key)}
-                </div>
-                <h2 className={`font-display mt-2 font-semibold ${starter ? 'text-xl' : 'text-3xl'}`}>{done ? 'Done for today. Nice.' : used ? 'Attempt used today' : starter ? 'Fancy a bonus challenge?' : `${DAILY_SIZE} elements. One shot.`}</h2>
-                <p className={`mt-2 max-w-md text-ink-2 ${starter ? 'text-sm' : ''}`}>
-                  {done
-                    ? `You scored ${today!.score.toLocaleString('en-US')}. Share your grid and come back tomorrow to keep your streak.`
-                    : used
-                      ? 'You left before the end, so there is no score this time. A fresh puzzle arrives at midnight.'
-                      : starter
-                        ? `${DAILY_SIZE} elements from all over the table, the same for everyone today. Some will be new, and that's fine.`
-                        : 'The same puzzle for every player today, scattered across the whole table. Keep your streak alive.'}
-                </p>
-                <div className="mt-5 flex flex-wrap items-center gap-4">
-                  {!used && (
-                    <span className={`${starter && !done ? 'btn-ghost' : 'btn-primary'} inline-flex h-11 items-center gap-2 rounded-xl px-5 text-sm font-semibold`}>
-                      {done ? 'See result' : 'Play now'} <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1.5 text-sm text-ink-2">
-                    <Flame size={16} className={streak ? 'fill-[#ff9f43] text-[#ff9f43]' : ''} /> {streak} day streak
-                  </span>
-                  <span className="text-sm text-ink-3">
-                    Next in <Countdown />
-                  </span>
-                </div>
-              </div>
-              <div className={`relative w-full sm:w-64 ${starter ? 'hidden' : ''}`}>
-                <MiniTable className="w-full" highlight={new Set()} color={() => undefined} />
-                {done && (
-                  <div className="absolute inset-0 grid place-items-center">
-                    <div className="flex flex-wrap justify-center gap-1 rounded-xl bg-bg/80 p-2 backdrop-blur">
-                      {today!.trail.map((t, i) => (
-                        <span key={i} className="h-4 w-4 rounded" style={{ background: t === 'hit' ? 'var(--good)' : t === 'hint' ? 'var(--gold)' : 'var(--bad)' }} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </motion.a>
-
-          <motion.a href="#/progress" className={`card group flex flex-col justify-between p-6 transition-colors hover:bg-surface-2 ${starter ? '' : 'lg:col-start-3 lg:row-start-2'}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.05 }}>
-            <div className="flex items-center gap-4">
-              <Ring value={lvl.progress} size={72} stroke={7}>
-                <span className="font-display text-xl font-bold">{lvl.level}</span>
-              </Ring>
-              <div>
-                <div className="text-sm text-ink-3">Level {lvl.level}</div>
-                <div className="font-display text-xl font-semibold">{titleForLevel(lvl.level)}</div>
-                <div className="text-xs text-ink-3">{lvl.toNext.toLocaleString('en-US')} XP to next</div>
-              </div>
-            </div>
-            <div className="mt-6">
-              <div className="flex justify-between gap-3 text-sm">
-                <span className="text-ink-2">
-                  Learning <span className="font-semibold tabular-nums text-ink">{learning}</span> · Mastered <span className="font-semibold tabular-nums text-ink">{mastered}</span>
-                </span>
-                <span className="text-ink-3 tabular-nums">of 118</span>
-              </div>
-              <div className="mt-2 flex h-2 overflow-hidden rounded-full bg-line" aria-hidden>
-                <div className="h-full" style={{ width: `${(mastered / 118) * 100}%`, background: 'var(--grad)' }} />
-                <div className="h-full" style={{ width: `${(learning / 118) * 100}%`, background: 'color-mix(in oklab, var(--accent-2) 45%, transparent)' }} />
-              </div>
-              {learning + mastered === 0 && <p className="mt-2 text-xs text-ink-3">Your first lesson lights up your first elements.</p>}
-              <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="flex items-center gap-1.5 text-ink-2">
-                  <Trophy size={15} className="text-gold" /> {Object.keys(p.achievements).length} achievements
-                </span>
-                <span className="font-medium text-accent-2">View progress →</span>
-              </div>
-            </div>
-          </motion.a>
-        </div>
-      </section>
-
-      {/* Regions */}
-      <section className="mx-auto mt-14 max-w-7xl px-4 sm:px-6">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h2 className="font-display text-3xl font-semibold">Pick a region</h2>
-            <p className="mt-1 text-ink-2">Start small, then take on the whole table.</p>
-          </div>
-          <a href="#/play" className="shrink-0 text-sm font-semibold text-accent-2 hover:underline">
-            All modes →
-          </a>
-        </div>
-        <div className="no-scrollbar -mx-4 mt-3 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-4 pt-3 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-56px),transparent)] sm:-mx-6 sm:scroll-px-6 sm:px-6">
-          {REGIONS.map((r, i) => {
-            const bestStars = Math.max(0, ...Object.entries(p.best).filter(([k]) => k.startsWith(r.id + ':')).map(([, v]) => v.stars));
-            return (
-              <motion.a
-                key={r.id}
-                href={`#/play/${r.id}`}
-                className="card group w-[260px] shrink-0 snap-start p-5 transition-[background,transform] duration-300 hover:-translate-y-1 hover:bg-surface-2"
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ ...spring, delay: i * 0.04 }}
-              >
-                <MiniTable highlight={new Set(r.numbers)} className="w-full" />
-                <div className="mt-4 flex items-center justify-between">
-                  <h3 className="font-display font-semibold">{r.name}</h3>
-                  <span className="text-xs tabular-nums text-ink-3">{r.short}</span>
-                </div>
-                <div className="mt-2 flex gap-0.5">
-                  {[0, 1, 2].map((s) => (
-                    <Star key={s} size={14} className={s < bestStars ? 'fill-gold text-gold' : 'text-line-strong'} />
-                  ))}
-                </div>
-              </motion.a>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="mx-auto mt-4 max-w-7xl px-4 sm:px-6">
-        <ElementOfTheDay n={featured.number} />
-      </section>
-
-      {/* Real life + quiz + match */}
-      <section className="mx-auto mt-14 grid max-w-7xl gap-4 px-4 sm:px-6 md:grid-cols-2 lg:grid-cols-3">
-        <motion.a href="#/life" className="card card-hover group relative flex flex-col overflow-hidden p-6 sm:p-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
-          <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full opacity-25 blur-3xl" style={{ background: 'var(--accent-3)' }} />
-          <div className="relative flex gap-2" aria-hidden>
-            {['📱', '🎆', '🍌', '🦴'].map((emoji, i) => (
-              <span key={emoji} className="grid h-14 w-14 place-items-center rounded-2xl border border-line text-3xl transition-transform duration-500 group-hover:-translate-y-1" style={{ background: 'radial-gradient(circle at 30% 20%, var(--surface-2), var(--surface))', transitionDelay: `${i * 50}ms` }}>
-                {emoji}
-              </span>
-            ))}
-          </div>
-          <h2 className="font-display relative mt-6 text-3xl font-semibold">In Real Life</h2>
-          <p className="relative mt-2 text-ink-2">What's inside your phone? Why are fireworks red? Spot the elements hiding in everyday things.</p>
-          <span className="relative mt-5 inline-flex items-center gap-1.5 font-semibold text-accent-3">
-            Spot the elements <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+    <Row
+      href="#/daily"
+      icon={<CalendarDays size={18} strokeWidth={1.5} />}
+      title={`Daily challenge #${dailyNumber(key)}`}
+      meta={done ? <span className="font-sans text-sm text-ink-2">See result</span> : undefined}
+      extra={
+        <>
+          {done && <TrailSquares trail={today!.trail} animate={false} className="mt-3 justify-start!" />}
+          <span className="meta mt-2 block">
+            {streak} day streak · next in <Countdown />
           </span>
-        </motion.a>
-        <motion.a href="#/quiz" className="card card-hover group relative flex flex-col overflow-hidden p-6 sm:p-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
-          <div className="pointer-events-none absolute -bottom-16 -right-10 h-56 w-56 rounded-full opacity-25 blur-3xl" style={{ background: 'var(--accent)' }} />
-          <div className="relative grid h-14 w-14 place-items-center rounded-2xl transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-105" style={{ background: 'color-mix(in oklab, var(--accent) 18%, transparent)', color: 'var(--accent)' }}>
-            <BrainCircuit size={28} />
-          </div>
-          <div className="relative mt-6">
-            <h2 className="font-display text-3xl font-semibold">Quick Quiz</h2>
-            <p className="mt-2 text-ink-2">Ten fast questions — symbols, numbers, families and facts — weighted towards the elements you haven't nailed yet.</p>
-            <span className="mt-5 inline-flex items-center gap-1.5 font-semibold text-accent">
-              Take a quiz <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-            </span>
-          </div>
-        </motion.a>
-        <motion.a href="#/match" className="card card-hover group relative flex flex-col overflow-hidden p-6 sm:p-8 md:col-span-2 lg:col-span-1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
-          <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full opacity-25 blur-3xl" style={{ background: 'var(--accent-2)' }} />
-          <div className="relative flex gap-2" aria-hidden>
-            {[
-              ['Na', 'cat-alkali-metal'],
-              ['Sodium', 'cat-alkali-metal'],
-            ].map(([t, c], i) => (
-              <span
-                key={t}
-                className={`cat-chip font-display grid h-14 place-items-center rounded-2xl border px-3 font-semibold transition-transform duration-500 ${i ? 'min-w-24 text-base group-hover:translate-x-1' : 'w-14 text-2xl group-hover:-translate-x-1'}`}
-                style={{ '--c': `var(--${c})`, borderColor: `color-mix(in oklab, var(--${c}) 50%, transparent)` } as CSSProperties}
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-          <h2 className="font-display relative mt-6 text-3xl font-semibold">Match Pairs</h2>
-          <p className="relative mt-2 text-ink-2">A relaxed memory game. Flip the cards and pair each symbol with its name. No rush.</p>
-          <span className="relative mt-5 inline-flex items-center gap-1.5 font-semibold text-accent-2">
-            Find the pairs <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-          </span>
-        </motion.a>
-      </section>
-
-      {/* How it works */}
-      {!returning && (
-        <section className="mx-auto mt-16 max-w-7xl px-4 sm:px-6">
-          <h2 className="font-display text-center text-3xl font-semibold">How it works</h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {[
-              { icon: Hand, title: 'Place', body: 'Drag tiles onto the table — or tap a tile, then its cell. Fast, correct moves build your combo.' },
-              { icon: Lightbulb, title: 'Learn', body: 'Every element opens into a card: what it is, where you meet it, and one fact worth remembering.' },
-              { icon: Sparkles, title: 'Master', body: 'Periodica tracks each element. Get it right first time, again and again, and it lights up on your map.' },
-            ].map((s, i) => (
-              <motion.div key={s.title} className="card p-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: i * 0.08 }}>
-                <div className="flex items-center gap-3">
-                  <span className="font-display text-grad text-sm font-bold">0{i + 1}</span>
-                  <s.icon size={20} className="text-ink-2" />
-                </div>
-                <h3 className="font-display mt-4 text-xl font-semibold">{s.title}</h3>
-                <p className="mt-2 text-ink-2">{s.body}</p>
-              </motion.div>
-            ))}
-          </div>
-        </section>
+        </>
+      }
+    >
+      {done ? (
+        <>
+          Done for today: <span className="num text-ink">{today!.score.toLocaleString('en-US')}</span> points
+        </>
+      ) : used ? (
+        <span>Attempt used today</span>
+      ) : bonus ? (
+        `A bonus: ${DAILY_SIZE} elements from all over the table, the same for everyone today`
+      ) : (
+        `${DAILY_SIZE} elements from all over the table, one try`
       )}
-      <ForTeachers />
-      <div className="h-16" />
+    </Row>
+  );
+}
+
+function LevelRow({ level, learning, mastered, achievements }: LevelInfo) {
+  return (
+    <Row href="#/progress" icon={<BarChart3 size={18} strokeWidth={1.5} />} title={`Level ${level} · ${titleForLevel(level)}`}>
+      {learning + mastered === 0 ? (
+        'Your first lesson lights up your first elements'
+      ) : (
+        <>
+          Learning <span className="num text-ink">{learning}</span> · Mastered <span className="num text-ink">{mastered}</span> of 118 · {achievements} {achievements === 1 ? 'achievement' : 'achievements'}
+        </>
+      )}
+    </Row>
+  );
+}
+
+/* ------------------------------------------------------------------ the table */
+
+function useWidth<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [width, setWidth] = useState(0);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
+    ro.observe(el);
+    setWidth(el.getBoundingClientRect().width);
+    return () => ro.disconnect();
+  }, []);
+  return [ref, width] as const;
+}
+
+/**
+ * The first 20 as the real top of the table: groups 1 and 2, a gap where the transition metals will go,
+ * then groups 13 to 18. Elements you have met are printed in their category colour; the rest are empty places.
+ */
+function FirstTwenty({ done, mastery }: { done: number; mastery: Record<number, Mastery> }) {
+  const [ref, w] = useWidth<HTMLDivElement>();
+  const gap = w >= 480 ? 6 : 4;
+  const cell = w ? Math.min(64, Math.floor((w - 8 * gap) / 8.5)) : 0;
+  return (
+    <div>
+      <div className="card p-4 sm:p-6">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 id="first-20-label" className="text-[15px] font-medium">
+            Your first 20 elements
+          </h2>
+          <span className="mono text-sm text-ink-2">
+            <span className="text-ink">{done}</span>/20
+          </span>
+        </div>
+        <p className="mt-1 text-sm text-ink-2">{done === 0 ? 'Each one lights up the first time you get it right' : done === 20 ? 'All twenty met, hydrogen to calcium' : `${20 - done} still to meet, up to calcium`}</p>
+        <div
+          ref={ref}
+          role="progressbar"
+          aria-labelledby="first-20-label"
+          aria-valuemin={0}
+          aria-valuemax={20}
+          aria-valuenow={done}
+          aria-valuetext={`${done} of 20 started`}
+          className="mt-6"
+          style={{ minHeight: cell ? undefined : 132 }}
+        >
+          {cell > 0 && (
+            <div className="grid" style={{ gridTemplateColumns: `repeat(2, ${cell}px) ${Math.round(cell / 2)}px repeat(6, ${cell}px)`, gridAutoRows: `${cell}px`, gap }}>
+              {FIRST_20.map((n) => {
+                const el = byNumber(n);
+                return (
+                  <div key={n} style={{ gridColumn: el.col <= 2 ? el.col : el.col - 9, gridRow: el.row }}>
+                    <FragmentCell el={el} size={cell} on={isMet(mastery, n)} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+      <a href="#/explore" className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-ink-2 transition-colors hover:text-ink">
+        Explore the full periodic table <ArrowRight size={16} strokeWidth={1.5} aria-hidden />
+      </a>
     </div>
   );
 }
 
-/** A short, honest note for teachers and parents deciding whether to recommend the app. */
-function ForTeachers() {
-  const points = [
-    { icon: GraduationCap, title: 'What it covers', body: 'Starts with elements 1 to 20, then the groups: alkali metals, halogens, noble gases and more, through to the whole table.' },
-    { icon: ShieldCheck, title: 'No accounts', body: 'No sign-up, no email, no names. Progress is saved only in this browser, on this device.' },
-    { icon: BarChart3, title: 'Easy to check', body: 'Students can open Progress and show you a summary of the elements they have started and mastered.' },
+/** A square of the first-20 fragment. Keeps the corner number at every size, down to phone cells. */
+function FragmentCell({ el, size, on }: { el: Element; size: number; on: boolean }) {
+  const radius = Math.min(12, Math.max(4, Math.round(size * 0.14)));
+  const named = on && size >= 54;
+  return (
+    <div
+      className={`relative flex h-full w-full flex-col items-center justify-center overflow-hidden ${on ? 'tile' : 'slot text-ink-3'}`}
+      style={{ '--c': catVar(el.category), borderRadius: radius } as CSSProperties}
+    >
+      <span className="tile-number absolute" style={{ left: Math.max(3, Math.round(size * 0.09)), top: Math.max(3, Math.round(size * 0.08)), fontSize: size < 48 ? 9 : Math.round(size * 0.16) }}>
+        {el.number}
+      </span>
+      <span className="font-medium leading-none" style={{ fontSize: Math.round(size * (named ? 0.34 : 0.38)), marginTop: Math.round(size * (named ? 0.08 : 0.14)) }}>
+        {el.symbol}
+      </span>
+      {named && (
+        <span className="tile-name max-w-[92%] truncate" style={{ fontSize: Math.max(9, Math.round(size * 0.14)), marginTop: Math.round(size * 0.06) }}>
+          {el.name}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The whole table as your map: elements you have met in their category colours, the rest in plain ink.
+ * Below 28px a cell cannot hold readable text, so the phone map is plain printed squares, no symbols or markers.
+ */
+function TableMap({ mastery, met }: { mastery: Record<number, Mastery>; met: number }) {
+  const [cell, setCell] = useState(0);
+  const compact = cell > 0 && cell < 28;
+  return (
+    <a href="#/explore" className="card card-link block p-4 sm:p-5">
+      <div aria-hidden>
+        <PeriodicGrid
+          minCell={12}
+          maxCell={36}
+          gap={2}
+          showMarkers={!compact}
+          onLayout={setCell}
+          renderCell={(el, rect) => (
+            <ElementTile
+              element={el}
+              size={rect.size}
+              showName={false}
+              showNumber={false}
+              showSymbol={rect.size >= 28}
+              color={isMet(mastery, el.number) ? undefined : 'var(--ink-3)'}
+            />
+          )}
+        />
+      </div>
+      <span className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <span className="text-sm text-ink-2">
+          In colour: the <span className="num text-ink">{met}</span> of 118 you have met
+        </span>
+        <span className="inline-flex items-center gap-2 text-sm font-medium text-ink">
+          Explore the full periodic table <ArrowRight size={16} strokeWidth={1.5} aria-hidden />
+        </span>
+      </span>
+    </a>
+  );
+}
+
+function LevelStrip({ level, progress, toNext, learning, mastered, achievements }: { level: number; progress: number; toNext: number } & Omit<LevelInfo, 'level'>) {
+  return (
+    <a href="#/progress" className="card card-link mt-4 flex shrink-0 items-center gap-4 p-4 sm:px-5">
+      <Ring value={progress} size={40} stroke={3}>
+        <span className="num text-sm font-medium">{level}</span>
+      </Ring>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-medium">
+          Level {level} · {titleForLevel(level)}
+        </span>
+        <span className="meta mt-1 block">
+          {toNext.toLocaleString('en-US')} XP to next level · {achievements} {achievements === 1 ? 'achievement' : 'achievements'}
+        </span>
+      </span>
+      <span className="hidden text-sm text-ink-2 sm:block">
+        Learning <span className="num text-ink">{learning}</span> · Mastered <span className="num text-ink">{mastered}</span> of 118
+      </span>
+      <ChevronRight aria-hidden size={16} strokeWidth={1.5} className="shrink-0 text-ink-3" />
+    </a>
+  );
+}
+
+/* ------------------------------------------------------------------ sections */
+
+/**
+ * A reference entry, the way a data book prints one: the square, the name, the figures, then the text.
+ * From lg the uses and two plain facts sit in a second column, so the card has no empty half.
+ */
+function ElementOfTheDay({ e }: { e: Element }) {
+  const openDetail = useUi((s) => s.openDetail);
+  const c = catVar(e.category);
+  const place = e.group ? `Group ${e.group} · period ${e.period}` : `Period ${e.period}`;
+  const facts: [string, string][] = [
+    ['State at 20 °C', e.state],
+    ['Discovered', e.ancient ? 'Ancient' : (e.year?.toString() ?? '—')],
   ];
   return (
-    <section className="mx-auto mt-16 max-w-7xl px-4 sm:px-6" aria-labelledby="teachers-title">
-      <div className="card p-6 sm:p-8">
-        <p className="text-sm font-semibold text-accent-2">For teachers and parents</p>
-        <h2 id="teachers-title" className="font-display mt-1 text-2xl font-semibold">
-          Free, private, and built around short practice
-        </h2>
-        <ul className="mt-5 grid gap-5 md:grid-cols-3">
-          {points.map((pt) => (
-            <li key={pt.title} className="flex gap-3">
-              <pt.icon size={20} className="mt-0.5 shrink-0 text-accent-2" aria-hidden />
-              <div>
-                <h3 className="font-semibold">{pt.title}</h3>
-                <p className="mt-1 text-sm text-ink-2">{pt.body}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-5 text-xs text-ink-3">Element data comes from PubChem (NCBI).</p>
+    <article className="card grid gap-5 p-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-8 sm:p-6 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,20rem)] lg:gap-x-12">
+      <div className="h-28 w-28">
+        <ElementTile element={e} size={112} />
       </div>
+      <div className="min-w-0">
+        <p className="label">Element of the day</p>
+        <h2 id="eotd-title" className="t-heading mt-1">
+          {e.name}
+        </h2>
+        <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2">
+          <span className="flex items-center gap-2">
+            <span className="dot" style={{ '--c': c } as CSSProperties} aria-hidden />
+            {categoryLabel(e.category)}
+          </span>
+          <span className="mono text-[13px]">{formatNumber(e.mass, 6)} u</span>
+          <span className="mono text-[13px]">{place}</span>
+        </p>
+        {e.summary && <p className="mt-4 max-w-2xl text-[15px] leading-6 text-ink-2">{e.summary}</p>}
+        {e.fact && <p className="mt-4 max-w-2xl border-l-2 border-line-strong pl-4 text-[15px] leading-6 text-ink">{e.fact}</p>}
+        <button onClick={() => openDetail(e.number)} className="btn btn-secondary mt-6">
+          Open the full card
+        </button>
+      </div>
+      <aside aria-label={`More about ${e.name}`} className="min-w-0 sm:col-start-2 lg:col-start-3 lg:border-l lg:border-line lg:pl-8">
+        {e.uses.length > 0 && (
+          <>
+            <h3 className="label mb-2">Where you&rsquo;ll find it</h3>
+            <ul className="flex flex-wrap gap-2">
+              {e.uses.map((u) => (
+                <li key={u} className="chip text-ink">
+                  {u}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        <dl className={`grid grid-cols-2 gap-4 ${e.uses.length > 0 ? 'mt-6 border-t border-line pt-4' : ''}`}>
+          {facts.map(([k, v]) => (
+            <div key={k}>
+              <dt className="text-[13px] text-ink-2">{k}</dt>
+              <dd className="num mt-1 text-[15px] font-medium">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </aside>
+    </article>
+  );
+}
+
+function ActionLine({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <span className={`inline-flex items-center gap-2 text-sm font-medium text-ink ${className}`}>
+      {children} <ArrowRight size={16} strokeWidth={1.5} aria-hidden />
+    </span>
+  );
+}
+
+function PracticeCard({ href, icon, title, action, children }: { href: string; icon: ReactNode; title: string; action: string; children: ReactNode }) {
+  return (
+    <a href={href} className="card card-link flex gap-3 p-5">
+      <span aria-hidden className="grid h-6 w-6 shrink-0 place-items-center text-ink-2">
+        {icon}
+      </span>
+      <span className="min-w-0">
+        <span className="block text-base font-medium leading-6">{title}</span>
+        <span className="mt-1 block text-sm text-ink-2">{children}</span>
+        <ActionLine className="mt-4">{action}</ActionLine>
+      </span>
+    </a>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    { title: 'Place', body: 'Drag tiles onto the table, or tap a tile and then its cell. Fast, correct moves build your combo.' },
+    { title: 'Learn', body: 'Every element opens into a card: what it is, where you meet it, and one fact worth remembering.' },
+    { title: 'Master', body: 'Periodica tracks each element. Get it right first time, again and again, and it lights up on your map.' },
+  ];
+  return (
+    <section aria-labelledby="how-title" className={`${PAGE} mt-16`}>
+      <h2 id="how-title" className="t-heading">
+        How it works
+      </h2>
+      <ol className="mt-4 grid gap-6 border-t border-line pt-6 md:grid-cols-3 md:gap-8">
+        {steps.map((s, i) => (
+          <li key={s.title} className="flex gap-3">
+            <span className="mono w-4 shrink-0 text-sm leading-6 text-ink-3">{i + 1}</span>
+            <div>
+              <h3 className="text-base font-medium leading-6">{s.title}</h3>
+              <p className="mt-1 text-sm text-ink-2">{s.body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }
 
-function HeroTable({ featured }: { featured: number }) {
-  const openDetail = useUi((s) => s.openDetail);
-  const e = ELEMENTS[featured - 1];
+/** A short, honest note for teachers and parents deciding whether to recommend the app. Quiet, like a colophon. */
+function ForTeachers() {
+  const points = [
+    { title: 'What it covers', body: 'Starts with elements 1 to 20, then the groups: alkali metals, halogens, noble gases and more, through to the whole table.' },
+    { title: 'No accounts', body: 'No sign-up, no email, no names. Progress is saved only in this browser, on this device, and the app works offline.' },
+    { title: 'Easy to check', body: 'Students can open Progress and show you a summary of the elements they have started and mastered.' },
+  ];
   return (
-    <motion.div className="relative" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ ...spring, delay: 0.1 }}>
-      <div className="pointer-events-none absolute -inset-10 rounded-[48px] opacity-60 blur-3xl" style={{ background: 'radial-gradient(closest-side, color-mix(in oklab, var(--accent) 30%, transparent), transparent)' }} />
-      {/* One link for the whole picture: the tiny cells are decoration, so they are hidden from assistive tech and the tab order. */}
-      <a href="#/explore" aria-label="Explore the full periodic table" className="glass group relative block rounded-[28px] p-3 sm:p-5" style={{ boxShadow: 'var(--shadow-lg)' }}>
-        <div aria-hidden>
-          <PeriodicGrid
-            minCell={12}
-            maxCell={40}
-            gap={2}
-            renderCell={(el, rect) => (
-              <motion.div
-                className="block h-full w-full transition-transform duration-200 hover:z-10 hover:scale-[1.35]"
-                initial={{ opacity: 0, scale: 0.4 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.15 + (el.col + el.row * 1.6) * 0.022, type: 'spring', damping: 16, stiffness: 260 }}
-              >
-                <ElementTile element={el} size={rect.size} showName={false} showNumber={false} className={el.number === featured ? 'ring-2 ring-white/70' : ''} />
-              </motion.div>
-            )}
-          />
-        </div>
-        <span aria-hidden className="mt-2 flex justify-end sm:mt-3">
-          <span className="solid flex items-center gap-1.5 rounded-full border border-line-strong py-1.5 pl-3 pr-2.5 text-xs font-semibold text-ink transition-colors group-hover:border-accent-2">
-            <Telescope size={14} className="text-accent-2" /> Explore the table
-            <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
-          </span>
-        </span>
-      </a>
-      <motion.button
-        onClick={() => openDetail(e.number)}
-        className="glass absolute left-[22%] top-[9%] hidden items-center gap-3 rounded-2xl p-3 pr-5 text-left sm:flex"
-        style={{ boxShadow: 'var(--shadow-lg)' }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: [0, -6, 0] }}
-        transition={{ opacity: { delay: 1.2 }, y: { delay: 1.2, duration: 5, repeat: Infinity, ease: 'easeInOut' } }}
-      >
-        <div className="h-12 w-12" aria-hidden>
-          <ElementTile element={e} size={48} showName={false} />
-        </div>
+    <section aria-labelledby="teachers-title" className={`${PAGE} mt-20`}>
+      <div className="grid gap-6 border-t border-line pt-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-16">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-3">Element of the day</div>
-          <div className="font-display font-semibold">{e.name}</div>
+          <p className="label">For teachers and parents</p>
+          <h2 id="teachers-title" className="mt-1 text-base font-medium leading-6">
+            Free, private, and built around short practice
+          </h2>
         </div>
-      </motion.button>
-    </motion.div>
-  );
-}
-
-/** The first 20 elements as a progress bar plus a little grid of symbols that light up as you meet them. */
-function FirstTwenty({ done, mastery }: { done: number; mastery: Record<number, Mastery> }) {
-  return (
-    <div className="mt-7 max-w-md">
-      <div className="flex items-baseline justify-between gap-3 text-sm">
-        <span id="first-20-label" className="font-semibold">
-          Your first 20 elements
-        </span>
-        <span className="font-semibold tabular-nums text-ink-2">{done}/20</span>
+        <dl className="grid gap-5 sm:grid-cols-3 sm:gap-8">
+          {points.map((pt) => (
+            <div key={pt.title}>
+              <dt className="text-sm font-medium">{pt.title}</dt>
+              <dd className="mt-1 text-sm text-ink-2">{pt.body}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
-      <div
-        role="progressbar"
-        aria-labelledby="first-20-label"
-        aria-valuemin={0}
-        aria-valuemax={20}
-        aria-valuenow={done}
-        aria-valuetext={`${done} of 20 started`}
-        className="mt-2 h-2.5 overflow-hidden rounded-full bg-line"
-      >
-        <motion.div className="h-full rounded-full" style={{ background: 'var(--grad)' }} initial={{ width: 0 }} animate={{ width: `${(done / 20) * 100}%` }} transition={{ ...spring, delay: 0.3 }} />
-      </div>
-      <div aria-hidden className="mt-3 grid max-w-[340px] grid-cols-10 gap-1">
-        {FIRST_20.map((n) => {
-          const el = byNumber(n);
-          const on = (mastery[n]?.s ?? 0) >= 1;
-          return (
-            <span
-              key={n}
-              className={`font-display grid aspect-square place-items-center rounded-md text-[11px] font-semibold transition-colors ${on ? 'cat-chip' : ''}`}
-              style={
-                on
-                  ? ({ '--c': catVar(el.category), boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${catVar(el.category)} 55%, transparent)` } as CSSProperties)
-                  : { background: 'var(--surface)', color: 'var(--ink-3)', boxShadow: 'inset 0 0 0 1px var(--line)' }
-              }
-            >
-              {el.symbol}
-            </span>
-          );
-        })}
-      </div>
-      {done === 0 && <p className="mt-2 text-sm text-ink-3">Each one lights up the first time you get it right.</p>}
-    </div>
-  );
-}
-
-function GoalCard({ lessonHref, className = '' }: { lessonHref: string; className?: string }) {
-  const { xp, goal, value, met } = useDailyGoal();
-  return (
-    <motion.div
-      className={`card relative flex items-center gap-5 overflow-hidden p-6 ${className}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ ...spring, delay: 0.03 }}
-    >
-      {met && <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl" style={{ background: 'var(--good)' }} />}
-      <div role="img" aria-label={goalLabel(xp, goal)} className="relative shrink-0">
-        <Ring value={met ? 1 : value} size={76} stroke={8} color={met ? 'var(--good)' : undefined}>
-          {met ? (
-            <PartyPopper size={26} className="text-good" />
-          ) : (
-            <span className="text-center leading-none">
-              <span className="font-display block text-lg font-bold tabular-nums">{xp}</span>
-              <span className="text-[10px] text-ink-3 tabular-nums">/ {goal} XP</span>
-            </span>
-          )}
-        </Ring>
-      </div>
-      <div className="relative min-w-0">
-        {met ? (
-          <>
-            <h2 className="font-display text-xl font-semibold">Goal reached. See you tomorrow!</h2>
-            <p className="mt-1 text-sm text-ink-2">You earned {xp} XP today. Anything extra is a bonus.</p>
-          </>
-        ) : (
-          <>
-            <h2 className="font-display text-xl font-semibold">Today&rsquo;s goal: two quick activities</h2>
-            <p className="mt-1 text-sm text-ink-2">{xp === 0 ? 'Any two short lessons or games should get you there.' : `${goal - xp} XP to go. You're on your way!`}</p>
-            <a href={lessonHref} className="mt-3 inline-flex min-h-6 items-center gap-1.5 text-sm font-semibold text-accent-2 hover:underline">
-              {xp === 0 ? 'Start with a lesson' : 'Keep going'} <ArrowRight size={15} />
-            </a>
-          </>
-        )}
-      </div>
-    </motion.div>
-  );
-}
-
-function ReviewCard({ due }: { due: number[] }) {
-  const label = `${due.length} ${due.length === 1 ? 'element' : 'elements'} ready for a quick review`;
-  return (
-    <motion.a
-      href="#/learn/review"
-      className="card card-hover group relative mb-4 flex items-center gap-4 overflow-hidden p-4 sm:p-5"
-      style={{ borderColor: 'color-mix(in oklab, var(--accent-2) 45%, transparent)' }}
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={spring}
-    >
-      <span aria-hidden className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-bg" style={{ background: 'var(--grad)' }}>
-        <RefreshCw size={22} strokeWidth={2.4} />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block font-semibold leading-snug">{label}</span>
-        <span className="mt-0.5 block text-sm text-ink-2">A quick refresh helps them stick.</span>
-        <span aria-hidden className="mt-2 flex flex-wrap gap-1">
-          {due.slice(0, 8).map((n) => {
-            const el = byNumber(n);
-            return (
-              <span key={n} className="cat-chip rounded-md px-1.5 py-0.5 text-[11px] font-semibold" style={{ '--c': catVar(el.category) } as CSSProperties}>
-                {el.symbol}
-              </span>
-            );
-          })}
-          {due.length > 8 && <span className="px-1 text-[11px] text-ink-3">+{due.length - 8}</span>}
-        </span>
-      </span>
-      <ArrowRight aria-hidden size={20} className="shrink-0 text-accent-2 transition-transform group-hover:translate-x-0.5" />
-    </motion.a>
-  );
-}
-
-function ElementOfTheDay({ n }: { n: number }) {
-  const openDetail = useUi((s) => s.openDetail);
-  const e = ELEMENTS[n - 1];
-  const c = catVar(e.category);
-  return (
-    <motion.article className="card relative overflow-hidden p-6 sm:p-8" style={{ '--c': c } as CSSProperties} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
-      <div className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full opacity-25 blur-3xl" style={{ background: c }} />
-      <div className="relative flex flex-col gap-6 sm:flex-row">
-        <div className="h-28 w-28 shrink-0" style={{ filter: `drop-shadow(0 16px 30px color-mix(in oklab, ${c} 40%, transparent))` }}>
-          <ElementTile element={e} size={112} showName={false} />
-        </div>
-        <div className="min-w-0">
-          <p className="cat-ink text-sm font-semibold">
-            Element of the day · {categoryLabel(e.category)}
-          </p>
-          <h2 className="font-display mt-1 text-3xl font-semibold">{e.name}</h2>
-          <p className="mt-3 leading-relaxed text-ink-2">{e.summary}</p>
-          <p className="mt-4 border-l-2 pl-4 text-[15px] italic leading-relaxed" style={{ borderColor: c }}>
-            {e.fact}
-          </p>
-          <button onClick={() => openDetail(e.number)} className="cat-ink mt-5 inline-flex items-center gap-1.5 font-semibold">
-            Open the full card <ArrowRight size={16} />
-          </button>
-        </div>
-      </div>
-    </motion.article>
+    </section>
   );
 }

@@ -33,7 +33,7 @@ export const useSettings = create<SettingsState>()(
 );
 
 export const DIFFICULTIES: { id: Difficulty; name: string; desc: string }[] = [
-  { id: 'learner', name: 'Learner', desc: 'Atomic numbers on tiles and colour hints on the table.' },
-  { id: 'standard', name: 'Standard', desc: 'Symbol and name only. The classic challenge.' },
-  { id: 'expert', name: 'Expert', desc: 'Symbols only and three lives. One wrong drop costs a life.' },
+  { id: 'learner', name: 'Learner', desc: 'Atomic numbers on tiles and colour hints on the table' },
+  { id: 'standard', name: 'Standard', desc: 'Symbol and name only' },
+  { id: 'expert', name: 'Expert', desc: 'Symbols only, and three lives: each wrong drop costs one' },
 ];

@@ -1,9 +1,9 @@
-import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, CalendarDays, Clock, Flame, Play, Target } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { MiniTable } from '../components/MiniTable';
 import { ShareButton, TrailSquares } from '../components/Results';
 import { ELEMENTS } from '../lib/elements';
+import { formatDate } from '../lib/date';
 import { DAILY_SIZE, dailyElements, dailyNumber, todayKey } from '../lib/daily';
 import { hashString, seeded, shuffle } from '../lib/random';
 import { go } from '../lib/router';
@@ -49,79 +49,81 @@ export function Daily() {
   const summary: RoundSummary | null = result
     ? { kind: 'daily', dailyKey: key, difficulty: 'standard', score: result.score, correct: DAILY_SIZE, mistakes: result.mistakes, hints: 0, timeMs: result.timeMs, maxCombo: 0, stars: result.stars, completed: true, results: {}, trail: result.trail }
     : null;
+  const date = formatDate();
 
   return (
-    <div className="relative min-h-dvh">
-      <div className="mx-auto max-w-3xl px-5 pb-16 pt-6">
-        <button onClick={() => go('/')} className="btn-ghost grid h-10 w-10 place-items-center rounded-full" aria-label="Back to home">
-          <ArrowLeft size={18} />
-        </button>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-8 text-center">
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-sm text-ink-2">
-            <CalendarDays size={15} /> {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
-          </div>
-          <h1 className="font-display mt-5 text-5xl font-semibold sm:text-6xl">
-            Daily <span className="text-grad">#{n}</span>
+    <div className="mx-auto flex min-h-dvh max-w-6xl flex-col px-4 pb-12 pt-4 sm:px-6 sm:pt-6">
+      <button onClick={() => go('/')} className="icon-btn -ml-2" aria-label="Back to home">
+        <ArrowLeft size={18} strokeWidth={1.5} />
+      </button>
+
+      <main className="grid flex-1 content-center gap-8 py-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-x-16 lg:gap-y-10">
+        <header className="lg:col-start-1 lg:row-start-1 lg:self-end">
+          <p className="label">{date}</p>
+          <h1 className="t-display mt-3">
+            Daily <span className="text-ink-3">#{n}</span>
           </h1>
-          <p className="mx-auto mt-3 max-w-md text-ink-2">
-            {DAILY_SIZE} elements from all over the table, the same for everyone today. One attempt, and it only counts once you drop your first tile.
+          <p className="mt-4 max-w-md text-ink-2">
+            {DAILY_SIZE} elements from all over the table, the same for everyone today. You get one attempt, and it only counts once you place your first tile.
           </p>
-          {helped && !result && <p className="mx-auto mt-2 max-w-md text-sm text-ink-3">Some will be new. You'll get atomic numbers and colour hints to help.</p>}
-        </motion.div>
+          {helped && !result && <p className="mt-2 max-w-md text-sm text-ink-3">Some will be new, so you get atomic numbers and colour hints</p>}
+        </header>
 
-        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="card mx-auto mt-10 max-w-xl p-6">
-          <MiniTable highlight={result ? new Set(targets) : new Set()} className="w-full" color={(x) => (!result && targets.includes(x) ? 'var(--accent-2)' : undefined)} label="Today's elements on the table" />
-          <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-            <Stat icon={Target} label="Elements" value={String(DAILY_SIZE)} />
-            <Stat icon={Flame} label="Streak" value={`${streak} day${streak === 1 ? '' : 's'}`} />
-            <Stat icon={Clock} label="Next in" value={<Countdown />} />
-          </div>
-        </motion.div>
+        <div className="card p-5 sm:p-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
+          <MiniTable highlight={result ? new Set(targets) : new Set()} className="w-full" color={(x) => (!result && targets.includes(x) ? 'var(--accent)' : undefined)} label="Today's elements on the table" />
+          <dl className="mt-6 grid grid-cols-3 border-t border-line pt-4">
+            <Fact label="Elements" value={String(DAILY_SIZE)} />
+            <Fact label="Streak" value={`${streak} day${streak === 1 ? '' : 's'}`} />
+            <Fact label="Next puzzle" value={<Countdown />} />
+          </dl>
+        </div>
 
-        <div className="mx-auto mt-8 max-w-xl">
+        <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
           {summary && summary.stars === 0 ? (
             // Started but left before the end: the attempt counts, but there is no score to show or share.
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
-              <p className="font-display text-2xl font-semibold">Attempt used today</p>
-              <p className="mx-auto mt-2 max-w-sm text-ink-2">You left before the end, so there is no score this time. A fresh puzzle arrives at midnight.</p>
-              <a href="#/play/full" className="btn-primary mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base">
-                Practise the full table <ArrowRight size={18} aria-hidden />
+            <div>
+              <h2 className="t-heading">Attempt used today</h2>
+              <p className="mt-1 max-w-md text-ink-2">You left before the end, so there is no score this time. A fresh puzzle arrives at midnight.</p>
+              <a href="#/play/full" className="btn btn-lg btn-primary mt-6 w-full sm:w-auto">
+                Practise the full table <ArrowRight size={18} strokeWidth={1.5} aria-hidden />
               </a>
-            </motion.div>
+            </div>
           ) : summary ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
+            <div>
               <p className="text-sm font-medium text-good">Completed today</p>
-              <div className="font-display mt-1 text-4xl font-semibold tabular-nums">{summary.score.toLocaleString('en-US')} pts</div>
-              <p className="mt-1 text-sm text-ink-2">
+              <p className="mt-2 flex items-baseline gap-2">
+                <span className="num text-5xl font-medium leading-none">{summary.score.toLocaleString('en-US')}</span>
+                <span className="meta text-sm">pts</span>
+              </p>
+              <p className="meta mt-3">
                 {formatTime(summary.timeMs)} · {summary.mistakes} mistake{summary.mistakes === 1 ? '' : 's'}
               </p>
-              <TrailSquares trail={summary.trail} animate={false} className="mt-4" />
-              <div className="mt-6 flex">
-                <ShareButton summary={summary} total={DAILY_SIZE} />
+              <div className="mt-4 w-fit">
+                <TrailSquares trail={summary.trail} animate={false} />
               </div>
-              <a href="#/play/full" className="mt-4 inline-block text-sm font-medium text-ink-2 underline-offset-4 hover:text-ink hover:underline">
-                Keep practising with the full table →
-              </a>
-            </motion.div>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <ShareButton summary={summary} total={DAILY_SIZE} />
+                <a href="#/play/full" className="btn btn-lg btn-secondary">
+                  Practise the full table
+                </a>
+              </div>
+            </div>
           ) : (
-            <button
-              onClick={() => setPlaying(true)}
-              className="btn-primary shine flex h-16 w-full items-center justify-center gap-2 rounded-2xl text-lg">
-              <Play size={20} className="fill-current" /> Start today's challenge
+            <button onClick={() => setPlaying(true)} className="btn btn-lg btn-primary w-full sm:w-auto">
+              Start today's challenge <ArrowRight size={18} strokeWidth={1.5} aria-hidden />
             </button>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
 
-function Stat({ icon: I, label, value }: { icon: typeof Flame; label: string; value: React.ReactNode }) {
+function Fact({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-2xl bg-surface p-3">
-      <I size={16} className="mx-auto text-ink-3" />
-      <div className="font-display mt-1.5 text-lg font-semibold tabular-nums">{value}</div>
-      <div className="text-[11px] uppercase tracking-wider text-ink-3">{label}</div>
+    <div className="flex flex-col-reverse gap-1 border-l border-line pl-4 first:border-l-0 first:pl-0">
+      <dt className="text-sm text-ink-2">{label}</dt>
+      <dd className="num text-xl font-medium">{value}</dd>
     </div>
   );
 }
