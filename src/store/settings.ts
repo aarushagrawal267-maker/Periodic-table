@@ -2,10 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type Difficulty = 'learner' | 'standard' | 'expert';
-export type Theme = 'system' | 'dark' | 'light';
 
 interface SettingsState {
-  theme: Theme;
   sound: boolean;
   haptics: boolean;
   reduceMotion: boolean;
@@ -19,7 +17,6 @@ interface SettingsState {
 export const useSettings = create<SettingsState>()(
   persist(
     (set) => ({
-      theme: 'light',
       sound: true,
       haptics: true,
       reduceMotion: typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -30,13 +27,11 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: 'periodica-settings',
-      version: 2,
-      // v2: the chart's paper became the default theme. 'system' was the old default, so it moves to paper;
-      // anyone who picked light or dark keeps it.
-      migrate: (persisted, version) => {
-        const s = (persisted ?? {}) as Partial<SettingsState>;
-        if (version < 2 && (s.theme === 'system' || s.theme === undefined)) s.theme = 'light';
-        return s as SettingsState;
+      version: 3,
+      // v3: Periodica has one theme, dark, so the old theme choice is dropped.
+      migrate: (persisted) => {
+        const { theme: _theme, ...rest } = (persisted ?? {}) as Record<string, unknown>;
+        return rest as unknown as SettingsState;
       },
     },
   ),

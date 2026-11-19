@@ -80,7 +80,7 @@ The audit was run on the original UI (the `screenshots/` folder and the code at 
 - **Moments.** (1) The table itself: element tiles printed in their category colours, wherever the table or a tile appears (game board, Explore, mini tables, flashcards, chips). It is the only place many hues live. (2) The round result: three gold stars, the score set large, and the trail of what you placed.
 - **Signature.** The corner number. Every element shown carries its atomic number in its top-left corner in small mono figures, exactly as the wall chart prints it: tiles, element chips, the review list, the detail card, the app icon. Nowhere else.
 
-This is an app, so app rules apply: near-neutral surfaces, the moments carry the colour. The template check (unslop `signs.md`, "Template look") failed on a pure grey page with white text, so the ramp is unslop's Warm ramp: the paper the chart is printed on. Paper (light) is the default theme; dark is the same paper at night. The accent is cobalt ink on that paper.
+This is an app, so app rules apply: near-neutral surfaces, the moments carry the colour. The template check (unslop `signs.md`, "Template look") failed on a pure grey page with white text, so the ramp is unslop's Warm ramp: the paper the chart is printed on. Periodica has one theme, dark: the same warm ramp at night (unslop tokens, Warm, dark column). There is no light theme and no theme setting. The accent is cobalt ink.
 
 ---
 

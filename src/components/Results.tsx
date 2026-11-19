@@ -260,7 +260,7 @@ function enter(delay: number) {
 }
 
 /**
- * Three stars, the middle one larger: gold fill with a darker gold edge, so they read as objects in both themes.
+ * Three stars, the middle one larger: gold fill with a darker gold edge, so they read as objects on the dark page.
  * They come in one after another with a small scale, the only celebration on the screen.
  */
 function Stars({ stars, reduce }: { stars: number; reduce: boolean }) {

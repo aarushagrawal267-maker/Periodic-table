@@ -49,13 +49,12 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@custom-variant light (&:where([data-theme='light'], [data-theme='light'] *));
 
 /* ---------------------------------------------------------------- tokens */
 
 :root {
   color-scheme: dark;
-  /* Warm ramp: the wall chart's paper at night, never a colour of its own. */
+  /* The one theme: a warm dark ramp (unslop tokens, Warm), never a colour of its own. */
   --bg-deep: #12110f;
   --bg: #161513;
   --surface: #1c1a18;
@@ -127,59 +126,6 @@
   --cat-actinide: #d6b48a;
 }
 
-[data-theme='light'] {
-  color-scheme: light;
-  /* Warm ramp: the paper the wall chart is printed on. */
-  --bg-deep: #efeae1;
-  --bg: #f7f4ee;
-  --surface: #fdfbf7;
-  --surface-2: #efe9df;
-  --line: rgb(31 27 22 / 0.09);
-  --line-strong: rgb(31 27 22 / 0.18);
-  --line-control: #8a8175;
-  --ink: #1f1b16;
-  --ink-2: #5e554a;
-  --ink-3: #6b6357;
-
-  --accent: #1f5bd6;
-  --on-accent: #ffffff;
-  --accent-soft: rgb(31 91 214 / 0.08);
-  --primary: #1f1b16;
-  --on-primary: #fdfbf7;
-
-  --good: #13773a;
-  --bad: #c92a2a;
-  --gold: #8f5f00;
-  --star: #e8a400;
-  --star-line: #8f5f00;
-
-  --focus: #1f5bd6;
-
-  --cell-empty: rgb(31 27 22 / 0.04);
-  --slot-line: rgb(31 27 22 / 0.5);
-  --cell-ink-mix: 56%;
-  --tile-tint: 13%;
-  --tile-edge: 50%;
-  --mini-tint: 40%;
-  --mini-empty: rgb(31 27 22 / 0.08);
-
-  --shadow-sm: 0 1px 2px rgb(31 27 22 / 0.05);
-  --shadow-md: 0 8px 24px rgb(31 27 22 / 0.06);
-  --shadow-lg: 0 16px 48px rgb(0 0 0 / 0.12), 0 0 0 1px var(--line);
-  --highlight: none;
-
-  --cat-alkali-metal: #e5334f;
-  --cat-alkaline-earth-metal: #e57a10;
-  --cat-transition-metal: #c99a00;
-  --cat-post-transition-metal: #5c9a0c;
-  --cat-metalloid: #0e9f8e;
-  --cat-nonmetal: #2f7de1;
-  --cat-halogen: #7655e8;
-  --cat-noble-gas: #c23dd6;
-  --cat-lanthanide: #db4c94;
-  --cat-actinide: #9a7340;
-}
-
 /* Okabe–Ito based palette, distinguishable with the common colour-vision deficiencies. */
 [data-colorblind='true'] {
   --cat-alkali-metal: #e69f00;
@@ -194,11 +140,8 @@
   --cat-actinide: #b08cff;
 }
 /* Several Okabe–Ito colours are very light or very dark, so text leans further towards --ink. */
-[data-colorblind='true']:not([data-theme='light']) {
+[data-colorblind='true'] {
   --cell-ink-mix: 58%;
-}
-[data-theme='light'][data-colorblind='true'] {
-  --cell-ink-mix: 46%;
 }
 
 @layer base {
@@ -315,9 +258,6 @@
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: var(--radius-card);
-  }
-  [data-theme='light'] .card {
-    box-shadow: var(--shadow-sm);
   }
   .panel {
     background: var(--surface);
@@ -624,9 +564,6 @@
   /* Element name on a tile: plain --ink-2 dips just under 4.5:1 on the brightest dark tiles. */
   .tile-name {
     color: color-mix(in oklab, var(--ink-2) 60%, var(--ink));
-  }
-  [data-theme='light'] .tile-name {
-    color: var(--ink-2);
   }
   /* The corner number. */
   .tile-number {

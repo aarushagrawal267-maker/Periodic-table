@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
-import { useEffect, useState, type MouseEvent } from 'react';
+import { useEffect, type MouseEvent } from 'react';
 import { ElementDetailSheet } from './components/ElementDetail';
 import { Shell } from './components/Shell';
 import { SettingsSheet } from './components/SettingsSheet';
@@ -21,17 +21,13 @@ import { useSettings } from './store/settings';
 
 export function App() {
   const route = useRoute();
-  const { theme, colorblind, reduceMotion } = useSettings();
-  const systemLight = useMediaQuery('(prefers-color-scheme: light)');
+  const { colorblind, reduceMotion } = useSettings();
 
   useEffect(() => {
     const root = document.documentElement;
-    const light = theme === 'light' || (theme === 'system' && systemLight);
-    root.dataset.theme = light ? 'light' : 'dark';
     root.dataset.colorblind = String(colorblind);
     root.classList.toggle('reduce-motion', reduceMotion);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f7f4ee' : '#161513');
-  }, [theme, systemLight, colorblind, reduceMotion]);
+  }, [colorblind, reduceMotion]);
 
   const immersive = route.name === 'game' || route.name === 'daily' || route.name === 'quiz' || route.name === 'life' || route.name === 'match' || (route.name === 'learn' && !!route.chapter);
   const key = route.name === 'game' ? `game-${route.region}` : route.name === 'learn' ? `learn-${route.chapter ?? ''}` : route.name;
@@ -103,17 +99,6 @@ export function App() {
       </div>
     </MotionConfig>
   );
-}
-
-function useMediaQuery(q: string) {
-  const [match, setMatch] = useState(() => matchMedia(q).matches);
-  useEffect(() => {
-    const m = matchMedia(q);
-    const on = () => setMatch(m.matches);
-    m.addEventListener('change', on);
-    return () => m.removeEventListener('change', on);
-  }, [q]);
-  return match;
 }
 
 function skipToMain(e: MouseEvent) {

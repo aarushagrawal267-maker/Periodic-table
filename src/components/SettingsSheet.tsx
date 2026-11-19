@@ -1,6 +1,5 @@
-import { Monitor, Moon, Sun } from 'lucide-react';
 import { useState, type KeyboardEvent } from 'react';
-import { DIFFICULTIES, useSettings, type Theme } from '../store/settings';
+import { DIFFICULTIES, useSettings } from '../store/settings';
 import { useProgress } from '../store/progress';
 import { useUi } from '../store/ui';
 import { Sheet } from './Sheet';
@@ -13,32 +12,10 @@ export function SettingsSheet() {
   const reset = useProgress((p) => p.reset);
   const [confirm, setConfirm] = useState(false);
 
-  const themes: { id: Theme; label: string; icon: typeof Sun }[] = [
-    { id: 'system', label: 'Auto', icon: Monitor },
-    { id: 'dark', label: 'Dark', icon: Moon },
-    { id: 'light', label: 'Light', icon: Sun },
-  ];
-
   return (
     <Sheet open={open} onClose={() => setOpen(false)} label="Settings">
       <div className="px-6 pb-8 pt-8 sm:px-8">
         <h2 className="t-heading">Settings</h2>
-
-        <section className="mt-8">
-          <h3 className="label mb-2">Appearance</h3>
-          <div className="seg grid w-full grid-cols-3" role="radiogroup" aria-label="Theme" onKeyDown={(e) => roveRadios(e, themes.map((t) => t.id), s.theme, (theme) => s.set({ theme }))}>
-            {themes.map((t) => {
-              const I = t.icon;
-              const on = s.theme === t.id;
-              return (
-                <button key={t.id} role="radio" aria-checked={on} tabIndex={on ? 0 : -1} onClick={() => s.set({ theme: t.id })} className="seg-item flex items-center justify-center gap-2">
-                  <I size={16} strokeWidth={1.5} aria-hidden />
-                  {t.label}
-                </button>
-              );
-            })}
-          </div>
-        </section>
 
         <section className="mt-8">
           <h3 className="label mb-2">Default difficulty</h3>

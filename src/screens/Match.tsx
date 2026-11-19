@@ -151,12 +151,12 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
               >
                 <motion.div className="relative h-full w-full [transform-style:preserve-3d]" initial={false} animate={{ rotateY: faceUp ? 180 : 0 }} transition={tween(DUR.enter)}>
                   {/* Back: a plain raised card with one hairline and an empty place from the table, so it never reads as a symbol. */}
-                  <div className="absolute inset-0 grid place-items-center rounded-card border border-line bg-surface-2 transition-colors duration-150 ease-out light:bg-surface light:shadow-[var(--shadow-sm)] [backface-visibility:hidden] group-hover:border-line-strong">
+                  <div className="absolute inset-0 grid place-items-center rounded-card border border-line bg-surface-2 transition-colors duration-150 ease-out light:shadow-[var(--shadow-sm)] [backface-visibility:hidden] group-hover:border-line-strong">
                     <span aria-hidden className="slot h-7 w-7 rounded-tag" />
                   </div>
                   {/* Face: the brighter card stock (raised on dark, white on light); a found pair takes its element's printed colour. */}
                   <div
-                    className="absolute inset-0 flex flex-col items-center justify-center rounded-card border bg-surface-2 p-3 text-center light:bg-surface [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                    className="absolute inset-0 flex flex-col items-center justify-center rounded-card border bg-surface-2 p-3 text-center [backface-visibility:hidden] [transform:rotateY(180deg)]"
                     style={{
                       background: isFound ? `color-mix(in oklab, ${c} var(--tile-tint), var(--surface))` : undefined,
                       borderColor: isFound ? `color-mix(in oklab, ${c} var(--tile-edge), transparent)` : 'var(--line-strong)',
