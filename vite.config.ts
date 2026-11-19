@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'Periodica · Learn the periodic table',
         short_name: 'Periodica',
         description: 'Learn the periodic table in three-minute lessons and quick games',
-        theme_color: '#131315',
-        background_color: '#131315',
+        theme_color: '#f7f4ee',
+        background_color: '#f7f4ee',
         display: 'standalone',
         start_url: './',
         icons: [

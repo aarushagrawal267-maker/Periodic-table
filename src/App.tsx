@@ -30,7 +30,7 @@ export function App() {
     root.dataset.theme = light ? 'light' : 'dark';
     root.dataset.colorblind = String(colorblind);
     root.classList.toggle('reduce-motion', reduceMotion);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f8f8f9' : '#131315');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f7f4ee' : '#161513');
   }, [theme, systemLight, colorblind, reduceMotion]);
 
   const immersive = route.name === 'game' || route.name === 'daily' || route.name === 'quiz' || route.name === 'life' || route.name === 'match' || (route.name === 'learn' && !!route.chapter);

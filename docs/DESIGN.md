@@ -80,23 +80,23 @@ The audit was run on the original UI (the `screenshots/` folder and the code at 
 - **Moments.** (1) The table itself: element tiles printed in their category colours, wherever the table or a tile appears (game board, Explore, mini tables, flashcards, chips). It is the only place many hues live. (2) The round result: three gold stars, the score set large, and the trail of what you placed.
 - **Signature.** The corner number. Every element shown carries its atomic number in its top-left corner in small mono figures, exactly as the wall chart prints it: tiles, element chips, the review list, the detail card, the app icon. Nowhere else.
 
-This is an app, so app rules apply: neutral graphite surfaces, the moments carry the colour.
+This is an app, so app rules apply: near-neutral surfaces, the moments carry the colour. The template check (unslop `signs.md`, "Template look") failed on a pure grey page with white text, so the ramp is unslop's Warm ramp: the paper the chart is printed on. Paper (light) is the default theme; dark is the same paper at night. The accent is cobalt ink on that paper.
 
 ---
 
 ## 3. Colour
 
-One graphite ramp, a hair cool (ink on a wall chart). Surfaces never read as a colour.
+One warm ramp, the chart's paper (unslop tokens, Warm). Saturation stays so low that a surface never reads as a colour.
 
 | Role | Token | Dark | Light |
 | --- | --- | --- | --- |
-| Deepest surface | `--bg-deep` / `bg-bg-deep` | #0e0e10 | #f1f1f3 |
-| Page | `--bg` / `bg-bg` | #131315 | #f8f8f9 |
-| Card, sheet | `--surface` / `bg-surface` | #18181b | #ffffff |
-| Raised: active row, input, secondary button | `--surface-2` / `bg-surface-2` (`bg-raised`) | #212124 | #f1f1f3 |
+| Deepest surface | `--bg-deep` / `bg-bg-deep` | #12110f | #efeae1 |
+| Page | `--bg` / `bg-bg` | #161513 | #f7f4ee |
+| Card, sheet | `--surface` / `bg-surface` | #1c1a18 | #fdfbf7 |
+| Raised: active row, input, secondary button | `--surface-2` / `bg-surface-2` (`bg-raised`) | #262421 | #efe9df |
 | Hairline | `--line` / `border-line` | ink at 8% | ink at 8% |
 | Strong hairline, empty track | `--line-strong` | ink at 16% | ink at 16% |
-| Control edge: a control that must be found at rest (switch track and knob when off, `.field` border, chosen `.seg-item` ring) | `--line-control` / `border-line-control` | #727279 | #85858c |
+| Control edge: a control that must be found at rest (switch track and knob when off, `.field` border, chosen `.seg-item` ring) | `--line-control` / `border-line-control` | #7d776d | #8a8175 |
 | Empty square in a mini table | `--mini-empty` | ink at 10% | ink at 8% |
 
 `--line-control` is the one exception to quiet hairlines: it is 3:1 or better against bg, surface and surface-2 in both themes (WCAG 1.4.11), and only goes on the edges that tell a student where a control is or which option is chosen.
@@ -105,9 +105,9 @@ One graphite ramp, a hair cool (ink on a wall chart). Surfaces never read as a c
 
 | Role | Token | Dark | Light | Use |
 | --- | --- | --- | --- | --- |
-| Primary | `text-ink` | #ededf0 | #17171a | headings, body, values |
-| Secondary | `text-ink-2` | #a3a3aa | #505058 | labels, descriptions, inactive nav |
-| Muted | `text-ink-3` | #8b8b93 | #696972 | meta, captions, units only (4.5:1 or better on every surface) |
+| Primary | `text-ink` | #efe9de | #1f1b16 | headings, body, values |
+| Secondary | `text-ink-2` | #aaa398 | #5e554a | labels, descriptions, inactive nav |
+| Muted | `text-ink-3` | #969085 | #6b6357 | meta, captions, units only (4.5:1 or better on every surface) |
 
 ### One accent: cobalt
 

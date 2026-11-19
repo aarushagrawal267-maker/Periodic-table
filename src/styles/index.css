@@ -55,27 +55,27 @@
 
 :root {
   color-scheme: dark;
-  /* Graphite ramp, a hair cool, like black ink on a wall chart. */
-  --bg-deep: #0e0e10;
-  --bg: #131315;
-  --surface: #18181b;
-  --surface-2: #212124;
-  --line: rgb(237 237 240 / 0.08);
-  --line-strong: rgb(237 237 240 / 0.16);
+  /* Warm ramp: the wall chart's paper at night, never a colour of its own. */
+  --bg-deep: #12110f;
+  --bg: #161513;
+  --surface: #1c1a18;
+  --surface-2: #262421;
+  --line: rgb(239 233 222 / 0.08);
+  --line-strong: rgb(239 233 222 / 0.16);
   /* Edge of a control that must be found at rest (switch track, field, chosen segment): 3:1 or better on every surface. */
-  --line-control: #727279;
-  --ink: #ededf0;
-  --ink-2: #a3a3aa;
+  --line-control: #7d776d;
+  --ink: #efe9de;
+  --ink-2: #aaa398;
   /* Muted: meta and captions only. 4.5:1 or better on bg, surface and surface-2. */
-  --ink-3: #8b8b93;
+  --ink-3: #969085;
 
   /* The one accent: cobalt (element 27). Selection, progress, the key figure. */
   --accent: #6ea3ff;
-  --on-accent: #0e0e10;
+  --on-accent: #12110f;
   --accent-soft: rgb(110 163 255 / 0.12);
   /* Primary action: off-white from the ramp with dark text. */
-  --primary: #ededf0;
-  --on-primary: #131315;
+  --primary: #efe9de;
+  --on-primary: #161513;
 
   --good: #4cc38a;
   --bad: #ec5d61;
@@ -87,9 +87,9 @@
   /* Focus ring: 3:1 or better against every surface. */
   --focus: #6ea3ff;
 
-  --cell-empty: rgb(237 237 240 / 0.035);
+  --cell-empty: rgb(239 233 222 / 0.035);
   /* Empty-slot outline: 3:1 or better against the slot and the page (WCAG 1.4.11). */
-  --slot-line: rgb(237 237 240 / 0.4);
+  --slot-line: rgb(239 233 222 / 0.4);
   /*
    * Tile, chip and .cat-ink text = category colour mixed with --ink by this amount.
    * Tuned per palette so text stays at 4.5:1 or better on its tinted background.
@@ -101,7 +101,7 @@
   --tile-edge: 42%;
   /* Mini table squares: the same printed tint, a little stronger so a 10px square still reads. */
   --mini-tint: 52%;
-  --mini-empty: rgb(237 237 240 / 0.1);
+  --mini-empty: rgb(239 233 222 / 0.1);
 
   /* Depth on dark: surface steps and hairlines. Shadows only for things that float. */
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
@@ -129,22 +129,23 @@
 
 [data-theme='light'] {
   color-scheme: light;
-  --bg-deep: #f1f1f3;
-  --bg: #f8f8f9;
-  --surface: #ffffff;
-  --surface-2: #f1f1f3;
-  --line: rgb(23 23 26 / 0.08);
-  --line-strong: rgb(23 23 26 / 0.16);
-  --line-control: #85858c;
-  --ink: #17171a;
-  --ink-2: #505058;
-  --ink-3: #696972;
+  /* Warm ramp: the paper the wall chart is printed on. */
+  --bg-deep: #efeae1;
+  --bg: #f7f4ee;
+  --surface: #fdfbf7;
+  --surface-2: #efe9df;
+  --line: rgb(31 27 22 / 0.09);
+  --line-strong: rgb(31 27 22 / 0.18);
+  --line-control: #8a8175;
+  --ink: #1f1b16;
+  --ink-2: #5e554a;
+  --ink-3: #6b6357;
 
   --accent: #1f5bd6;
   --on-accent: #ffffff;
   --accent-soft: rgb(31 91 214 / 0.08);
-  --primary: #17171a;
-  --on-primary: #ffffff;
+  --primary: #1f1b16;
+  --on-primary: #fdfbf7;
 
   --good: #13773a;
   --bad: #c92a2a;
@@ -154,16 +155,16 @@
 
   --focus: #1f5bd6;
 
-  --cell-empty: rgb(23 23 26 / 0.04);
-  --slot-line: rgb(23 23 26 / 0.5);
+  --cell-empty: rgb(31 27 22 / 0.04);
+  --slot-line: rgb(31 27 22 / 0.5);
   --cell-ink-mix: 56%;
   --tile-tint: 13%;
   --tile-edge: 50%;
   --mini-tint: 40%;
-  --mini-empty: rgb(23 23 26 / 0.08);
+  --mini-empty: rgb(31 27 22 / 0.08);
 
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
-  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.06);
+  --shadow-sm: 0 1px 2px rgb(31 27 22 / 0.05);
+  --shadow-md: 0 8px 24px rgb(31 27 22 / 0.06);
   --shadow-lg: 0 16px 48px rgb(0 0 0 / 0.12), 0 0 0 1px var(--line);
   --highlight: none;
 

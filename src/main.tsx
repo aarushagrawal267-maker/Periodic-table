@@ -4,7 +4,11 @@ import { createRoot } from 'react-dom/client';
 import '@fontsource-variable/figtree';
 import '@fontsource-variable/geist-mono';
 import './styles/index.css';
+import { registerSW } from 'virtual:pwa-register';
 import { App } from './App';
+
+// Offline cache: when a new version is deployed, take it and reload once, so nobody is left on an old build.
+registerSW({ immediate: true });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
