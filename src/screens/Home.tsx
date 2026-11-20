@@ -641,7 +641,10 @@ function HowItWorks() {
 function ForTeachers() {
   const points = [
     { title: 'What it covers', body: 'Starts with elements 1 to 20, then the groups: alkali metals, halogens, noble gases and more, through to the whole table.' },
-    { title: 'No accounts', body: 'No sign-up, no email, no names. Progress is saved only in this browser, on this device, and the app works offline.' },
+    {
+      title: 'Accounts are optional',
+      body: 'Students can play without signing up, and progress stays in this browser. If they sign in with Google or an email, progress is saved to their account with Google Firebase and follows them to any device. On a shared computer, closing the browser or signing out clears it.',
+    },
     { title: 'Easy to check', body: 'Students can open Progress and show you a summary of the elements they have started and mastered.' },
   ];
   return (

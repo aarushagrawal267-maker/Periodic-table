@@ -5,6 +5,7 @@ import type { Route } from '../lib/router';
 import { levelFromXp } from '../lib/scoring';
 import { liveStreak, useProgress } from '../store/progress';
 import { useUi } from '../store/ui';
+import { AccountEntry, useAccountSlot } from './account/AccountEntry';
 import { GoalRingBadge } from './DailyGoal';
 import { Ring } from './Stats';
 
@@ -16,6 +17,24 @@ const NAV = [
   { path: '/explore', name: 'explore', label: 'Explore', icon: Telescope, mobile: true },
   { path: '/progress', name: 'progress', label: 'Progress', icon: BarChart3, mobile: false },
 ] as const;
+
+/**
+ * Widths at which the header has room for the daily goal ring, by what the account entry shows. From md to lg the
+ * top nav takes the room, so beside an account control the ring waits for lg (the header is no wider than without one).
+ */
+const GOAL_SHOWN = {
+  none: 'hidden min-[375px]:contents',
+  guest: 'hidden min-[375px]:max-[399px]:contents min-[460px]:max-md:contents lg:contents',
+  avatar: 'hidden min-[430px]:max-md:contents lg:contents',
+} as const;
+
+/**
+ * The account entry and what it shows: nothing, "Sign in" from 400px, or a 44px avatar (AccountEntry). In a build
+ * without accounts both are constants, so the bundler leaves the account code out. The env check is written out
+ * for that, rather than isConfigured() (docs/ACCOUNTS.md 8.3).
+ */
+const HeaderAccount = import.meta.env.VITE_FIREBASE_PROJECT_ID ? AccountEntry : () => null;
+const useHeaderAccount = import.meta.env.VITE_FIREBASE_PROJECT_ID ? useAccountSlot : (): keyof typeof GOAL_SHOWN => 'none';
 
 /** Flat mark: the product's own element square, "Pa". The app icon adds its atomic number, 91, in the corner. */
 export function LogoMark({ size = 28 }: { size?: number }) {
@@ -29,11 +48,12 @@ export function LogoMark({ size = 28 }: { size?: number }) {
   );
 }
 
-export function Logo({ size = 28 }: { size?: number }) {
+/** `compact`: below 340px only the mark shows, to leave room for the account avatar in the header. */
+export function Logo({ size = 28, compact = false }: { size?: number; compact?: boolean }) {
   return (
     <a href="#/" className="-mx-2 flex h-11 items-center gap-2 rounded-control px-2 md:h-9" aria-label="Periodica home">
       <LogoMark size={size} />
-      <span className="text-[17px] font-semibold leading-none">Periodica</span>
+      <span className={`text-[17px] font-semibold leading-none ${compact ? 'max-[339px]:hidden' : ''}`}>Periodica</span>
     </a>
   );
 }
@@ -45,6 +65,7 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
   const lvl = levelFromXp(xp);
   const streak = liveStreak(daily, todayKey());
   const active = route === 'game' ? 'play' : route;
+  const account = useHeaderAccount();
 
   // Immersive screens (games, lessons) bring their own <main>, so the skip-link target here is a plain wrapper.
   if (immersive)
@@ -58,7 +79,7 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
     <div className="relative z-10 flex min-h-dvh flex-col">
       <header className="sticky top-0 z-40 border-b border-line bg-bg">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4 sm:px-6 md:h-16 md:gap-8">
-          <Logo />
+          <Logo compact={account === 'avatar'} />
           <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
             {NAV.map((n) => {
               const on = active === n.name;
@@ -84,8 +105,10 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
               <span className="mono">{streak}</span>
             </a>
             {/* Below 375px (and at 400% zoom) there is no room; the goal is on Home anyway (WCAG 1.4.10). On phones the settings
-                icon sits on the page gutter (its 44px target reaches into the padding), which leaves room for the goal from 375px. */}
-            <div className="hidden min-[375px]:contents">
+                icon sits on the page gutter (its 44px target reaches into the padding), which leaves room for the goal from 375px.
+                With the account entry in the header it needs more: from 430px beside the avatar, and beside "Sign in" (from 400px)
+                from 460px, so a three-digit streak and "140/150" still fit without squeezing a 44px target (see GOAL_SHOWN). */}
+            <div className={account === 'none' ? GOAL_SHOWN.none : account === 'guest' ? GOAL_SHOWN.guest : GOAL_SHOWN.avatar}>
               <GoalRingBadge />
             </div>
             <a
@@ -98,6 +121,7 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
               </Ring>{' '}
               <span className="mono hidden text-[13px] text-ink-2 sm:inline">{xp.toLocaleString('en-US')} XP</span>
             </a>
+            <HeaderAccount />
             <button onClick={() => setSettings(true)} className="icon-btn max-md:-mr-3" aria-label="Settings">
               <Settings size={18} strokeWidth={1.5} />
             </button>

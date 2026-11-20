@@ -1,0 +1,114 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedInAs(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function isCount(n, max) {
+      return n is int && n >= 0 && n <= max;
+    }
+
+    function validProfile(d) {
+      return !('profile' in d)
+        || (d.profile is map
+            && d.profile.keys().hasOnly(['name'])
+            && d.profile.name is string
+            && d.profile.name.size() >= 1
+            && d.profile.name.size() <= 40);
+    }
+
+    function validDaily(x) {
+      return x is map
+        && x.keys().hasOnly(['results', 'streak', 'bestStreak', 'lastKey'])
+        && x.keys().hasAll(['results', 'streak', 'bestStreak', 'lastKey'])
+        && x.results is map && x.results.size() <= 400
+        && isCount(x.streak, 100000)
+        && isCount(x.bestStreak, 100000)
+        && (x.lastKey == null
+            || (x.lastKey is string && x.lastKey.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')));
+    }
+
+    // Atomic numbers 1 to 118: the only values `explored` may hold.
+    function ELEMENTS() {
+      return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118];
+    }
+
+    // A time in ms when given; settings.at holds one per setting key.
+    function optTime(m, k) {
+      return !(k in m) || (m[k] is int && m[k] >= 0 && m[k] <= 100000000000000);
+    }
+
+    function validProgress(p) {
+      return p is map
+        && p.keys().hasOnly(['epoch', 'slots', 'mastery', 'best', 'bestCombo', 'daily', 'achievements', 'explored', 'chapters'])
+        && p.keys().hasAll(['epoch', 'slots', 'mastery', 'best', 'bestCombo', 'daily', 'achievements', 'explored', 'chapters'])
+        && isCount(p.epoch, 1000000)
+        && p.slots is map && p.slots.size() <= 500
+        && p.mastery is map && p.mastery.size() <= 118
+        && p.best is map && p.best.size() <= 64
+        && isCount(p.bestCombo, 100000)
+        && validDaily(p.daily)
+        && p.achievements is map && p.achievements.size() <= 64
+        && p.explored is list && p.explored.size() <= 118
+        && p.explored.toSet().hasOnly(ELEMENTS())
+        && p.chapters is map && p.chapters.size() <= 64;
+    }
+
+    function validSettings(s) {
+      return s is map
+        && s.keys().hasOnly(['values', 'at'])
+        && s.keys().hasAll(['values', 'at'])
+        && s.values is map
+        && s.values.keys().hasOnly(['sound', 'haptics', 'reduceMotion', 'colorblind', 'difficulty', 'quizTimer'])
+        && s.values.keys().hasAll(['sound', 'haptics', 'reduceMotion', 'colorblind', 'difficulty', 'quizTimer'])
+        && s.values.sound is bool
+        && s.values.haptics is bool
+        && s.values.reduceMotion is bool
+        && s.values.colorblind is bool
+        && s.values.quizTimer is bool
+        && s.values.difficulty in ['learner', 'standard', 'expert']
+        && s.at is map
+        && s.at.keys().hasOnly(['sound', 'haptics', 'reduceMotion', 'colorblind', 'difficulty', 'quizTimer'])
+        && optTime(s.at, 'sound') && optTime(s.at, 'haptics') && optTime(s.at, 'reduceMotion')
+        && optTime(s.at, 'colorblind') && optTime(s.at, 'difficulty') && optTime(s.at, 'quizTimer');
+    }
+
+    function validUser(d) {
+      return d.keys().hasOnly(['schemaVersion', 'profile', 'progress', 'settings', 'clientId', 'createdAt', 'updatedAt'])
+        && d.keys().hasAll(['schemaVersion', 'progress', 'settings', 'clientId', 'createdAt', 'updatedAt'])
+        && d.schemaVersion is int && d.schemaVersion >= 1 && d.schemaVersion <= 1000
+        && d.clientId is string && d.clientId.size() >= 8 && d.clientId.size() <= 64
+        && d.updatedAt == request.time
+        && validProfile(d)
+        && validProgress(d.progress)
+        && validSettings(d.settings);
+    }
+
+    match /users/{uid} {
+      allow get: if signedInAs(uid);
+      allow list: if false;
+      allow create: if signedInAs(uid)
+        && validUser(request.resource.data)
+        && request.resource.data.createdAt == request.time;
+      // At most one save a second per account (docs/ACCOUNTS.md 6.1): sync never needs more (it waits
+      // MIN_SAVE_GAP_MS between its own saves and retries a refusal), and it bounds a write loop.
+      allow update: if signedInAs(uid)
+        && validUser(request.resource.data)
+        // createdAt never changes; a stored document without one (edited by hand or by a tool) can be
+        // healed once with the request time, which is what sync.ts sends then (serverTimestamp()).
+        && (('createdAt' in resource.data)
+            ? request.resource.data.createdAt == resource.data.createdAt
+            : request.resource.data.createdAt == request.time)
+        && request.resource.data.schemaVersion >= resource.data.schemaVersion
+        && request.time > resource.data.updatedAt + duration.value(1, 's');
+      allow delete: if signedInAs(uid);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

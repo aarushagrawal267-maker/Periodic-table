@@ -10,11 +10,17 @@
     "test": "vitest run",
     "data": "node scripts/build-data.mjs",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "emulators": "npx -y firebase-tools@15.37.0 emulators:start --only auth,firestore --project demo-periodica",
+    "dev:accounts": "vite --mode emulators",
+    "test:rules": "npx -y firebase-tools@15.37.0 emulators:exec --only firestore --project demo-periodica \"vitest run -c vitest.emulator.config.ts tests-emulator/rules.test.ts\"",
+    "test:accounts": "npx -y firebase-tools@15.37.0 emulators:exec --only auth,firestore --project demo-periodica \"vitest run -c vitest.emulator.config.ts && playwright test -c playwright.accounts.config.ts\"",
+    "test:accounts:e2e": "npx -y firebase-tools@15.37.0 emulators:exec --only auth,firestore --project demo-periodica \"playwright test -c playwright.accounts.config.ts\""
   },
   "dependencies": {
     "@fontsource-variable/figtree": "^5.3.0",
     "@fontsource-variable/geist-mono": "^5.3.0",
+    "firebase": "^13.4.0",
     "lucide-react": "^1.75.0",
     "motion": "^14.14.0",
     "react": "^19.3.1",
@@ -22,6 +28,7 @@
     "zustand": "^5.1.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
     "@playwright/test": "^1.65.1",
     "@tailwindcss/vite": "^4.3.5",
     "@types/react": "^19.3.0",

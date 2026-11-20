@@ -4,3 +4,9 @@ dev-dist
 *.local
 .DS_Store
 .claude/settings.local.json
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+e2e-accounts/.dist
+e2e-accounts/.results
+e2e-accounts/.report

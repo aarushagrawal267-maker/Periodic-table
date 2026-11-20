@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { guardedStorage } from '../lib/syncMeta';
 import { ACHIEVEMENTS } from '../lib/achievements';
 import { CHAPTERS } from '../lib/chapters';
 import { previousKey, todayKey } from '../lib/daily';
@@ -69,10 +70,16 @@ interface ProgressState extends ProgressData {
   markExplored: (n: number) => string[];
   /** Marks today's daily as attempted, so quitting and retrying can't be used to practise it. */
   startDaily: (key: string) => void;
+  /**
+   * Unlocks badges the current state already qualifies for, with no round. Account sync calls it after
+   * merging another device's progress, which can pass a check neither side passed alone.
+   */
+  reconcileAchievements: () => string[];
   reset: () => void;
 }
 
-const initial: ProgressData = {
+/** A fresh start: what a new guest, a reset and a signed-out device hold. */
+export const EMPTY_PROGRESS: ProgressData = {
   xp: 0,
   mastery: {},
   best: {},
@@ -83,6 +90,7 @@ const initial: ProgressData = {
   chapters: {},
   today: { key: '', xp: 0 },
 };
+const initial = EMPTY_PROGRESS;
 
 function unlockNew(p: ProgressData, r?: RoundSummary) {
   const now = Date.now();
@@ -167,9 +175,20 @@ export const useProgress = create<ProgressState>()(
         return unlocked;
       },
       startDaily: (key) => set({ daily: { ...get().daily, started: key } }),
+      reconcileAchievements: () => {
+        const { achievements, unlocked } = unlockNew(get());
+        if (unlocked.length) set({ achievements });
+        return unlocked;
+      },
       reset: () => set({ ...initial }),
     }),
-    { name: 'periodica-progress', version: 2, migrate: (old) => ({ ...initial, ...(old as object) }) as ProgressState },
+    {
+      name: 'periodica-progress',
+      version: 2,
+      migrate: (old) => ({ ...initial, ...(old as object) }) as ProgressState,
+      // localStorage, except that a tab left over from before a sign out or sign in elsewhere cannot write (docs/ACCOUNTS.md 5.6.8).
+      storage: createJSONStorage(() => guardedStorage),
+    },
   ),
 );
 

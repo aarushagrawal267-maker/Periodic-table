@@ -64,3 +64,40 @@ jobs:
             e2e/.report
             e2e/.results
           retention-days: 7
+
+  # Firestore rules, multi-device sync and the browser account flows against the Firebase emulators
+  # (auth 9099, firestore 8080, project demo-periodica) in one emulator session. The emulators need Java.
+  accounts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Account tests (emulators)
+        run: npm run test:accounts
+
+      - name: Upload Playwright report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-accounts-report
+          path: |
+            e2e-accounts/.report
+            e2e-accounts/.results
+          retention-days: 7

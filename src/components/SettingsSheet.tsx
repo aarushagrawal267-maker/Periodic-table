@@ -1,9 +1,19 @@
-import { useState, type KeyboardEvent } from 'react';
+import { useRef, useState, type KeyboardEvent } from 'react';
 import { DIFFICULTIES, useSettings } from '../store/settings';
 import { useProgress } from '../store/progress';
 import { useUi } from '../store/ui';
+import { AccountDataSummary, useSignedIn } from './account/AccountData';
+import { ConfirmBlock } from './account/ConfirmBlock';
 import { Sheet } from './Sheet';
 import { Switch } from './Switch';
+
+/**
+ * "Your data" with accounts, and whether the reset reaches every device. In a build without accounts these are
+ * constants, so the bundler leaves the account code out. The env check is written out for that, rather than
+ * isConfigured() (docs/ACCOUNTS.md 8.3).
+ */
+const DataSummary = import.meta.env.VITE_FIREBASE_PROJECT_ID ? AccountDataSummary : LocalDataSummary;
+const useResetReachesAccount = import.meta.env.VITE_FIREBASE_PROJECT_ID ? useSignedIn : () => false;
 
 export function SettingsSheet() {
   const open = useUi((s) => s.settingsOpen);
@@ -11,6 +21,20 @@ export function SettingsSheet() {
   const s = useSettings();
   const reset = useProgress((p) => p.reset);
   const [confirm, setConfirm] = useState(false);
+  const resetRef = useRef<HTMLButtonElement>(null);
+  const signedIn = useResetReachesAccount();
+
+  /** Back to "Reset progress…", with focus on it. */
+  const closeConfirm = () => {
+    setConfirm(false);
+    requestAnimationFrame(() => resetRef.current?.focus());
+  };
+
+  /** A link to the account screen: the sheet closes and the account screen's heading takes focus. */
+  const toAccount = () => {
+    setOpen(false);
+    focusHeadingWhenSheetCloses('#/account');
+  };
 
   return (
     <Sheet open={open} onClose={() => setOpen(false)} label="Settings">
@@ -57,24 +81,23 @@ export function SettingsSheet() {
 
         <section className="mt-8">
           <h3 className="label mb-2">Your data</h3>
-          <p className="text-sm text-ink-2">Progress is saved on this device only. Nothing is sent anywhere.</p>
+          <DataSummary onNavigate={toAccount} />
           {confirm ? (
-            <div className="mt-4 flex gap-3">
-              <button className="btn btn-secondary flex-1" onClick={() => setConfirm(false)}>
-                Cancel
-              </button>
-              <button
-                className="btn btn-danger flex-1"
-                onClick={() => {
+            <div className="mt-4">
+              <ConfirmBlock
+                title="Erase your progress?"
+                body={<p>{signedIn ? 'This erases your progress on every device signed in to this account' : 'This erases your progress in this browser'}</p>}
+                confirmLabel="Erase everything"
+                tone="danger"
+                onConfirm={() => {
                   reset();
-                  setConfirm(false);
+                  closeConfirm();
                 }}
-              >
-                Erase everything
-              </button>
+                onCancel={closeConfirm}
+              />
             </div>
           ) : (
-            <button className="btn btn-quiet -ml-4 mt-2 text-bad hover:text-bad" onClick={() => setConfirm(true)}>
+            <button ref={resetRef} className="btn btn-quiet -ml-4 mt-2 text-bad hover:text-bad" onClick={() => setConfirm(true)}>
               Reset progress…
             </button>
           )}
@@ -82,6 +105,29 @@ export function SettingsSheet() {
       </div>
     </Sheet>
   );
+}
+
+/**
+ * The sheet hands focus back to the Settings button as it closes, and the new screen's heading does not take it
+ * while the sheet is still fading out (App's RouteFocus leaves an open dialog alone). Once the sheet is gone and
+ * the screen has loaded, move focus to its heading, unless the student has already moved it somewhere else.
+ */
+function focusHeadingWhenSheetCloses(hash: string) {
+  const until = performance.now() + 2000;
+  // The current screen's heading is the target only when the link leads to the screen already open.
+  const previous = window.location.hash === hash ? null : document.querySelector('#main h1');
+  const step = () => {
+    const h1 = document.querySelector<HTMLElement>('#main h1');
+    if (document.querySelector('[aria-modal="true"]') || !h1 || h1 === previous) {
+      if (performance.now() < until) requestAnimationFrame(step);
+      return;
+    }
+    const a = document.activeElement;
+    if (a && a !== document.body && !a.closest('header')) return;
+    if (!h1.hasAttribute('tabindex')) h1.tabIndex = -1;
+    h1.focus({ preventScroll: true });
+  };
+  requestAnimationFrame(step);
 }
 
 /**
@@ -111,4 +157,9 @@ function Toggle({ label, hint, on, set }: { label: string; hint?: string; on: bo
       <Switch on={on} onChange={set} label={label} />
     </label>
   );
+}
+
+/** "Your data" in a build without accounts: nothing leaves the device. */
+function LocalDataSummary() {
+  return <p className="text-sm text-ink-2">Progress is saved on this device only. Nothing is sent anywhere.</p>;
 }

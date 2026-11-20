@@ -33,10 +33,39 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      # Public Firebase web config (docs/ACCOUNTS.md 9 and 10). Two sources, both supported:
+      # repository variables (Settings, Secrets and variables, Actions, Variables), or a committed
+      # .env.production. Vite lets process env win over .env files, so only non-empty variables are
+      # exported: an unset repository variable must not blank out a value from .env.production.
+      # With neither, the build has no accounts and behaves exactly as before.
+      - name: Firebase web config from repository variables
+        env:
+          FIREBASE_API_KEY: ${{ vars.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ vars.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ vars.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ vars.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ vars.FIREBASE_APP_ID }}
+          FIREBASE_APPCHECK_SITE_KEY: ${{ vars.FIREBASE_APPCHECK_SITE_KEY }}
+        run: |
+          for name in API_KEY AUTH_DOMAIN PROJECT_ID STORAGE_BUCKET MESSAGING_SENDER_ID APP_ID APPCHECK_SITE_KEY; do
+            value="$(printenv "FIREBASE_$name" || true)"
+            if [ -n "$value" ]; then
+              printf 'VITE_FIREBASE_%s=%s\n' "$name" "$value" >> "$GITHUB_ENV"
+              echo "VITE_FIREBASE_$name set from the repository variable FIREBASE_$name"
+            fi
+          done
+
       # vite.config.ts uses base './' and the app uses hash routing,
       # so dist/ works under /<repo>/ with no 404.html SPA fallback.
       - name: Type-check and build
-        run: npm run build
+        run: |
+          if [ -n "$VITE_FIREBASE_EMULATORS" ] || [ -f .env.local ] || [ -f .env.production.local ] \
+            || grep -qs '^[[:space:]]*VITE_FIREBASE_EMULATORS[[:space:]]*=[[:space:]]*[^[:space:]#]' .env .env.production; then
+            echo "::error::Deploy builds must not use the emulators or a local env file"
+            exit 1
+          fi
+          npm run build
 
       - name: Publish dist/ to the gh-pages branch
         working-directory: dist

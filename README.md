@@ -22,4 +22,4 @@ npm run dev
 
 - Element properties: PubChem (NCBI), `scripts/source/pubchem-periodic-table.json`.
 - Learning content (summary, uses, fact for each element): `src/data/content-1.json`, `src/data/content-2.json`.
-- Progress is stored in the browser's local storage. Nothing is sent to a server.
+- Progress is stored in the browser's local storage. Accounts are optional: a student who signs in with Google or an email has their progress saved to their account in Cloud Firestore (Google Firebase) and synced across devices. A build without the `VITE_FIREBASE_*` variables has no accounts and sends nothing to a server. See `docs/ACCOUNTS.md`.

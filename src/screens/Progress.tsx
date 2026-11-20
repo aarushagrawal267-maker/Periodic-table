@@ -246,7 +246,7 @@ function KeyItem({ swatch, label, count }: { swatch: ReactNode; label: string; c
   );
 }
 
-/** A plain summary a student can screenshot or show to a teacher. Everything here comes from this device's progress. */
+/** A plain summary a student can screenshot or show to a teacher. Everything here comes from the progress this browser holds (the account's, when signed in). */
 function TeacherSummary() {
   const mastery = useProgress((s) => s.mastery);
   const chapters = useProgress((s) => s.chapters);
@@ -268,7 +268,7 @@ function TeacherSummary() {
         </h2>
         <span className="meta">{date}</span>
       </div>
-      <p className="mt-1 text-sm text-ink-2">A summary of your work on this device, ready for a screenshot</p>
+      <p className="mt-1 text-sm text-ink-2">A summary of your work, ready for a screenshot</p>
       <dl className="mt-4 grid gap-px sm:mt-5 overflow-hidden rounded-control border border-line bg-line sm:grid-cols-3">
         {[
           ['First 20 elements', `${first20Started} of 20 started · ${first20Mastered} mastered`],

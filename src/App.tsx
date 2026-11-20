@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
-import { useEffect, type MouseEvent } from 'react';
+import { lazy, Suspense, useEffect, type MouseEvent } from 'react';
 import { ElementDetailSheet } from './components/ElementDetail';
 import { Shell } from './components/Shell';
 import { SettingsSheet } from './components/SettingsSheet';
@@ -18,6 +18,15 @@ import { PlayHub, RegionGame } from './screens/Play';
 import { ProgressScreen } from './screens/Progress';
 import { Quiz } from './screens/Quiz';
 import { useSettings } from './store/settings';
+
+// The account screen and its forms load on first visit, so the guest bundle stays as it was (docs/ACCOUNTS.md 9).
+// A build without accounts has only the "not set up yet" note. The env check is written out, rather than
+// isConfigured(), so that the bundler leaves the account code out of such a build (section 8.3).
+const Account = lazy(() =>
+  import.meta.env.VITE_FIREBASE_PROJECT_ID
+    ? import('./screens/Account').then((m) => ({ default: m.Account }))
+    : import('./screens/AccountOff').then((m) => ({ default: m.AccountOff })),
+);
 
 export function App() {
   const route = useRoute();
@@ -70,6 +79,10 @@ export function App() {
     case 'match':
       screen = <Match />;
       break;
+    case 'account':
+      // Lazy: rendered inside the <Suspense fallback={null}> below, together with RouteFocus.
+      screen = <Account />;
+      break;
   }
 
   return (
@@ -88,8 +101,11 @@ export function App() {
               exit={{ opacity: 0, transition: { duration: DUR.menu, ease: EASE } }}
               transition={{ duration: DUR.enter, ease: EASE }}
             >
-              {screen}
-              <RouteFocus />
+              {/* RouteFocus shares the boundary, so after a lazy screen loads it still finds that screen's h1. */}
+              <Suspense fallback={null}>
+                {screen}
+                <RouteFocus />
+              </Suspense>
             </motion.div>
           </AnimatePresence>
         </Shell>
@@ -137,6 +153,8 @@ function titleFor(route: Route) {
       return t('In real life');
     case 'match':
       return t('Match pairs');
+    case 'account':
+      return t('Your account');
   }
 }
 
