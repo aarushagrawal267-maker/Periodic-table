@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Check, ChevronRight, Eye, EyeOff, RotateCcw, Sta
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ElementChip, ElementTile } from '../components/ElementTile';
 import { MiniTable } from '../components/MiniTable';
+import { SectionHeader } from '../components/SectionHeader';
 import { DUR, rise, tween } from '../components/motion';
 import { CHAPTERS, chapterById, type Chapter } from '../lib/chapters';
 import { byNumber, catVar, categoryLabel, type Element } from '../lib/elements';
@@ -20,13 +21,13 @@ export function LearnPath() {
   const current = CHAPTERS.find((c) => !chapters[c.id]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-24 pt-8 sm:px-6 sm:pt-12 lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16">
+    <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12 lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-16">
       <header className="lg:sticky lg:top-28 lg:self-start">
         <h1 className="t-title">Learn it, then play it</h1>
         <p className="mt-3 max-w-xl text-ink-2">
           {CHAPTERS.length} short chapters, about three minutes each. Flip through a few cards, then place those same elements on the table. No timer, no pressure.
         </p>
-        <div className="mt-6 max-w-xl">
+        <div className="mt-4 max-w-xl lg:mt-6">
           <div className="flex items-baseline justify-between gap-4">
             <span className="label">Chapters done</span>
             <span className="meta">
@@ -40,14 +41,20 @@ export function LearnPath() {
       </header>
 
       <div className="mt-8 lg:mt-0">
-        {current && <UpNext chapter={current} index={CHAPTERS.indexOf(current)} />}
-        {due.length > 0 && <ReviewBanner due={due} />}
-        <h2 className="t-heading mb-4">All chapters</h2>
-        <ol className="border-b border-line">
-          {CHAPTERS.map((c, i) => (
-            <ChapterRow key={c.id} chapter={c} index={i} stars={chapters[c.id] ?? 0} current={c === current} />
-          ))}
-        </ol>
+        {(current || due.length > 0) && (
+          <div className="mb-12 flex flex-col gap-3 md:mb-16 md:gap-4">
+            {current && <UpNext chapter={current} index={CHAPTERS.indexOf(current)} />}
+            {due.length > 0 && <ReviewBanner due={due} />}
+          </div>
+        )}
+        <section aria-labelledby="all-chapters">
+          <SectionHeader id="all-chapters" title="All chapters" />
+          <ol className="border-b border-line">
+            {CHAPTERS.map((c, i) => (
+              <ChapterRow key={c.id} chapter={c} index={i} stars={chapters[c.id] ?? 0} current={c === current} />
+            ))}
+          </ol>
+        </section>
       </div>
     </div>
   );
@@ -57,15 +64,17 @@ export function LearnPath() {
 function ReviewBanner({ due }: { due: number[] }) {
   const label = `${due.length} ${due.length === 1 ? 'element' : 'elements'} ready for a quick review`;
   return (
-    <a href="#/learn/review" className="card card-link group mb-10 flex items-center gap-4 p-5 sm:p-6">
+    <a href="#/learn/review" className="card card-link group flex items-center gap-4 p-4 sm:p-6">
       <span className="min-w-0 flex-1">
         <span className="block font-medium">{label}</span>
         <span className="mt-1 block text-sm text-ink-2">A few cards, then a short game on the table</span>
         <span aria-hidden className="mt-3 flex flex-wrap items-center gap-1">
-          {due.slice(0, 8).map((n) => (
-            <ElementChip key={n} element={byNumber(n)} size={28} />
+          {/* Six chips below 360px and eight above, so the row never leaves one or two on a line of their own. */}
+          {due.slice(0, 8).map((n, i) => (
+            <ElementChip key={n} element={byNumber(n)} size={28} className={i >= 6 ? 'max-[359px]:hidden' : ''} />
           ))}
-          {due.length > 8 && <span className="meta pl-1">+{due.length - 8}</span>}
+          {due.length > 6 && <span className="meta pl-1 min-[360px]:hidden">+{due.length - 6}</span>}
+          {due.length > 8 && <span className="meta pl-1 max-[359px]:hidden">+{due.length - 8}</span>}
         </span>
       </span>
       <ArrowRight aria-hidden size={18} strokeWidth={1.5} className="shrink-0 text-ink-3 transition-colors group-hover:text-ink" />
@@ -82,7 +91,7 @@ function UpNext({ chapter: c, index }: { chapter: Chapter; index: number }) {
   return (
     <a
       href={`#/learn/${c.id}`}
-      className="card card-link mb-6 block p-5 sm:p-6"
+      className="card card-link block p-4 sm:p-6"
       aria-label={`Start chapter ${index + 1}: ${c.title}, up next`}
     >
       <p className="label">Up next · chapter {index + 1}</p>
@@ -113,25 +122,28 @@ function ChapterRow({ chapter: c, index, stars, current }: { chapter: Chapter; i
     <li className="border-t border-line">
       <a
         href={`#/learn/${c.id}`}
-        className="group -mx-4 flex min-h-[72px] items-center gap-4 px-4 py-3 transition-colors hover:bg-surface sm:mx-0 sm:gap-6 sm:rounded-control sm:px-5"
+        className="group -mx-4 flex h-[88px] items-center gap-3 px-4 transition-colors hover:bg-surface sm:mx-0 sm:h-[72px] sm:gap-6 sm:rounded-control sm:px-5"
         aria-label={`Chapter ${index + 1}: ${c.title}${stars ? `, completed with ${stars} stars` : ''}`}
       >
         <span aria-hidden className={`mono w-6 shrink-0 text-[15px] leading-6 ${current ? 'text-accent' : 'text-ink-3'}`}>
           {index + 1}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[15px] font-medium leading-6">{c.title}</span>
-          <span className="mt-0.5 block truncate text-sm text-ink-2">{c.blurb}</span>
+          <span className="block truncate text-[15px] font-medium leading-6">{c.title}</span>
+          <span className="line-clamp-2 text-sm leading-5 text-ink-2 sm:line-clamp-1">{c.blurb}</span>
         </span>
-        {stars ? (
-          <ChapterStars stars={stars} />
-        ) : current ? (
-          <span className="shrink-0 text-sm text-ink-2">Up next</span>
-        ) : (
-          <span aria-hidden className="meta hidden shrink-0 sm:block">
-            {c.numbers.length} elements · {minutes(c)} min
-          </span>
-        )}
+        {/* On phones the state column exists only on rows that have a state, so the other summaries get the width. */}
+        <span className={`${stars || current ? 'flex w-14' : 'hidden sm:flex'} shrink-0 justify-end sm:w-auto`}>
+          {stars ? (
+            <ChapterStars stars={stars} />
+          ) : current ? (
+            <span className="text-sm leading-6 text-ink-2">Up next</span>
+          ) : (
+            <span aria-hidden className="meta hidden sm:block">
+              {c.numbers.length} elements · {minutes(c)} min
+            </span>
+          )}
+        </span>
         <ChevronRight aria-hidden size={16} strokeWidth={1.5} className="shrink-0 text-ink-3 transition-colors group-hover:text-ink" />
       </a>
     </li>
@@ -162,6 +174,8 @@ interface LessonPlan {
   regionId: string;
   title: string;
   kicker: string;
+  /** The count after the kicker; dropped below 360px, where the meter beside the card already gives it. */
+  kickerCount: string;
   subtitle: string;
   numbers: number[];
   /** Chapter whose memory trick opens the deck, if it has one. */
@@ -193,7 +207,8 @@ export function Lesson({ chapterId }: { chapterId: string }) {
       return {
         regionId: 'review',
         title: 'Quick review',
-        kicker: `Spaced review · ${reviewNumbers.length} ${reviewNumbers.length === 1 ? 'element' : 'elements'}`,
+        kicker: 'Spaced review',
+        kickerCount: ` · ${reviewNumbers.length} ${reviewNumbers.length === 1 ? 'element' : 'elements'}`,
         subtitle: 'Quick review · put them back on the table',
         numbers: reviewNumbers,
       };
@@ -201,7 +216,8 @@ export function Lesson({ chapterId }: { chapterId: string }) {
     return {
       regionId: chapter.id,
       title: chapter.title,
-      kicker: `Chapter ${idx + 1} · ${chapter.numbers.length} elements`,
+      kicker: `Chapter ${idx + 1}`,
+      kickerCount: ` · ${chapter.numbers.length} elements`,
       subtitle: `Chapter ${idx + 1} · put them on the table`,
       numbers: chapter.numbers,
       trick: chapter.mnemonic ? chapter : undefined,
@@ -325,12 +341,24 @@ export function Lesson({ chapterId }: { chapterId: string }) {
           <ArrowLeft size={18} strokeWidth={1.5} />
         </button>
         <div className="min-w-0 flex-1">
-          <div className="meta">{empty ? 'Spaced review' : plan.kicker}</div>
+          <div className="meta truncate">
+            {empty ? (
+              'Spaced review'
+            ) : (
+              <>
+                {plan.kicker}
+                <span className="max-[359px]:hidden">{plan.kickerCount}</span>
+              </>
+            )}
+          </div>
           <h1 className="text-balance text-base font-medium leading-6">{plan.title}</h1>
         </div>
         {phase === 'cards' && !empty && (
-          <button onClick={() => setPhase('ready')} className="btn btn-quiet -mr-3 px-3">
-            Skip to game
+          // Below 360px the button reads "Skip", so a two-word chapter title keeps one line and the card keeps its height.
+          <button onClick={() => setPhase('ready')} className="btn btn-quiet -mr-3 px-3" aria-label="Skip to game">
+            <span>
+              Skip<span className="max-[359px]:hidden"> to game</span>
+            </span>
           </button>
         )}
       </header>
@@ -414,14 +442,14 @@ export function Lesson({ chapterId }: { chapterId: string }) {
           </div>
         </>
       ) : (
-        <motion.div {...rise} className="flex flex-1 flex-col items-center justify-center py-8 text-center">
+        <motion.div {...rise} className="flex flex-1 flex-col items-center justify-center py-4 text-center sm:py-8">
           <MiniTable highlight={new Set(plan.numbers)} className="w-full max-w-[280px]" />
           <p className="meta mt-4">
             {plan.numbers.length} {plan.numbers.length === 1 ? 'element' : 'elements'} to place
           </p>
           <h2 className="t-title mt-6">{isReview ? 'Now put them back' : 'Now put them on the table'}</h2>
           <p className="mt-3 max-w-sm text-ink-2">Drag each element to its place. There is no clock, the colour hints are on, and the hint button shows the right cell if you get stuck.</p>
-          <button ref={startRef} onClick={() => setPhase('play')} className="btn btn-primary btn-lg mt-8 w-full max-w-xs">
+          <button ref={startRef} onClick={() => setPhase('play')} className="btn btn-primary btn-lg mt-6 w-full max-w-xs sm:mt-8">
             Let's go <ArrowRight size={18} strokeWidth={1.5} aria-hidden />
           </button>
           <button
@@ -463,8 +491,8 @@ function ReviewEmpty({ next }: { next?: Chapter }) {
   );
 }
 
-/** Shared card height: grows with the viewport, never smaller than a comfortable read. */
-const CARD_H = 'h-[clamp(380px,calc(100dvh-288px),560px)]';
+/** Shared card height: the viewport minus the 300px of header, meter, hint and buttons around it, so the answer buttons stay on screen. */
+const CARD_H = 'h-[clamp(320px,calc(100dvh-300px),560px)]';
 
 /** The ruled head of an index card: the category on the left, where it sits on the table on the right. */
 function CardHead({ e }: { e: Element }) {
@@ -528,23 +556,42 @@ function FlipCard({ e, flipped, onFlip }: { e: Element; flipped: boolean; onFlip
 
 function MnemonicCard({ chapter }: { chapter: Chapter }) {
   const words = chapter.mnemonic!;
-  // Long rhymes get tighter rows; the card also grows rather than clipping.
-  const dense = words.length > 7;
+  // Seven words get tighter rows. Ten-word rhymes read in two columns, top to bottom, on screens under 760px tall,
+  // and in one column above that. Either way the whole trick and its button fit one 320x640 screen.
+  const dense = words.length > 6;
+  const twoCol = words.length > 7;
+  const rows = Math.ceil(words.length / 2);
   return (
-    <div className="card flex min-h-[clamp(380px,calc(100dvh-288px),560px)] flex-col overflow-hidden">
+    // The trick step has no "Show answer" row, so it reserves 224px of chrome instead of the flip card's 300,
+    // and may grow 64px past the flip card's 560 cap to take that row's place.
+    <div className="card flex min-h-[clamp(320px,calc(100dvh-224px),624px)] flex-col overflow-hidden">
       <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-line px-5">
         <span className="text-[13px] font-medium text-ink-2">Memory trick</span>
         <span className="meta">{words.length} words</span>
       </div>
       <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
         <p className="text-sm text-ink-2">The first letters spell the elements in order</p>
-        <ol className={`mt-4 flex flex-1 flex-col justify-center ${dense ? 'gap-2' : 'gap-3'}`}>
+        <ol
+          className={`mt-4 flex-1 ${twoCol ? 'grid grid-flow-col content-center justify-start gap-x-3 gap-y-2 min-[375px]:gap-x-4 [@media(min-height:760px)]:flex [@media(min-height:760px)]:flex-col [@media(min-height:760px)]:justify-center' : `flex flex-col justify-center ${dense ? 'gap-2' : 'gap-3'}`}`}
+          style={twoCol ? { gridTemplateRows: `repeat(${rows}, auto)` } : undefined}
+        >
           {words.map(([word, symbol], i) => {
             const e = byNumber(chapter.numbers[i]);
             return (
-              <li key={word + i} className="flex items-center gap-3" style={{ '--c': catVar(e.category) } as CSSProperties}>
+              <li
+                key={word + i}
+                className={`flex min-w-0 items-center ${twoCol ? 'gap-2 min-[375px]:gap-3 [@media(min-height:760px)]:gap-3' : 'gap-3'}`}
+                style={{ '--c': catVar(e.category) } as CSSProperties}
+              >
                 <ElementChip element={e} size={dense ? 32 : 36} />
-                <span className="text-xl leading-tight text-ink-2">
+                <span
+                  className={
+                    twoCol
+                      ? // Below 340px the longest words (Measurements) break with a hyphen rather than push past the card.
+                        'min-w-0 text-base leading-6 text-ink-2 hyphens-auto [overflow-wrap:anywhere] min-[375px]:text-lg min-[375px]:leading-7 [@media(min-height:760px)]:text-xl [@media(min-height:760px)]:leading-tight'
+                      : 'text-xl leading-tight text-ink-2'
+                  }
+                >
                   <Highlight word={word} symbol={symbol} />
                 </span>
               </li>

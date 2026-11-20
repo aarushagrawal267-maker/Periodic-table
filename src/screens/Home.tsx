@@ -68,7 +68,7 @@ export function Home() {
   return (
     <div className="overflow-x-clip">
       {/* Hero: one first step for a new student, today's round for a returning one. The table is the visual. */}
-      <section aria-labelledby="home-title" className={`${PAGE} grid gap-10 pt-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16 lg:items-center lg:pt-16`}>
+      <section aria-labelledby="home-title" className={`${PAGE} grid gap-8 pt-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16 lg:items-center lg:pt-16`}>
         <motion.div {...rise}>
           {starter ? (
             <>
@@ -115,16 +115,16 @@ export function Home() {
       </section>
 
       {/* Today: the goal, a review if one is due, the next lesson and the daily, as one strip below the hero. */}
-      <section aria-labelledby="today-title" className={`${PAGE} mt-16`}>
+      <section aria-labelledby="today-title" className={`${PAGE} mt-12 md:mt-16`}>
         <SectionHeader id="today-title" title="Today" aside={<span className="meta">{formatDate()}</span>} />
         {today}
       </section>
 
       {/* Regions */}
-      <section aria-labelledby="regions-title" className={`${PAGE} mt-16`}>
+      <section aria-labelledby="regions-title" className={`${PAGE} mt-12 md:mt-16`}>
         <SectionHeader id="regions-title" title="Pick a region" sub="Start small, then take on the whole table" action={{ href: '#/play', label: 'All modes' }} />
-        {/* A sideways row on phones and tablets. From lg, two even rows of four: the full table takes two places. */}
-        <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-1 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-48px),transparent)] sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0 lg:pb-0 lg:[mask-image:none]">
+        {/* A sideways row on phones and tablets, each card narrow enough that the next one shows. From lg, two even rows of four: the full table takes two places. */}
+        <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto md:gap-4 px-4 pb-1 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-48px),transparent)] sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0 lg:pb-0 lg:[mask-image:none]">
           {REGIONS.map((r) => {
             const bestStars = Math.max(0, ...Object.entries(p.best).filter(([k]) => k.startsWith(r.id + ':')).map(([, v]) => v.stars));
             const wide = r.id === 'full';
@@ -132,7 +132,7 @@ export function Home() {
               <a
                 key={r.id}
                 href={`#/play/${r.id}`}
-                className={`card card-link relative w-64 shrink-0 snap-start p-4 lg:w-auto ${wide ? 'lg:col-span-2 lg:flex lg:items-end lg:gap-6' : ''}`}
+                className={`card card-link relative w-[calc(100vw-6rem)] max-w-64 shrink-0 snap-start p-4 lg:w-auto lg:max-w-none ${wide ? 'lg:col-span-2 lg:flex lg:items-end lg:gap-6' : ''}`}
               >
                 <MiniTable highlight={new Set(r.numbers)} className={wide ? 'w-full lg:w-[calc(50%-12px)] lg:shrink-0' : 'w-full'} />
                 <span className={`block ${wide ? 'lg:min-w-0 lg:flex-1' : ''}`}>
@@ -158,17 +158,17 @@ export function Home() {
         </div>
       </section>
 
-      <section aria-labelledby="eotd-title" className={`${PAGE} mt-16`}>
+      <section aria-labelledby="eotd-title" className={`${PAGE} mt-12 md:mt-16`}>
         <SectionHeader id="eotd-title" title="Element of the day" />
         <ElementOfTheDay e={featured} />
       </section>
 
       {/* More ways to practise: three cards with one anatomy, title, line, content, and the action on one shared bottom line. */}
-      <section aria-labelledby="practise-title" className={`${PAGE} mt-16`}>
+      <section aria-labelledby="practise-title" className={`${PAGE} mt-12 md:mt-16`}>
         <SectionHeader id="practise-title" title="More ways to practise" sub="Quick rounds for when you have five minutes" />
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-3 md:gap-4">
           <PracticeCard href="#/life" title="In real life" action="Spot the elements" body="What’s inside your phone? Why are fireworks red? Spot the elements hiding in everyday things.">
-            <ul className="flex h-24 flex-col divide-y divide-line border-y border-line" aria-hidden>
+            <ul className="flex h-16 flex-col sm:h-20 md:h-24 divide-y divide-line border-y border-line" aria-hidden>
               {LIFE_SAMPLES.map((t) => (
                 <li key={t.id} className="flex flex-1 items-center justify-between gap-4">
                   <span className="text-sm text-ink-2">{t.name}</span>
@@ -182,12 +182,12 @@ export function Home() {
             </ul>
           </PracticeCard>
           <PracticeCard href="#/quiz" title="Quick quiz" action="Take a quiz" body="Ten fast questions on symbols, numbers, families and facts, weighted towards the elements you haven’t nailed yet.">
-            <span aria-hidden className="grid h-24 place-items-center rounded-control bg-surface-2">
+            <span aria-hidden className="grid h-16 place-items-center rounded-control bg-surface-2 sm:h-20 md:h-24">
               <QuizArt />
             </span>
           </PracticeCard>
           <PracticeCard href="#/match" title="Match pairs" action="Find the pairs" body="A relaxed memory game. Flip the cards and pair each symbol with its name. No rush.">
-            <span aria-hidden className="grid h-24 place-items-center rounded-control bg-surface-2">
+            <span aria-hidden className="grid h-16 place-items-center rounded-control bg-surface-2 sm:h-20 md:h-24">
               <MatchArt />
             </span>
           </PracticeCard>
@@ -196,6 +196,7 @@ export function Home() {
 
       {!returning && <HowItWorks />}
       <ForTeachers />
+      {/* 64px under the last section, as every page ends (pb-16). */}
       <div className="h-16" />
     </div>
   );
@@ -249,8 +250,10 @@ function Row({ href, icon, title, children, meta, extra }: { href?: string; icon
         <span className="block text-[15px] font-medium leading-[22px] text-ink">{title}</span>
         {children && <span className="mt-1 block text-sm text-ink-2">{children}</span>}
         {extra}
+        {/* On phones the meta drops under the text, so the title keeps the full width. */}
+        {meta && <span className="meta mt-2 block sm:hidden">{meta}</span>}
       </span>
-      {meta && <span className="meta shrink-0 leading-[22px]">{meta}</span>}
+      {meta && <span className="meta hidden shrink-0 leading-[22px] sm:block">{meta}</span>}
       {href && <ChevronRight aria-hidden size={16} strokeWidth={1.5} className="mt-[3px] shrink-0 text-ink-3" />}
     </>
   );
@@ -290,12 +293,11 @@ function ReviewRow({ due }: { due: number[] }) {
       title={`${due.length} ${due.length === 1 ? 'element' : 'elements'} ready for a quick review`}
       extra={
         <span aria-hidden className="mt-2 flex flex-wrap items-center gap-1">
-          {/* Six chips fit one line on phones, eight from sm. */}
-          {due.slice(0, 8).map((n, i) => (
-            <ElementChip key={n} element={byNumber(n)} size={28} className={i >= 6 ? 'max-sm:hidden' : ''} />
+          {/* Five chips and the "+N" fit one line at every width, from a 320px phone to the four-column strip. */}
+          {due.slice(0, 5).map((n) => (
+            <ElementChip key={n} element={byNumber(n)} size={28} />
           ))}
-          {due.length > 6 && <span className="meta px-1 sm:hidden">+{due.length - 6}</span>}
-          {due.length > 8 && <span className="meta px-1 max-sm:hidden">+{due.length - 8}</span>}
+          {due.length > 5 && <span className="meta px-1">+{due.length - 5}</span>}
         </span>
       }
     />
@@ -320,7 +322,7 @@ function DailyRow({ bonus }: { bonus: boolean }) {
         <>
           {done && <TrailSquares trail={today!.trail} animate={false} className="mt-3 justify-start!" />}
           <span className="meta mt-2 block">
-            {streak} day streak · next in <Countdown />
+            {streak} day streak <span className="whitespace-nowrap">· next in <Countdown /></span>
           </span>
         </>
       }
@@ -425,19 +427,28 @@ function FirstTwenty({ done, mastery }: { done: number; mastery: Record<number, 
   );
 }
 
-/** A square of the first-20 fragment. Keeps the corner number at every size, down to phone cells. */
+/**
+ * A square of the first-20 fragment. Same rule as ElementTile: the corner number from 34px up.
+ * Smaller phone cells (320px screens) show a centred symbol only, never under 12px.
+ */
 function FragmentCell({ el, size, on }: { el: Element; size: number; on: boolean }) {
   const radius = Math.min(12, Math.max(4, Math.round(size * 0.14)));
   const named = on && size >= 54;
+  const numbered = size >= 34;
   return (
     <div
       className={`relative flex h-full w-full flex-col items-center justify-center overflow-hidden ${on ? 'tile' : 'slot text-ink-3'}`}
       style={{ '--c': catVar(el.category), borderRadius: radius } as CSSProperties}
     >
-      <span className="tile-number absolute" style={{ left: Math.max(3, Math.round(size * 0.09)), top: Math.max(3, Math.round(size * 0.08)), fontSize: size < 48 ? 9 : Math.round(size * 0.16) }}>
-        {el.number}
-      </span>
-      <span className="font-medium leading-none" style={{ fontSize: Math.round(size * (named ? 0.34 : 0.38)), marginTop: Math.round(size * (named ? 0.08 : 0.14)) }}>
+      {numbered && (
+        <span className="tile-number absolute" style={{ left: Math.max(3, Math.round(size * 0.09)), top: Math.max(3, Math.round(size * 0.08)), fontSize: size < 48 ? 9 : Math.round(size * 0.16) }}>
+          {el.number}
+        </span>
+      )}
+      <span
+        className="font-medium leading-none"
+        style={{ fontSize: Math.max(12, Math.round(size * (named ? 0.34 : 0.38))), marginTop: numbered ? Math.round(size * (named ? 0.08 : 0.14)) : 0 }}
+      >
         {el.symbol}
       </span>
       {named && (
@@ -491,7 +502,7 @@ function TableMap({ mastery, met }: { mastery: Record<number, Mastery>; met: num
 
 function LevelStrip({ level, progress, toNext, learning, mastered, achievements }: { level: number; progress: number; toNext: number } & Omit<LevelInfo, 'level'>) {
   return (
-    <a href="#/progress" className="card card-link mt-4 flex shrink-0 items-center gap-4 p-4 sm:px-5">
+    <a href="#/progress" className="card card-link mt-3 flex shrink-0 items-center gap-4 p-4 sm:px-5 md:mt-4">
       <Ring value={progress} size={40} stroke={3}>
         <span className="num text-sm font-medium">{level}</span>
       </Ring>
@@ -500,7 +511,10 @@ function LevelStrip({ level, progress, toNext, learning, mastered, achievements 
           Level {level} · {titleForLevel(level)}
         </span>
         <span className="meta mt-1 block">
-          {toNext.toLocaleString('en-US')} XP to next level · {achievements} {achievements === 1 ? 'achievement' : 'achievements'}
+          {toNext.toLocaleString('en-US')} XP to next level{' '}
+          <span className="whitespace-nowrap">
+            · {achievements} {achievements === 1 ? 'achievement' : 'achievements'}
+          </span>
         </span>
       </span>
       <span className="hidden text-sm text-ink-2 sm:block">
@@ -526,13 +540,19 @@ function ElementOfTheDay({ e }: { e: Element }) {
     ['Discovered', e.ancient ? 'Ancient' : (e.year?.toString() ?? '—')],
   ];
   return (
-    <article className="card grid gap-5 p-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-8 sm:p-6 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,20rem)] lg:gap-x-12">
-      <div className="h-28 w-28">
-        <ElementTile element={e} size={112} />
+    <article className="card grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-4 p-4 sm:gap-x-8 sm:p-6 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,20rem)] lg:grid-rows-[auto_1fr] lg:gap-x-12">
+      {/* Phones: a 72px square beside the name, then the text across the card. From sm the square heads its own column. */}
+      <div className="row-start-1 sm:row-span-3 lg:row-span-2">
+        <div className="h-18 w-18 sm:hidden">
+          <ElementTile element={e} size={72} showName={false} />
+        </div>
+        <div className="hidden h-28 w-28 sm:block">
+          <ElementTile element={e} size={112} />
+        </div>
       </div>
-      <div className="min-w-0">
+      <div className="col-start-2 row-start-1 min-w-0 self-center sm:self-start">
         <h3 className="t-heading">{e.name}</h3>
-        <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2">
+        <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2 sm:mt-2">
           <span className="flex items-center gap-2">
             <span className="dot" style={{ '--c': c } as CSSProperties} aria-hidden />
             {categoryLabel(e.category)}
@@ -540,13 +560,15 @@ function ElementOfTheDay({ e }: { e: Element }) {
           <span className="mono text-[13px]">{formatNumber(e.mass, 6)} u</span>
           <span className="mono text-[13px]">{place}</span>
         </p>
-        {e.summary && <p className="mt-4 max-w-2xl text-[15px] leading-6 text-ink-2">{e.summary}</p>}
+      </div>
+      <div className="col-span-2 min-w-0 sm:col-span-1 sm:col-start-2">
+        {e.summary && <p className="max-w-2xl text-[15px] leading-6 text-ink-2">{e.summary}</p>}
         {e.fact && <p className="mt-4 max-w-2xl border-l-2 border-line-strong pl-4 text-[15px] leading-6 text-ink">{e.fact}</p>}
-        <button onClick={() => openDetail(e.number)} className="btn btn-secondary mt-6">
+        <button onClick={() => openDetail(e.number)} className="btn btn-secondary mt-4 w-full sm:mt-6 sm:w-auto">
           Open the full card
         </button>
       </div>
-      <aside aria-label={`More about ${e.name}`} className="min-w-0 sm:col-start-2 lg:col-start-3 lg:border-l lg:border-line lg:pl-8">
+      <aside aria-label={`More about ${e.name}`} className="col-span-2 mt-2 min-w-0 border-t border-line pt-4 sm:col-span-1 sm:col-start-2 sm:mt-4 sm:border-t-0 sm:pt-0 lg:col-start-3 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:border-l lg:border-line lg:pl-8">
         {e.uses.length > 0 && (
           <>
             <h3 className="label mb-2">Where you&rsquo;ll find it</h3>
@@ -582,11 +604,11 @@ function ActionLine({ children, className = '' }: { children: ReactNode; classNa
 
 function PracticeCard({ href, title, action, body, children }: { href: string; title: string; action: string; body: string; children?: ReactNode }) {
   return (
-    <a href={href} className="card card-link flex flex-col p-5">
+    <a href={href} className="card card-link flex flex-col p-4 sm:p-5">
       <span className="block text-base font-medium leading-6">{title}</span>
       <span className="mt-1 block text-sm text-ink-2">{body}</span>
       {children && <span className="mt-auto block pt-4">{children}</span>}
-      <ActionLine className="mt-6">{action}</ActionLine>
+      <ActionLine className="mt-4 md:mt-6">{action}</ActionLine>
     </a>
   );
 }
@@ -598,7 +620,7 @@ function HowItWorks() {
     { title: 'Master', body: 'Periodica tracks each element. Get it right first time, again and again, and it lights up on your map.' },
   ];
   return (
-    <section aria-labelledby="how-title" className={`${PAGE} mt-16`}>
+    <section aria-labelledby="how-title" className={`${PAGE} mt-12 md:mt-16`}>
       <SectionHeader id="how-title" title="How it works" />
       <ol className="grid gap-6 border-t border-line pt-6 md:grid-cols-3 md:gap-8">
         {steps.map((s, i) => (
@@ -623,7 +645,7 @@ function ForTeachers() {
     { title: 'Easy to check', body: 'Students can open Progress and show you a summary of the elements they have started and mastered.' },
   ];
   return (
-    <section aria-labelledby="teachers-title" className={`${PAGE} mt-16`}>
+    <section aria-labelledby="teachers-title" className={`${PAGE} mt-12 md:mt-16`}>
       <SectionHeader id="teachers-title" title="For teachers and parents" sub="Free, private, and built around short practice" />
       <dl className="grid gap-6 border-t border-line pt-6 md:grid-cols-3 md:gap-8">
         {points.map((pt) => (

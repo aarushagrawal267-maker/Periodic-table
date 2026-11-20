@@ -109,6 +109,16 @@ export function PeriodicGrid({
     return () => el.removeEventListener('scroll', measure);
   }, [measure]);
 
+  // The chip sits in the empty band above the f-block (row 8), so it never covers a tile; centred when there is no band or axis.
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [bandTop, setBandTop] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const band = layout?.rows.get(8);
+    const inner = innerRef.current;
+    // No band (a region above the f-block): the group-number row, so the chip covers labels rather than tiles.
+    setBandTop(!inner ? null : band ? inner.offsetTop + axis + band.start + band.size / 2 : axis ? inner.offsetTop + axis / 2 : null);
+  }, [layout, axis]);
+
   const overflows = edges.left || edges.right;
   const fadeL = edges.left ? FADE : 0;
   const fadeR = edges.right ? FADE : 0;
@@ -122,7 +132,7 @@ export function PeriodicGrid({
         style={mask ? { maskImage: mask, WebkitMaskImage: mask } : undefined}
       >
       {layout && (
-        <div className="relative mx-auto" style={{ width: layout.width + axis, height: layout.height + axis }}>
+        <div ref={innerRef} className="relative mx-auto" style={{ width: layout.width + axis, height: layout.height + axis }}>
           {showAxes && <Axes layout={layout} />}
           <div className="absolute" style={{ left: axis, top: axis, width: layout.width, height: layout.height }}>
             {showMarkers &&
@@ -172,13 +182,14 @@ export function PeriodicGrid({
           <motion.div
             key="swipe"
             aria-hidden
-            className="pointer-events-none absolute right-2 top-1/2 z-20 -translate-y-1/2"
+            className={`pointer-events-none absolute right-4 z-20 -translate-y-1/2 ${bandTop === null ? 'top-1/2' : ''}`}
+            style={bandTop === null ? undefined : { top: bandTop }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: reduceMotion ? 0 : DUR.menu, ease: EASE }}
           >
-            <div className="flex h-8 items-center gap-1 rounded-control border border-line-strong bg-surface pl-3 pr-2 text-[13px] font-medium text-ink" style={{ boxShadow: 'var(--shadow-md)' }}>
+            <div className="flex h-7 items-center gap-1 rounded-control border border-line-strong bg-surface pl-3 pr-2 text-[13px] font-medium text-ink" style={{ boxShadow: 'var(--shadow-md)' }}>
               Swipe for more
               <motion.span
                 className="grid place-items-center text-ink-2"

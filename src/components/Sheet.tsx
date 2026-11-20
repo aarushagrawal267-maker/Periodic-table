@@ -75,17 +75,21 @@ export function Sheet({ open, onClose, label, children, wide }: Props) {
             aria-modal="true"
             aria-label={label}
             tabIndex={-1}
-            className={`relative max-h-[92dvh] w-full overflow-y-auto rounded-t-panel border border-line bg-surface outline-none thin-scroll sm:rounded-panel ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
+            className={`relative max-h-[92dvh] w-full overflow-y-auto rounded-t-panel border border-line bg-surface pb-[env(safe-area-inset-bottom)] outline-none thin-scroll sm:rounded-panel sm:pb-0 ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
             style={{ boxShadow: 'var(--shadow-lg)' }}
             initial={{ y: 24, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 16, opacity: 0 }}
             transition={tween(DUR.enter)}
           >
-            <div aria-hidden className="mx-auto mt-2 h-1 w-8 rounded-full bg-line-strong sm:hidden" />
-            <button onClick={onClose} className="icon-btn absolute right-3 top-3 z-10 sm:right-4 sm:top-4" aria-label="Close">
-              <X size={18} strokeWidth={1.5} />
-            </button>
+            {/* Phones: grabber and close share the sheet's top band (8 to 52px); content clears it or centres its heading on the close button.
+                The close button sits in a sticky zero-height band, so it stays in reach while a long sheet scrolls; the layout does not move. */}
+            <div aria-hidden className="absolute left-1/2 top-2 h-1 w-8 -translate-x-1/2 rounded-full bg-line-strong sm:hidden" />
+            <div className="sticky top-0 z-10 h-0">
+              <button onClick={onClose} className="icon-btn absolute right-1 top-2 bg-surface hover:bg-surface-2 sm:right-4 sm:top-4" aria-label="Close">
+                <X size={18} strokeWidth={1.5} />
+              </button>
+            </div>
             {children}
           </motion.div>
         </div>

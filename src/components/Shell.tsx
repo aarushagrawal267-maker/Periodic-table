@@ -83,8 +83,9 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
               <Flame size={18} strokeWidth={1.5} className={streak ? 'text-ink-2' : 'text-ink-3'} />
               <span className="mono">{streak}</span>
             </a>
-            {/* Below 360px (e.g. 400% zoom) there is no room; the goal is on Home anyway (WCAG 1.4.10). */}
-            <div className="hidden min-[360px]:contents">
+            {/* Below 375px (and at 400% zoom) there is no room; the goal is on Home anyway (WCAG 1.4.10). On phones the settings
+                icon sits on the page gutter (its 44px target reaches into the padding), which leaves room for the goal from 375px. */}
+            <div className="hidden min-[375px]:contents">
               <GoalRingBadge />
             </div>
             <a
@@ -97,14 +98,14 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
               </Ring>{' '}
               <span className="mono hidden text-[13px] text-ink-2 sm:inline">{xp.toLocaleString('en-US')} XP</span>
             </a>
-            <button onClick={() => setSettings(true)} className="icon-btn" aria-label="Settings">
+            <button onClick={() => setSettings(true)} className="icon-btn max-md:-mr-3" aria-label="Settings">
               <Settings size={18} strokeWidth={1.5} />
             </button>
           </div>
         </div>
       </header>
 
-      <main id="main" tabIndex={-1} className="flex-1 pb-24 outline-none md:pb-0">
+      <main id="main" tabIndex={-1} className="pb-tabbar flex-1 outline-none">
         {children}
       </main>
 

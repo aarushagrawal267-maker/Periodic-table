@@ -96,29 +96,37 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
 
   return (
     <article ref={root} style={{ '--c': c } as CSSProperties}>
-      <header className="px-6 pb-6 pt-8 sm:px-8 sm:pt-8">
-        <div className="flex items-center gap-5 pr-10 sm:gap-6 sm:pr-0">
-          <motion.div className="h-24 w-24 shrink-0 sm:h-32 sm:w-32" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={tween(DUR.enter)}>
-            <ElementTile element={e} size={128} showName={false} />
+      {/* Phones: the header starts under the sheet's top band (grabber and close), so the name gets the full width. */}
+      <header className="px-4 pb-6 pt-14 sm:px-8 sm:pt-8">
+        <div className="flex items-center gap-4 sm:gap-6">
+          <motion.div className="h-20 w-20 shrink-0 sm:h-32 sm:w-32" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={tween(DUR.enter)}>
+            {/* The tile's type is sized from its size prop, so phones get an 80px tile of their own rather than a squeezed 128. */}
+            <ElementTile element={e} size={80} showName={false} className="sm:hidden" />
+            <ElementTile element={e} size={128} showName={false} className="max-sm:hidden" />
           </motion.div>
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-2 text-sm text-ink-2">
               <span className="dot" aria-hidden />
               {categoryLabel(e.category)}
             </p>
-            <h2 tabIndex={-1} className="t-title mt-1 outline-none">
+            {/* 28px on phones so the longest names (Praseodymium, Rutherfordium) fit at 320; hyphens are the last resort. */}
+            <h2 tabIndex={-1} className="t-title mt-1 hyphens-auto break-words outline-none max-sm:text-[1.75rem]">
               {e.name}
             </h2>
             <p className="mt-1 text-sm text-ink-2">
-              Element <span className="num">{e.number}</span> · <span className="mono text-ink">{e.config}</span>
-              {e.configPredicted && ' (predicted)'}
+              Element <span className="num">{e.number}</span>
+              <span className="hidden sm:inline"> · </span>
+              <span className="block sm:inline">
+                <span className="mono text-ink">{e.config}</span>
+                {e.configPredicted && ' (predicted)'}
+              </span>
             </p>
             <MasteryDots s={m?.s ?? 0} />
           </div>
         </div>
       </header>
 
-      <div className="grid gap-8 px-6 pb-8 sm:grid-cols-[1fr_200px] sm:px-8">
+      <div className="grid gap-8 px-4 pb-8 sm:grid-cols-[1fr_200px] sm:px-8">
         <div className="space-y-6">
           <p className="text-base leading-relaxed text-ink">{e.summary}</p>
           {e.fact && (
@@ -143,16 +151,16 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
 
       <dl className="grid grid-cols-2 gap-px border-y border-line bg-line sm:grid-cols-3">
         {props.map(([k, v, unit]) => (
-          <div key={k} className="bg-surface px-6 py-3 sm:px-8">
+          <div key={k} className="bg-surface px-4 py-3 sm:px-8">
             <dt className="text-[13px] text-ink-2">{k}</dt>
             <dd className="num mt-1 text-[17px] font-medium">
-              {v} {unit && <span className="mono text-xs font-normal text-ink-3">{unit}</span>}
+              {v} {unit && <span className="mono whitespace-nowrap text-xs font-normal text-ink-3">{unit}</span>}
             </dd>
           </div>
         ))}
       </dl>
 
-      <nav className="flex items-center justify-between gap-2 px-4 py-4 sm:px-6" aria-label="Neighbouring elements">
+      <nav className="grid grid-cols-2 gap-3 px-4 py-4 sm:flex sm:items-center sm:justify-between sm:gap-2 sm:px-6" aria-label="Neighbouring elements">
         <NeighbourButton n={e.number === 1 ? 118 : e.number - 1} dir="prev" onClick={(n) => browse(n, 'prev')} />
         <span className="hidden items-center gap-1 text-[13px] text-ink-3 sm:flex">
           <kbd className="kbd">←</kbd>
@@ -161,7 +169,7 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
         </span>
         <NeighbourButton n={e.number === 118 ? 1 : e.number + 1} dir="next" onClick={(n) => browse(n, 'next')} />
       </nav>
-      <p className="px-6 pb-6 text-xs text-ink-3 sm:px-8">Property data: PubChem (NCBI). Values for superheavy elements are predictions or estimates.</p>
+      <p className="px-4 pb-6 text-xs text-ink-3 sm:px-8">Property data: PubChem (NCBI). Values for superheavy elements are predictions or estimates.</p>
     </article>
   );
 }
@@ -172,7 +180,7 @@ function NeighbourButton({ n, dir, onClick }: { n: number; dir: 'prev' | 'next';
     <button
       onClick={() => onClick(n)}
       data-neighbour={dir}
-      className={`btn btn-secondary min-w-0 ${dir === 'prev' ? 'pl-2' : 'pr-2'}`}
+      className={`btn btn-secondary w-full min-w-0 sm:w-auto ${dir === 'prev' ? 'pl-2' : 'pr-2'}`}
       // Includes the visible symbol and name, so "click Next" and "click Co" both work (WCAG 2.5.3).
       aria-label={`${dir === 'prev' ? 'Previous' : 'Next'}: ${e.symbol}, ${e.name}`}
     >
@@ -180,7 +188,8 @@ function NeighbourButton({ n, dir, onClick }: { n: number; dir: 'prev' | 'next';
       <span className="cat-ink font-medium" style={{ '--c': catVar(e.category) } as CSSProperties}>
         {e.symbol}
       </span>{' '}
-      <span className="truncate text-ink-2">{e.name}</span>
+      {/* At 320 two buttons leave no room for a name; the symbol stays and the accessible name keeps both. */}
+      <span className="hidden truncate text-ink-2 min-[360px]:inline">{e.name}</span>
       {dir === 'next' && <ChevronRight size={16} strokeWidth={1.5} className="shrink-0 text-ink-3" />}
     </button>
   );

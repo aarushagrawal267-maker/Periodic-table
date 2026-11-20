@@ -143,7 +143,7 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
               <button
                 key={card.id}
                 onClick={() => flip(card.id)}
-                className="group relative aspect-[4/5] w-full rounded-card transition-transform duration-150 ease-out active:scale-[0.98]"
+                className="group relative aspect-square w-full rounded-card sm:aspect-[4/5] transition-transform duration-150 ease-out active:scale-[0.98]"
                 style={{ perspective: 800 } as CSSProperties}
                 aria-label={faceUp ? `${card.face === 'symbol' ? e.symbol : e.name}${isFound ? ', matched' : ''}` : `Card ${i + 1}, face down`}
                 // aria-disabled, not disabled, so a card matched from the keyboard keeps focus (WCAG 2.4.3). flip() ignores it.
@@ -156,7 +156,7 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
                   </div>
                   {/* Face: the brighter card stock (raised on dark, white on light); a found pair takes its element's printed colour. */}
                   <div
-                    className="absolute inset-0 flex flex-col items-center justify-center rounded-card border bg-surface-2 p-3 text-center [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                    className="absolute inset-0 flex flex-col items-center justify-center rounded-card border bg-surface-2 p-1.5 text-center [container-type:inline-size] sm:p-3 [backface-visibility:hidden] [transform:rotateY(180deg)]"
                     style={{
                       background: isFound ? `color-mix(in oklab, ${c} var(--tile-tint), var(--surface))` : undefined,
                       borderColor: isFound ? `color-mix(in oklab, ${c} var(--tile-edge), transparent)` : 'var(--line-strong)',
@@ -167,7 +167,11 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
                         <ElementTile element={e} size={72} showName={false} quietNumber showNumber={difficulty === 'learner'} color={isFound || difficulty === 'learner' ? undefined : 'var(--ink-2)'} />
                       </div>
                     ) : (
-                      <span className={`text-base font-medium leading-tight sm:text-lg ${isFound ? 'cat-ink' : 'text-ink'}`} style={{ '--c': c } as CSSProperties}>
+                      // The name fits the card's width on one line: about 0.62em a letter, between 11px and 15px on phones, 18px from sm.
+                      <span
+                        className={`font-medium leading-5 [font-size:var(--fit)] [overflow-wrap:anywhere] sm:text-lg sm:leading-tight ${isFound ? 'cat-ink' : 'text-ink'}`}
+                        style={{ '--c': c, '--fit': `clamp(11px, ${(100 / (e.name.length * 0.62)).toFixed(1)}cqi, 15px)` } as CSSProperties}
+                      >
                         {e.name}
                       </span>
                     )}

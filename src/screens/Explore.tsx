@@ -39,7 +39,7 @@ const STATE_COLORS: Record<string, string> = { Solid: 'var(--cat-transition-meta
 /** Property lenses run from a cool blue to a warm orange, mixed in oklab so the middle stays neutral instead of swinging through magenta. */
 const heat = (t: number) => `color-mix(in oklab, var(--heat-hi) ${Math.round(t * 100)}%, var(--heat-lo))`;
 /** Mastery is progress, so it is drawn in the accent: one step of strength per level. */
-const masteryColor = (s: number) => `color-mix(in oklab, var(--accent) ${25 * s}%, var(--ink-3))`;
+const masteryColor = (s: number) => `color-mix(in oklab, var(--accent) ${25 * Math.min(s, 4)}%, var(--ink-3))`;
 const KEY_STEPS = [0, 0.25, 0.5, 0.75, 1];
 
 /** A lens value as text. Years are exact (never rounded to three figures), and ancient elements say so. */
@@ -134,11 +134,24 @@ export function Explore({ symbol }: { symbol?: string }) {
         </label>
       </div>
 
-      {/* Lenses: one quiet segmented control. On phones it scrolls sideways; py-1 leaves room for the focus ring. */}
-      <div className="no-scrollbar -mx-4 mt-6 overflow-x-auto px-4 py-1 sm:-mx-6 sm:px-6">
-        <div className="seg" role="tablist" aria-label="Colour the table by">
+      {/*
+        Lenses: one quiet segmented control. On phones it is an edge-to-edge sideways scroller whose content keeps the 16px page inset
+        (a flex row, so the end padding scrolls too). py-1 leaves room for the focus ring, so mt-5 lands it 24px under the search.
+      */}
+      <div className="no-scrollbar -mx-4 mt-5 flex scroll-px-4 overflow-x-auto px-4 py-1 sm:-mx-6 sm:mt-6 sm:scroll-px-6 sm:px-6">
+        <div className="seg shrink-0" role="tablist" aria-label="Colour the table by">
           {LENSES.map((l) => (
-            <button key={l.id} role="tab" aria-selected={lens === l.id} onClick={() => setLens(l.id)} className="seg-item shrink-0 whitespace-nowrap">
+            <button
+              key={l.id}
+              role="tab"
+              aria-selected={lens === l.id}
+              onClick={(ev) => {
+                setLens(l.id);
+                // A lens half under the screen edge slides fully into view when chosen.
+                ev.currentTarget.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+              }}
+              className="seg-item shrink-0 whitespace-nowrap"
+            >
               {l.label}
             </button>
           ))}
@@ -146,14 +159,15 @@ export function Explore({ symbol }: { symbol?: string }) {
       </div>
 
       {/* PeriodicGrid shows its own "Swipe for more" cue when the table is wider than the screen. */}
+      {/* On phones the table scrolls edge to edge and pads its content 16px, like the lenses above it. */}
       {/* One Tab stop for the whole table; arrow keys move between elements. */}
-      <div className="relative mt-6" data-roving role="group" aria-label="Periodic table. Use the arrow keys to move between elements.">
+      <div className="relative -mx-4 mt-4 sm:mx-0 sm:mt-6" data-roving role="group" aria-label="Periodic table. Use the arrow keys to move between elements.">
         <PeriodicGrid
           minCell={38}
           maxCell={74}
           gap={4}
           showAxes
-          className="pb-4 pt-1"
+          className="px-4 pb-4 pt-1 sm:px-0"
           renderCell={(e, rect) => {
             const c = colorFor(e);
             const d = dim(e);
@@ -194,7 +208,7 @@ export function Explore({ symbol }: { symbol?: string }) {
       </div>
 
       {/* The key, printed under the table like a wall chart's legend: what the colours mean, then the swatches. */}
-      <div className="mt-6 border-t border-line pt-4">
+      <div className="mt-4 border-t border-line pt-4 sm:mt-6">
         <p className="mb-2 max-w-2xl text-sm text-ink-2">{L.describe}</p>
         {lens === 'category' ? (
           <ul className="-mx-2 grid grid-cols-2 gap-x-4 sm:grid-cols-3 lg:grid-cols-5" aria-label="Categories" onMouseLeave={() => setHoverCat(null)}>
@@ -205,7 +219,7 @@ export function Explore({ symbol }: { symbol?: string }) {
                   onFocus={() => setHoverCat(c.id)}
                   onBlur={() => setHoverCat(null)}
                   onClick={() => setQuery(c.label)}
-                  className="flex h-11 w-full items-center gap-2 rounded-control px-2 text-left text-sm text-ink-2 transition-colors duration-150 ease-out hover:bg-surface-2 hover:text-ink md:h-9"
+                  className="flex h-11 w-full items-center gap-2 rounded-control px-2 text-left text-sm leading-5 text-ink-2 transition-colors duration-150 ease-out hover:bg-surface-2 hover:text-ink md:h-9"
                 >
                   <span className="dot" style={{ '--c': catVar(c.id) } as CSSProperties} />
                   {c.label}

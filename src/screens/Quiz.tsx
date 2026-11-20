@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { DifficultyPicker } from '../components/DifficultyPicker';
 import { ElementTile, tileRadius } from '../components/ElementTile';
 import { MiniTable } from '../components/MiniTable';
@@ -43,7 +43,7 @@ function QuizIntro({ onStart }: { onStart: () => void }) {
   const pool = useMemo(() => new Set(quizPool(difficulty, mastery).map((e) => e.number)), [difficulty, mastery]);
   return (
     <div className="mx-auto flex min-h-dvh max-w-6xl flex-col px-4 pb-12 pt-4 sm:px-6 sm:pt-6">
-      <button onClick={() => go('/play')} className="icon-btn -ml-2" aria-label="Back">
+      <button onClick={() => go('/play')} className="icon-btn -ml-3 md:-ml-2" aria-label="Back">
         <ArrowLeft size={18} strokeWidth={1.5} />
       </button>
       <main className="grid flex-1 content-center gap-8 py-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-x-16 lg:gap-y-8">
@@ -68,7 +68,7 @@ function QuizIntro({ onStart }: { onStart: () => void }) {
           </button>
         </div>
 
-        <figure className="card p-5 sm:p-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
+        <figure className="card p-4 sm:p-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
           <MiniTable highlight={pool} className="w-full" label={`The ${pool.size} elements this quiz can ask about, highlighted on the periodic table`} />
           <figcaption className="mt-4 border-t border-line pt-4 text-sm text-ink-2">
             Questions come from these <span className="num text-ink">{pool.size}</span> elements
@@ -205,11 +205,13 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
   const heroEl = q.hero ? byNumber(q.element) : null;
   // Category colour would give the answer away, and so would the tile on harder levels: show an unprinted square instead.
   const hideColour = q.kind === 'category' || difficulty !== 'learner';
+  // The hero tile is 80 on phones, so four answers stay above the fold at 320x640 with the timer on; 112 from sm.
+  const heroSize = useWide() ? 112 : 80;
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-4 pb-8 pt-4 sm:px-6">
       <header className="flex items-center gap-4">
-        <button onClick={() => go('/play')} className="icon-btn -ml-2" aria-label="Leave quiz">
+        <button onClick={() => go('/play')} className="icon-btn -ml-3 md:-ml-2" aria-label="Leave quiz">
           <ArrowLeft size={18} strokeWidth={1.5} />
         </button>
         <div className="flex flex-1 gap-1" role="progressbar" aria-label="Questions" aria-valuemin={1} aria-valuemax={QUIZ_LENGTH} aria-valuenow={index + 1} aria-valuetext={`Question ${index + 1} of ${QUIZ_LENGTH}`}>
@@ -245,23 +247,25 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
       )}
 
       <AnimatePresence mode="wait">
-        <motion.main key={index} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, transition: tween(DUR.press) }} transition={tween(DUR.enter)} className="flex flex-1 flex-col justify-center py-8">
+        <motion.main key={index} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, transition: tween(DUR.press) }} transition={tween(DUR.enter)} className="flex flex-1 flex-col justify-start py-4 sm:justify-center sm:py-8">
+          {/* Phones: the question sits under the header, so the feedback card below it can never move it.
+              From sm it is centred, with room for the card kept from the start. */}
           {/* The segments above already count the questions; this line only speaks up for a streak. */}
           <p className="meta h-4 text-center text-ink-2">{combo >= 3 ? `${combo} in a row ×${multiplier(combo)}` : ''}</p>
           {heroEl && (
-            <div className="mx-auto mt-6 h-28 w-28" aria-hidden>
+            <div className="mx-auto mt-4 h-20 w-20 sm:mt-6 sm:h-28 sm:w-28" aria-hidden>
               {q.kind === 'number' ? (
                 // The wall chart with the symbol left out: only the corner number is printed.
-                <div className="slot relative grid h-full w-full place-items-center" style={{ borderRadius: tileRadius(112) }}>
-                  <span className="tile-number absolute left-3 top-3 text-[28px] text-ink">{q.hero}</span>
-                  <span className="mt-4 text-4xl text-ink-3">?</span>
+                <div className="slot relative grid h-full w-full place-items-center" style={{ borderRadius: tileRadius(heroSize) }}>
+                  <span className="tile-number absolute left-2 top-2 text-xl text-ink sm:left-3 sm:top-3 sm:text-[28px]">{q.hero}</span>
+                  <span className="mt-4 text-3xl text-ink-3 sm:text-4xl">?</span>
                 </div>
               ) : (
-                <ElementTile element={heroEl} size={112} showName={false} showNumber={difficulty === 'learner'} color={hideColour ? 'var(--ink-3)' : undefined} />
+                <ElementTile element={heroEl} size={heroSize} showName={false} showNumber={difficulty === 'learner'} color={hideColour ? 'var(--ink-3)' : undefined} />
               )}
             </div>
           )}
-          <QuestionHeading className={`mx-auto mt-6 max-w-lg text-center font-medium ${q.kind === 'fact' ? 'text-xl leading-snug sm:text-2xl' : 'text-2xl leading-tight sm:text-3xl'}`}>
+          <QuestionHeading className={`mx-auto mt-4 max-w-lg sm:mt-6 text-center font-medium ${q.kind === 'fact' ? 'text-xl leading-snug sm:text-2xl' : 'text-2xl leading-tight sm:text-3xl'}`}>
             <span className="sr-only">
               Question {index + 1} of {QUIZ_LENGTH}:{' '}
             </span>
@@ -270,7 +274,7 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
           </QuestionHeading>
           {q.kind === 'fact' && <p className="mt-2 text-center text-sm text-ink-2">Which element is this?</p>}
 
-          <div ref={optionsRef} className="mt-8 grid gap-3 sm:grid-cols-2" role="group" aria-label="Answers">
+          <div ref={optionsRef} className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-2" role="group" aria-label="Answers">
             {q.options.map((o, i) => {
               const isAnswer = i === q.answer;
               const chosen = current?.choice === i;
@@ -308,13 +312,15 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
             })}
           </div>
 
-          <div className="mt-6 min-h-28" aria-live="polite">
+          {/* From sm, room for the tallest feedback card (120) is kept from the start, so the centred question never jumps
+              when it appears. On phones the empty slot takes no space, so nothing under the answers asks for a scroll. */}
+          <div className="mt-6 max-sm:empty:mt-0 sm:min-h-30" aria-live="polite">
             {answered && (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={tween(DUR.menu)} className="card flex flex-wrap items-center gap-4 p-4">
-                <div className="h-12 w-12 shrink-0">
-                  <ElementTile element={e} size={48} showName={false} />
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={tween(DUR.menu)} className="card grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-4 p-4 sm:flex sm:items-center sm:gap-4">
+                <div className="h-18 w-18 shrink-0">
+                  <ElementTile element={e} size={72} showName={false} />
                 </div>
-                <div className="min-w-0 flex-1 basis-48">
+                <div className="min-w-0 sm:flex-1">
                   <p className="text-sm font-medium" style={{ color: current.ok ? 'var(--good)' : 'var(--bad)' }}>
                     {current.ok ? `Correct · +${current.points}` : current.choice === null ? "Time's up" : 'Not quite'}
                   </p>
@@ -326,7 +332,7 @@ function QuizRun({ onReplay }: { onReplay: () => void }) {
                   </p>
                 </div>
                 {!current.ok && (
-                  <button ref={nextRef} onClick={next} className="btn btn-primary ml-auto shrink-0">
+                  <button ref={nextRef} onClick={next} className="btn btn-primary col-span-2 w-full shrink-0 sm:ml-auto sm:w-auto">
                     Next <ArrowRight size={18} strokeWidth={1.5} aria-hidden />
                   </button>
                 )}
@@ -355,6 +361,19 @@ function isControl(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
   const control = target.closest('button, a[href], input, select, textarea, [role="button"], [role="radio"], [role="switch"]');
   return !!control && !control.matches(':disabled, [aria-disabled="true"]');
+}
+
+const WIDE = '(min-width: 640px)';
+/** True from the sm breakpoint (640px). */
+function useWide() {
+  return useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia(WIDE);
+      mq.addEventListener('change', cb);
+      return () => mq.removeEventListener('change', cb);
+    },
+    () => window.matchMedia(WIDE).matches,
+  );
 }
 
 /** The question heading takes focus when a new question appears, so it is read out (WCAG 2.4.3, 4.1.3). */

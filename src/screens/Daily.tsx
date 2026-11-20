@@ -53,7 +53,7 @@ export function Daily() {
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-6xl flex-col px-4 pb-12 pt-4 sm:px-6 sm:pt-6">
-      <button onClick={() => go('/')} className="icon-btn -ml-2" aria-label="Back to home">
+      <button onClick={() => go('/')} className="icon-btn -ml-3 md:-ml-2" aria-label="Back to home">
         <ArrowLeft size={18} strokeWidth={1.5} />
       </button>
 
@@ -69,13 +69,16 @@ export function Daily() {
           {helped && !result && <p className="mt-2 max-w-md text-sm text-ink-3">Some will be new, so you get atomic numbers and colour hints</p>}
         </header>
 
-        <div className="card p-5 sm:p-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
+        <div className="card p-4 sm:p-6 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
           <MiniTable highlight={result ? new Set(targets) : new Set()} className="w-full" color={(x) => (!result && targets.includes(x) ? 'var(--accent)' : undefined)} label="Today's elements on the table" />
-          <dl className="mt-6 grid grid-cols-3 border-t border-line pt-4">
-            <Fact label="Elements" value={String(DAILY_SIZE)} />
-            <Fact label="Streak" value={`${streak} day${streak === 1 ? '' : 's'}`} />
-            <Fact label="Next puzzle" value={<Countdown />} />
-          </dl>
+          {/* Three equal columns: every figure carries the same left inset, and the row is pulled left by it so the first lines up with the table. */}
+          <div className="mt-4 border-t border-line pt-4 sm:mt-6">
+            <dl className="-ml-3 grid grid-cols-3 sm:-ml-4">
+              <Fact label="Elements" value={String(DAILY_SIZE)} />
+              <Fact label="Streak" value={`${streak} day${streak === 1 ? '' : 's'}`} />
+              <Fact label="Next puzzle" value={<Countdown />} />
+            </dl>
+          </div>
         </div>
 
         <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
@@ -98,8 +101,8 @@ export function Daily() {
               <p className="meta mt-3">
                 {formatTime(summary.timeMs)} · {summary.mistakes} mistake{summary.mistakes === 1 ? '' : 's'}
               </p>
-              <div className="mt-4 w-fit">
-                <TrailSquares trail={summary.trail} animate={false} />
+              <div className="mt-4">
+                <TrailSquares trail={summary.trail} animate={false} className="justify-start!" />
               </div>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <ShareButton summary={summary} total={DAILY_SIZE} />
@@ -121,9 +124,9 @@ export function Daily() {
 
 function Fact({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="flex flex-col-reverse gap-1 border-l border-line pl-4 first:border-l-0 first:pl-0">
-      <dt className="text-sm text-ink-2">{label}</dt>
-      <dd className="num text-xl font-medium">{value}</dd>
+    <div className="flex min-w-0 flex-col-reverse gap-1 pl-3 shadow-[inset_1px_0_0_var(--line)] first:shadow-none sm:pl-4">
+      <dt className="text-[13px] leading-5 text-ink-2 sm:text-sm">{label}</dt>
+      <dd className="num whitespace-nowrap text-lg font-medium leading-7 sm:text-xl">{value}</dd>
     </div>
   );
 }

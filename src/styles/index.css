@@ -654,6 +654,16 @@
   .safe-bottom {
     padding-bottom: max(8px, env(safe-area-inset-bottom));
   }
+
+  /*
+   * Phones: the page clears the fixed tab bar (56px plus its safe-area padding) exactly,
+   * so the page's own bottom padding (pb-16) is the space left above the bar on every screen.
+   */
+  @media (max-width: 767.98px) {
+    .pb-tabbar {
+      padding-bottom: calc(56px + max(8px, env(safe-area-inset-bottom)));
+    }
+  }
 }
 
 .reduce-motion *,

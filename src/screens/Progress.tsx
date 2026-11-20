@@ -19,6 +19,14 @@ const fmt = (n: number) => n.toLocaleString('en-US');
 /** Strip the period from one-line data captions (copy rule: captions end without one). */
 const caption = (s: string) => s.replace(/\.$/, '');
 
+/**
+ * One column template for the records header and every row, so names and stars sit in straight columns at every width.
+ * Phones: the name takes its own line and the three difficulties sit under it in equal columns, matching the header.
+ * From sm: name, then three narrow star columns. From lg: wider columns.
+ */
+const RECORD_COLS =
+  'grid grid-cols-3 items-center gap-x-2 gap-y-1 px-2 sm:grid-cols-[minmax(0,1fr)_repeat(3,3.5rem)] sm:gap-2 sm:px-3 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] lg:gap-6';
+
 /** Learning steps 1 to 3 print the tile lighter; step 4 (mastered) is the full printed tile. Values are tint % and edge %. */
 const STEP_INK: Record<number, [number, number]> = { 1: [4, 18], 2: [7, 26], 3: [10, 34] };
 
@@ -39,9 +47,9 @@ export function ProgressScreen() {
     <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12">
       <h1 className="t-title">Your progress</h1>
 
-      {/* Numbers first: a label, a figure and what it is measured against. */}
-      <section aria-label="Summary" className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div className="card col-span-2 flex flex-col p-5 lg:min-h-36">
+      {/* Numbers first: a label, a figure and what it is measured against. Every row shares one height, so the stat cards line up on phones too. */}
+      <section aria-label="Summary" className="mt-8 grid auto-rows-fr grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+        <div className="card col-span-2 flex flex-col p-4 sm:p-5 lg:min-h-36">
           <div className="flex items-baseline justify-between gap-4">
             <p className="label">Level</p>
             <p className="meta">{fmt(p.xp)} XP in total</p>
@@ -50,7 +58,7 @@ export function ProgressScreen() {
             <span className="num text-[32px] font-medium leading-none">{lvl.level}</span>
             <span className="text-ink-2">{titleForLevel(lvl.level)}</span>
           </p>
-          <div className="mt-auto pt-5">
+          <div className="mt-auto pt-4 sm:pt-5">
             <div className="meter" role="progressbar" aria-label={`Progress to level ${lvl.level + 1}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(lvl.progress * 100)}>
               <div className="meter-fill" style={{ transform: `scaleX(${lvl.progress})` }} />
             </div>
@@ -70,15 +78,19 @@ export function ProgressScreen() {
       <TeacherSummary />
 
       {/* The one main chart: mastery across the table. The wall chart prints itself in as you learn. */}
-      <section className="mt-16" aria-labelledby="mastery-map">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
-          <div>
-            <h2 id="mastery-map" className="t-heading">
-              Mastery map
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm text-ink-2">Each right answer prints an element a step darker, and a slip takes it a step back. Four steps and it is mastered.</p>
-          </div>
-          <ul className="flex shrink-0 flex-wrap gap-x-5 gap-y-2 text-sm text-ink-2" aria-label="Key">
+      <section className="mt-12 md:mt-16" aria-labelledby="mastery-map">
+        {/*
+          The shared section header, then the key 16px under it. From lg the key moves to the right of the header, its last
+          line level with the sub line (both keep their 16px bottom margin, so the bottoms meet).
+        */}
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-x-8">
+          <SectionHeader
+            id="mastery-map"
+            title="Mastery map"
+            sub="Each right answer prints an element a step darker, and a slip takes it a step back. Four steps and it is mastered."
+          />
+          {/* Phones: two equal columns, so the three entries line up instead of wrapping ragged. From sm one line. */}
+          <ul className="mb-4 grid shrink-0 grid-cols-2 gap-x-4 gap-y-2 text-sm text-ink-2 sm:flex sm:flex-wrap sm:gap-x-5" aria-label="Key">
             <KeyItem swatch={<span className="h-4 w-4 rounded-[4px] border border-dashed border-ink-3" />} label="Not started" count={ELEMENTS.length - learning - mastered} />
             <KeyItem swatch={<span className="h-4 w-4 rounded-[4px] border" style={{ background: 'color-mix(in oklab, var(--ink-2) 7%, var(--surface))', borderColor: 'color-mix(in oklab, var(--ink-2) 26%, transparent)' }} />} label="Learning" count={learning} />
             <KeyItem
@@ -93,7 +105,7 @@ export function ProgressScreen() {
           </ul>
         </div>
         {fresh && (
-          <a href="#/learn" className="card card-link mt-4 flex items-center gap-4 p-4 sm:p-5">
+          <a href="#/learn" className="card card-link mb-4 flex items-center gap-4 p-4 sm:p-5">
             <span className="min-w-0 flex-1">
               <span className="block font-medium">Your map is empty</span>
               <span className="mt-1 block text-sm text-ink-2">Finish the first lesson and hydrogen to neon start to print in</span>
@@ -101,7 +113,7 @@ export function ProgressScreen() {
             <ArrowRight aria-hidden size={18} strokeWidth={1.5} className="shrink-0 text-ink-3" />
           </a>
         )}
-        <div className="card mt-4 p-3 sm:p-5" data-roving role="group" aria-label="Mastery map. Use the arrow keys to move between elements.">
+        <div className="card p-4 sm:p-5" data-roving role="group" aria-label="Mastery map. Use the arrow keys to move between elements.">
           <PeriodicGrid
             minCell={32}
             maxCell={64}
@@ -134,15 +146,14 @@ export function ProgressScreen() {
       </section>
 
       {/* min-w-0 lets the columns shrink at 320px instead of pushing the page sideways (WCAG 1.4.10). */}
-      <section className="mt-16 grid gap-16">
+      <section className="mt-12 grid gap-12 md:mt-16 md:gap-16">
         <div className="min-w-0">
           <SectionHeader title="Region records" sub="Your best stars in each region, by difficulty" />
           <div className="card p-2">
-            {/* One column template for the header and every row, so names and stars sit in straight columns at every width. */}
-            <div className="grid grid-cols-[minmax(0,1fr)_repeat(3,3rem)] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_repeat(3,3.5rem)] lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] lg:gap-6 px-3 pb-1 pt-2 text-xs text-ink-3" aria-hidden>
-              <span>Stars by difficulty</span>
+            <div className={`${RECORD_COLS} pb-1 pt-2 text-xs text-ink-3`} aria-hidden>
+              <span className="hidden sm:block">Stars by difficulty</span>
               {DIFFICULTIES.map((d) => (
-                <span key={d.id} className="text-right lg:text-left">
+                <span key={d.id} className="sm:text-right lg:text-left">
                   {d.name}
                 </span>
               ))}
@@ -152,17 +163,17 @@ export function ProgressScreen() {
                 <li key={r.id}>
                   <a
                     href={`#/play/${r.id}`}
-                    className="row grid grid-cols-[minmax(0,1fr)_repeat(3,3rem)] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_repeat(3,3.5rem)] lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] lg:gap-6 rounded-[8px] px-3"
+                    className={`row ${RECORD_COLS} rounded-[8px] py-2`}
                     aria-label={`${r.name}: ${DIFFICULTIES.map((d) => {
                       const b = p.best[`${r.id}:${d.id}`];
                       return `${d.name} ${b ? `${b.stars} ${b.stars === 1 ? 'star' : 'stars'}` : 'not cleared'}`;
                     }).join(', ')}`}
                   >
-                    <span className="min-w-0 truncate text-[15px] leading-5">{r.name}</span>
+                    <span className="col-span-3 min-w-0 text-[15px] leading-5 sm:col-span-1 sm:truncate">{r.name}</span>
                     {DIFFICULTIES.map((d) => {
                         const b = p.best[`${r.id}:${d.id}`];
                         return (
-                          <span key={d.id} className="num flex items-center justify-end gap-1 text-sm text-ink-2 lg:justify-start" title={`${d.name}: ${b ? `${fmt(b.score)} pts` : 'not cleared'}`}>
+                          <span key={d.id} className="num flex h-5 items-center gap-1 text-sm text-ink-2 sm:justify-end lg:justify-start" title={`${d.name}: ${b ? `${fmt(b.score)} pts` : 'not cleared'}`}>
                             {b ? (
                               <>
                                 <Star size={14} strokeWidth={1.5} aria-hidden style={{ fill: 'var(--star)', color: 'var(--star-line)' }} />
@@ -184,11 +195,11 @@ export function ProgressScreen() {
 
         <div className="min-w-0">
           <SectionHeader title="Achievements" aside={<span className="meta">{unlocked ? `${unlocked} of ${ACHIEVEMENTS.length}` : `${ACHIEVEMENTS.length} to discover`}</span>} />
-          <ul className="card grid p-2 sm:auto-rows-fr sm:grid-cols-2 sm:gap-x-2 xl:grid-cols-3">
+          <ul className="card grid divide-y divide-line p-2 sm:auto-rows-fr sm:grid-cols-2 sm:gap-x-2 sm:divide-y-0 xl:grid-cols-3">
             {ACHIEVEMENTS.map((a) => {
               const at = p.achievements[a.id];
               return (
-                <li key={a.id} className="flex min-h-16 items-center gap-3 px-3 py-2">
+                <li key={a.id} className="flex min-h-16 items-center gap-3 px-2 py-3 sm:px-3 sm:py-2">
                   <span className="grid w-5 shrink-0 place-items-center">{at ? <Icon name={a.icon} size={18} className="text-ink-2" /> : <Lock size={16} strokeWidth={1.5} aria-hidden className="text-ink-3" />}</span>
                   <div className="min-w-0 flex-1">
                     <p className={`flex items-center gap-2 text-[15px] leading-6 ${at ? 'text-ink' : 'text-ink-2'}`}>
@@ -199,8 +210,10 @@ export function ProgressScreen() {
                       </span>
                     </p>
                     <p className="text-[13px] leading-5 text-ink-3">{caption(a.desc)}</p>
+                    {/* Phones: the date goes under the description, so the text keeps the full width. */}
+                    {at && <p className="meta mt-1 sm:hidden">{formatDate(at)}</p>}
                   </div>
-                  {at && <span className="meta shrink-0">{formatDate(at)}</span>}
+                  {at && <span className="meta hidden shrink-0 sm:block">{formatDate(at)}</span>}
                 </li>
               );
             })}
@@ -213,7 +226,7 @@ export function ProgressScreen() {
 
 function Stat({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div className="card flex flex-col p-5 lg:min-h-36">
+    <div className="card flex flex-col p-4 sm:p-5 lg:min-h-36">
       <p className="label">{label}</p>
       <p className="num mt-2 text-[28px] font-medium leading-none">{value}</p>
       <p className="meta mt-auto pt-3">{note}</p>
@@ -248,7 +261,7 @@ function TeacherSummary() {
   const done = CHAPTERS.filter((c) => chapters[c.id]);
   const date = formatDate(new Date(), true);
   return (
-    <section className="card mt-16 p-5 sm:p-6" aria-labelledby="teacher-summary">
+    <section className="card mt-12 p-4 sm:p-6 md:mt-16" aria-labelledby="teacher-summary">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="teacher-summary" className="t-heading">
           Show my teacher
@@ -256,7 +269,7 @@ function TeacherSummary() {
         <span className="meta">{date}</span>
       </div>
       <p className="mt-1 text-sm text-ink-2">A summary of your work on this device, ready for a screenshot</p>
-      <dl className="mt-5 grid gap-px overflow-hidden rounded-control border border-line bg-line sm:grid-cols-3">
+      <dl className="mt-4 grid gap-px sm:mt-5 overflow-hidden rounded-control border border-line bg-line sm:grid-cols-3">
         {[
           ['First 20 elements', `${first20Started} of 20 started · ${first20Mastered} mastered`],
           ['All elements', `${started.length} started · ${masteredList.length} mastered`],

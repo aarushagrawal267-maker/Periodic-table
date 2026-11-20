@@ -107,9 +107,9 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
         </motion.div>
 
         <motion.section className="card mt-6 overflow-hidden" {...enter(0.1)} aria-label="Round summary">
-          <div className="relative px-6 pb-5 pt-6 text-center">
+          <div className="relative px-4 pb-4 pt-4 text-center sm:px-6 sm:pb-5 sm:pt-6">
             {o.newBest && (
-              <span className="absolute right-4 top-4 inline-flex items-center gap-1 text-[13px] font-medium text-gold">
+              <span className="absolute right-4 top-4 inline-flex items-center gap-1 text-[13px] font-medium leading-5 text-gold">
                 <Trophy size={14} strokeWidth={1.5} aria-hidden /> New best
               </span>
             )}
@@ -151,7 +151,7 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
               </div>
             ))}
           </dl>
-          <div className="border-t border-line px-6 py-4">
+          <div className="border-t border-line px-4 py-4 sm:px-6">
             <div className="flex items-baseline justify-between gap-4 text-sm">
               <span>
                 {levelledUp ? (
@@ -202,7 +202,7 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
         </motion.div>
 
         {slipped.length > 0 && (
-          <motion.div className="mt-10" {...enter(0.2)}>
+          <motion.div className="mt-12" {...enter(0.2)}>
             <h3 className="label mb-2">Worth another look</h3>
             <div className="flex flex-wrap gap-2">
               {slipped.map((e) => (
@@ -216,7 +216,7 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
         )}
 
         {(unlocked.length > 0 || o.masteryUp.length > 0) && (
-          <motion.div className="mt-10" {...enter(0.2)}>
+          <motion.div className="mt-12" {...enter(0.2)}>
             {unlocked.length > 0 && (
               <>
                 <h3 className="label mb-2">{unlocked.length === 1 ? 'Achievement unlocked' : `${unlocked.length} achievements unlocked`}</h3>

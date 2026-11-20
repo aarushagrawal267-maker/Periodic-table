@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, useIsPresent } from 'motion/react';
 import { ArrowLeft, Lightbulb, Volume2, VolumeX } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore, type KeyboardEvent, type PointerEvent, type RefObject } from 'react';
 import { ElementTile, tileRadius } from '../components/ElementTile';
 import { DUR, EASE, tween } from '../components/motion';
 import { PeriodicGrid, type CellRect } from '../components/PeriodicGrid';
@@ -8,7 +8,7 @@ import { AnimatedNumber, Elapsed } from '../components/Stats';
 import { Sheet } from '../components/Sheet';
 import { Results } from '../components/Results';
 import { ELEMENTS, byNumber, catVar, type Element } from '../lib/elements';
-import { createGame, gameReducer, hand, summarize, EXPERT_LIVES } from '../lib/game';
+import { createGame, gameReducer, hand, summarize, EXPERT_LIVES, HAND_SIZE } from '../lib/game';
 import { haptic, sfx } from '../lib/feedback';
 import { multiplier } from '../lib/scoring';
 import { useProgress, type RoundOutcome, type RoundSummary } from '../store/progress';
@@ -56,6 +56,10 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
   const boardRef = useRef<HTMLElement>(null);
   const trayRef = useRef<HTMLElement>(null);
   const tilesRef = useRef<HTMLDivElement>(null);
+  const tileSize = useTrayTileSize(tilesRef);
+  /** From sm the board may keep bigger cells; on phones it shrinks to 34 before it scrolls, inside the 16px gutter. */
+  const wide = useWide();
+  const bigBoard = config.targets.length > 40 || !!config.view;
   /** Where keyboard focus was when the last placement was attempted. */
   const focusFrom = useRef<FocusOrigin | null>(null);
 
@@ -410,28 +414,30 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
       </header>
 
       {/* Board */}
-      <main ref={boardRef} className="relative z-10 flex flex-1 flex-col px-1 pb-6 pt-4 sm:px-6 sm:py-8">
-        {/* On phones the board sits right under the header, like the chart at the top of the wall, and the spare
-            height falls above the hand where feedback appears. From sm it sits centred between header and hand. */}
-        <div aria-hidden className="hidden flex-1 sm:block" />
+      <main ref={boardRef} className="relative z-10 flex flex-1 flex-col px-4 pb-2 pt-4 sm:px-6 sm:py-8">
+        {/* The board sits centred between header and hand on every width, so no empty band is left above the tray.
+            On phones it keeps the 16px page gutter like every other screen; a table too wide for it scrolls inside it. */}
+        <div aria-hidden className="flex-1" />
         <div className="relative mx-auto w-full max-w-7xl">
           <ComboBadge combo={state.combo} mult={mult} />
           <PeriodicGrid
             numbers={config.view ?? config.targets}
             renderCell={renderCell}
-            minCell={config.targets.length > 40 || config.view ? 34 : 38}
+            minCell={bigBoard || !wide ? 34 : 38}
             maxCell={72}
             showAxes
-            className="pb-2 pt-8"
+            className="pb-2 pt-6 sm:pt-8"
           />
           {/* On phones the guide sits under the table it talks about; from sm it sits under the tray. */}
-          <p className="mt-4 px-4 text-center text-[13px] leading-5 text-ink-3 sm:hidden">{guide}</p>
+          {/* A big board on a short phone needs every pixel above the tray, so there the guide steps aside rather than
+              add a vertical scroll to a board that already scrolls sideways. */}
+          <p className={`mt-4 text-balance text-center text-[13px] leading-5 text-ink-3 sm:hidden ${bigBoard ? '[@media(max-height:719px)]:hidden' : ''}`}>{guide}</p>
         </div>
         <div aria-hidden className="flex-1" />
       </main>
 
       {/* Tray */}
-      <footer ref={trayRef} className="safe-bottom sticky bottom-0 z-30 border-t border-line bg-bg">
+      <footer ref={trayRef} className="safe-bottom max-sm:pb-[max(16px,env(safe-area-inset-bottom))] sticky bottom-0 z-30 border-t border-line bg-bg">
         {/* Teaching note after a wrong drop. Screen readers get the same words from the live region. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-full flex justify-center px-4 pb-3" aria-hidden>
           <AnimatePresence>
@@ -458,8 +464,10 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
             )}
           </AnimatePresence>
         </div>
-        <div className="mx-auto flex max-w-3xl items-center justify-center gap-2 px-2 pt-3 sm:gap-6 sm:px-6">
-          <div ref={tilesRef} className="flex min-w-0 flex-1 items-center justify-center gap-1 sm:flex-none sm:gap-3" role="group" aria-label="Elements to place">
+        {/* Phones: the count and the hint key share one line above the tiles, so five tiles fit the full width down to 320.
+            From sm the key sits beside the tiles. */}
+        <div className="mx-auto flex max-w-3xl flex-col-reverse gap-2 px-4 pt-2 sm:flex-row sm:items-center sm:justify-center sm:gap-6 sm:px-6 sm:pt-3">
+          <div ref={tilesRef} className="flex min-w-0 items-center justify-center gap-1 min-[360px]:gap-2 sm:gap-3" role="group" aria-label="Elements to place">
             <AnimatePresence mode="popLayout" initial={false}>
               {tiles.map((n, i) => (
                 <TrayButton
@@ -470,6 +478,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
                   selected={state.selected === n}
                   missed={state.event?.kind === 'miss' && state.event.number === n}
                   dimmed={dragging === n}
+                  size={tileSize}
                   onPointerDown={(ev) => onTileDown(ev, n)}
                   onPointerMove={onTileMove}
                   onPointerUp={onTileUp}
@@ -482,7 +491,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
               ))}
             </AnimatePresence>
           </div>
-          <div className="flex shrink-0 flex-col items-center gap-1">
+          <div className="flex shrink-0 flex-row-reverse items-center justify-between gap-1 sm:flex-col sm:justify-center">
             <button
               onClick={() => dispatch({ type: 'hint' })}
               disabled={state.phase !== 'playing'}
@@ -618,6 +627,8 @@ interface TrayButtonProps {
   selected: boolean;
   missed: boolean;
   dimmed: boolean;
+  /** Type size of the printed tile (see TrayTile). */
+  size: number;
   onPointerDown: (ev: PointerEvent) => void;
   onPointerMove: (ev: PointerEvent) => void;
   onPointerUp: (ev: PointerEvent) => void;
@@ -625,7 +636,7 @@ interface TrayButtonProps {
   onActivate: () => void;
 }
 
-function TrayButton({ e, index, difficulty, selected, missed, dimmed, onActivate, ...pointer }: TrayButtonProps) {
+function TrayButton({ e, index, difficulty, selected, missed, dimmed, size, onActivate, ...pointer }: TrayButtonProps) {
   // While a placed tile animates out it must not take clicks or focus.
   const present = useIsPresent();
   const onKeyDown = (ev: KeyboardEvent<HTMLButtonElement>) => {
@@ -661,10 +672,10 @@ function TrayButton({ e, index, difficulty, selected, missed, dimmed, onActivate
       transition={tween(DUR.menu)}
       {...(present ? pointer : {})}
       onKeyDown={present ? onKeyDown : undefined}
-      className={`relative h-[68px] w-[60px] shrink-0 cursor-grab touch-none rounded-control sm:h-[84px] sm:w-[72px] ${missed ? 'animate-shake' : ''}`}
+      className={`relative aspect-[15/17] min-h-0 min-w-0 max-w-[72px] flex-1 basis-0 cursor-grab touch-none rounded-control sm:aspect-auto sm:h-[84px] sm:w-[72px] sm:flex-none ${missed ? 'animate-shake' : ''}`}
       style={{ pointerEvents: present ? undefined : 'none' }}
     >
-      <TrayTile e={e} difficulty={difficulty} selected={selected} />
+      <TrayTile e={e} difficulty={difficulty} selected={selected} size={size} />
       <kbd aria-hidden className="kbd absolute -bottom-3 left-1/2 hidden -translate-x-1/2 sm:inline-grid">
         {index + 1}
       </kbd>
@@ -677,15 +688,18 @@ function TrayButton({ e, index, difficulty, selected, missed, dimmed, onActivate
  * matching category colours. A tile takes its category colour once it lands on the table.
  * Learner still shows the atomic number in the corner.
  */
-function TrayTile({ e, difficulty, selected }: { e: Element; difficulty: Difficulty; selected: boolean }) {
+function TrayTile({ e, difficulty, selected, size = 80 }: { e: Element; difficulty: Difficulty; selected: boolean; size?: number }) {
   const learner = difficulty === 'learner';
   return (
     <div className={`relative h-full w-full rounded-control ${selected ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg' : ''}`}>
       <ElementTile
         element={e}
-        size={80}
+        size={size}
         showNumber={false}
         showName={difficulty !== 'expert'}
+        // Names stay at 11px or more; a long one (Phosphorus on a 54px phone tile) breaks over two lines.
+        minName={11}
+        wrapName
         color="var(--ink-2)"
         // Small phone tiles: nudge the symbol down so the atomic number never overlaps it.
         className={`rounded-control ${learner ? 'pt-3 sm:pt-0' : ''}`}
@@ -697,6 +711,48 @@ function TrayTile({ e, difficulty, selected }: { e: Element; difficulty: Difficu
       )}
     </div>
   );
+}
+
+const WIDE = '(min-width: 640px)';
+/** True from the sm breakpoint (640px). */
+function useWide() {
+  return useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia(WIDE);
+      mq.addEventListener('change', cb);
+      return () => mq.removeEventListener('change', cb);
+    },
+    () => window.matchMedia(WIDE).matches,
+  );
+}
+
+/**
+ * Tray tiles are 72x84 from sm. On phones five of them share the tray's width (54 wide at 320, capped at 72), and
+ * the printed type follows the tile so the symbol and name keep their proportions instead of overflowing it.
+ * 80 is the type size the 60-72px tiles were drawn with.
+ */
+function useTrayTileSize(ref: RefObject<HTMLDivElement | null>) {
+  const [size, setSize] = useState(80);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const wide = window.matchMedia('(min-width: 640px)');
+    const measure = () => {
+      if (wide.matches) return setSize(80);
+      const gap = parseFloat(getComputedStyle(el).columnGap) || 4;
+      const tile = Math.min(72, (el.clientWidth - gap * (HAND_SIZE - 1)) / HAND_SIZE);
+      setSize(Math.min(80, Math.round(tile * (80 / 60))));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    wide.addEventListener('change', measure);
+    return () => {
+      ro.disconnect();
+      wide.removeEventListener('change', measure);
+    };
+  }, [ref]);
+  return size;
 }
 
 /** The combo, as a quiet annotation centred above the board: how many in a row, and the multiplier it earns. */

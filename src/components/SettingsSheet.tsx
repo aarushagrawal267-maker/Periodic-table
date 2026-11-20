@@ -14,12 +14,13 @@ export function SettingsSheet() {
 
   return (
     <Sheet open={open} onClose={() => setOpen(false)} label="Settings">
-      <div className="px-6 pb-8 pt-8 sm:px-8">
+      {/* The heading sits on the close button's centre line: 30px on phones, 38px at sm, 34px from md. */}
+      <div className="px-4 pb-8 pt-4 sm:px-8 sm:pt-6 md:pt-5">
         <h2 className="t-heading">Settings</h2>
 
         <section className="mt-8">
           <h3 className="label mb-2">Default difficulty</h3>
-          <div className="space-y-1" role="radiogroup" aria-label="Default difficulty" onKeyDown={(e) => roveRadios(e, DIFFICULTIES.map((d) => d.id), s.difficulty, (difficulty) => s.set({ difficulty }))}>
+          <div className="grid auto-rows-fr gap-1" role="radiogroup" aria-label="Default difficulty" onKeyDown={(e) => roveRadios(e, DIFFICULTIES.map((d) => d.id), s.difficulty, (difficulty) => s.set({ difficulty }))}>
             {DIFFICULTIES.map((d) => {
               const on = s.difficulty === d.id;
               return (
@@ -29,14 +30,17 @@ export function SettingsSheet() {
                   aria-checked={on}
                   tabIndex={on ? 0 : -1}
                   onClick={() => s.set({ difficulty: d.id })}
-                  className={`flex w-full items-start gap-3 rounded-control p-3 text-left transition-colors duration-150 ease-out ${on ? 'is-selected' : 'hover:bg-surface-2'}`}
+                  // Rows share one height (the tallest), with each option's text centred in it.
+                  className={`flex w-full items-center rounded-control p-3 text-left transition-colors duration-150 ease-out ${on ? 'is-selected' : 'hover:bg-surface-2'}`}
                 >
-                  <span aria-hidden className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border-[1.5px] ${on ? 'border-accent' : 'border-ink-3'}`}>
-                    {on && <span className="h-2 w-2 rounded-full bg-accent" />}
-                  </span>
-                  <span>
-                    <span className="block font-medium">{d.name}</span>
-                    <span className="block text-sm text-ink-2">{d.desc}</span>
+                  <span className="flex items-start gap-3">
+                    <span aria-hidden className={`mt-1 grid h-4 w-4 shrink-0 place-items-center rounded-full border-[1.5px] ${on ? 'border-accent' : 'border-ink-3'}`}>
+                      {on && <span className="h-2 w-2 rounded-full bg-accent" />}
+                    </span>
+                    <span>
+                      <span className="block font-medium leading-6">{d.name}</span>
+                      <span className="block text-sm text-ink-2">{d.desc}</span>
+                    </span>
                   </span>
                 </button>
               );
@@ -44,7 +48,7 @@ export function SettingsSheet() {
           </div>
         </section>
 
-        <section className="mt-8 divide-y divide-line rounded-card border border-line">
+        <section className="mt-8 grid auto-rows-fr divide-y divide-line rounded-card border border-line">
           <Toggle label="Sound effects" on={s.sound} set={(v) => s.set({ sound: v })} />
           <Toggle label="Vibration" hint="On supported phones" on={s.haptics} set={(v) => s.set({ haptics: v })} />
           <Toggle label="Reduce motion" on={s.reduceMotion} set={(v) => s.set({ reduceMotion: v })} />
@@ -55,7 +59,7 @@ export function SettingsSheet() {
           <h3 className="label mb-2">Your data</h3>
           <p className="text-sm text-ink-2">Progress is saved on this device only. Nothing is sent anywhere.</p>
           {confirm ? (
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex gap-3">
               <button className="btn btn-secondary flex-1" onClick={() => setConfirm(false)}>
                 Cancel
               </button>
@@ -70,7 +74,7 @@ export function SettingsSheet() {
               </button>
             </div>
           ) : (
-            <button className="btn btn-quiet -ml-3 mt-2 text-bad hover:text-bad" onClick={() => setConfirm(true)}>
+            <button className="btn btn-quiet -ml-4 mt-2 text-bad hover:text-bad" onClick={() => setConfirm(true)}>
               Reset progress…
             </button>
           )}
@@ -99,10 +103,10 @@ function roveRadios<T extends string>(e: KeyboardEvent<HTMLElement>, ids: readon
 
 function Toggle({ label, hint, on, set }: { label: string; hint?: string; on: boolean; set: (v: boolean) => void }) {
   return (
-    <label className="flex min-h-14 cursor-pointer items-center justify-between gap-4 px-4 py-3">
+    <label className="flex min-h-16 cursor-pointer items-center justify-between gap-4 px-4 py-2">
       <span>
-        <span className="block text-[15px]">{label}</span>
-        {hint && <span className="block text-[13px] text-ink-2">{hint}</span>}
+        <span className="block text-[15px] leading-5">{label}</span>
+        {hint && <span className="block text-[13px] leading-5 text-ink-2">{hint}</span>}
       </span>
       <Switch on={on} onChange={set} label={label} />
     </label>

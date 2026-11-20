@@ -20,19 +20,20 @@ export function DifficultyPicker({ extra }: { extra?: Partial<Record<Difficulty,
 
   return (
     <div>
-      <div className="seg" role="radiogroup" aria-label="Difficulty" onKeyDown={onKeyDown}>
+      {/* Full width on phones: three equal segments, not a short pill hanging off the left. */}
+      <div className="seg max-md:flex" role="radiogroup" aria-label="Difficulty" onKeyDown={onKeyDown}>
         {DIFFICULTIES.map((d) => {
           const on = d.id === difficulty;
           return (
-            <button key={d.id} role="radio" aria-checked={on} tabIndex={on ? 0 : -1} onClick={() => set({ difficulty: d.id })} className="seg-item">
+            <button key={d.id} role="radio" aria-checked={on} tabIndex={on ? 0 : -1} onClick={() => set({ difficulty: d.id })} className="seg-item max-md:flex-1">
               {d.name}
             </button>
           );
         })}
       </div>
       <p className="mt-2 text-sm text-ink-2">
-        {current.desc}
-        {extra?.[difficulty] ? ` ${extra[difficulty]}` : ''}
+        {/* The descriptions have no full stop of their own; a following sentence needs one. */}
+        {extra?.[difficulty] ? `${current.desc}. ${extra[difficulty]}` : current.desc}
       </p>
     </div>
   );

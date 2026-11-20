@@ -15,6 +15,13 @@ interface Props {
    * after the symbol and name, so the visible label (symbol, name) leads the accessible name (WCAG 2.5.3).
    */
   quietNumber?: boolean;
+  /**
+   * Smallest name size in px. Map cells keep the 8px default; tiles that are touched or read as cards
+   * (game tray, In real life answers) pass 11 so no name prints below 11px.
+   */
+  minName?: number;
+  /** Let a long name break over two lines (with a hyphen) instead of shrinking under minName or cutting off. */
+  wrapName?: boolean;
 }
 
 /**
@@ -32,6 +39,8 @@ export const ElementTile = memo(function ElementTile({
   className = '',
   style,
   quietNumber = false,
+  minName = 8,
+  wrapName = false,
 }: Props) {
   const tiny = size < 34;
   return (
@@ -55,7 +64,10 @@ export const ElementTile = memo(function ElementTile({
         </span>
       )}{' '}
       {showName && (
-        <span className="tile-name max-w-[94%] truncate" style={{ fontSize: nameSize(e.name, size), marginTop: size * 0.06 }}>
+        <span
+          className={`tile-name max-w-full ${wrapName ? 'line-clamp-2 whitespace-normal text-center leading-none [hyphens:auto] [overflow-wrap:anywhere]' : 'truncate'}`}
+          style={{ fontSize: nameSize(e.name, size, minName), marginTop: size * 0.06 }}
+        >
           {e.name}
         </span>
       )}
@@ -65,11 +77,12 @@ export const ElementTile = memo(function ElementTile({
 
 /**
  * The name fits the tile's real width instead of being cut off: at most 13% of the tile, shrinking for long names
- * (Rutherfordium, Praseodymium) by the tile's own width (cqi), never under 8px. `truncate` stays only as a safety net.
+ * (Rutherfordium, Praseodymium) by the tile's own width (cqi), never under `min` px. Below that the name
+ * truncates, or wraps when the tile asks for it.
  */
-function nameSize(name: string, size: number) {
-  const fit = 90 / (name.length * 0.54);
-  return `max(8px, min(${Math.max(9, size * 0.13)}px, ${fit.toFixed(2)}cqi))`;
+function nameSize(name: string, size: number, min = 8) {
+  const fit = 94 / (name.length * 0.6);
+  return `max(${min}px, min(${Math.max(min, 9, size * 0.13)}px, ${fit.toFixed(2)}cqi))`;
 }
 
 /** Tile corner radius by size: 6px for map cells up to 20px for the detail card. */

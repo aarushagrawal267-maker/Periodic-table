@@ -137,7 +137,7 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
             Which {need === 1 ? 'element is' : `${need} elements are`} the key {need === 1 ? 'ingredient' : 'ingredients'}?
           </p>
 
-          <div className="mx-auto mt-8 grid w-full max-w-md grid-cols-4 gap-3 sm:gap-4" role="group" aria-label="Elements to choose from">
+          <div className="mx-auto mt-8 grid w-full max-w-md grid-cols-4 gap-2 sm:gap-4" role="group" aria-label="Elements to choose from">
             {q.options.map((e) => {
               const on = picked.has(e.number);
               const right = q.answer.has(e.number);
@@ -170,7 +170,7 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
                     Standard and Expert hide the category until the answer is checked; then the answer tiles show their printed colour.
                     The ones that are not in the object step back to plain ink, with their text still at full contrast.
                   */}
-                  <ElementTile element={e} size={TILE} showNumber={false} color={state === 'dim' ? 'var(--ink-3)' : checked || difficulty === 'learner' ? undefined : 'var(--ink-2)'} />
+                  <ElementTile element={e} size={TILE} showNumber={false} minName={11} color={state === 'dim' ? 'var(--ink-3)' : checked || difficulty === 'learner' ? undefined : 'var(--ink-2)'} />
                   {checked && (right || on) && (
                     <span aria-hidden className={`absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full border-2 border-bg text-bg ${right ? 'bg-good' : 'bg-bad'}`}>
                       {right ? <Check size={14} strokeWidth={2.5} /> : <X size={14} strokeWidth={2.5} />}
@@ -183,7 +183,7 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
 
           <div className="mt-8 min-h-24" aria-live="polite">
             {checked ? (
-              <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={tween(DUR.menu)} className="card p-5" aria-label="What is inside">
+              <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={tween(DUR.menu)} className="card p-4 sm:p-5" aria-label="What is inside">
                 <p className="text-[15px] font-medium" style={{ color: verdict.color }}>
                   {verdict.text}
                 </p>
