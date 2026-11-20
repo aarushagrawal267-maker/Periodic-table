@@ -2,6 +2,7 @@ import { ArrowRight, ChevronRight, Star } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { DifficultyPicker } from '../components/DifficultyPicker';
 import { ElementChip, tileRadius } from '../components/ElementTile';
+import { SectionHeader } from '../components/SectionHeader';
 import { MiniTable } from '../components/MiniTable';
 import { bySymbol } from '../lib/elements';
 import { REGIONS, regionById, type Region } from '../lib/regions';
@@ -30,21 +31,16 @@ export function PlayHub() {
         <DifficultyPicker />
       </header>
 
-      <div className="mt-8 grid gap-3 lg:grid-cols-2">
+      <div className="mt-8 grid gap-4 lg:grid-cols-2">
         {regions.map((r) => (
           <RegionRow key={r.id} region={r} />
         ))}
       </div>
       {full && <FullTableCard region={full} />}
 
-      <section className="mt-16 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-8" aria-labelledby="more-ways">
-        <div>
-          <h2 id="more-ways" className="t-heading">
-            More ways to play
-          </h2>
-          <p className="mt-1 text-sm text-ink-2">Quick rounds for when you have five minutes</p>
-        </div>
-        <div className="grid gap-3">
+      <section className="mt-16" aria-labelledby="more-ways">
+        <SectionHeader id="more-ways" title="More ways to play" sub="Quick rounds for when you have five minutes" />
+        <div className="grid gap-4 md:grid-cols-3">
           <ModeRow href="#/match" title="Match pairs" text="A relaxed memory game: flip cards and pair each symbol with its name" art={<MatchArt />} />
           <ModeRow href="#/life" title="In real life" text="Spot the elements inside phones, fireworks, bananas and your own bones" art={<LifeArt />} />
           <ModeRow href="#/quiz" title="Quick quiz" text="Ten questions, with extra practice on the elements you find hardest" art={<QuizArt />} />
@@ -103,7 +99,7 @@ function RegionRow({ region: r }: { region: Region }) {
 function FullTableCard({ region: r }: { region: Region }) {
   const { b, known, cleared } = useRegionProgress(r);
   return (
-    <a href={`#/play/${r.id}`} className="card card-link mt-3 grid gap-6 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-12 lg:p-8">
+    <a href={`#/play/${r.id}`} className="card card-link mt-4 grid gap-6 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-12">
       <MiniTable className="w-full" label={`${r.name} highlighted on the periodic table`} />
       <div>
         <h2 className="t-heading">{r.name}</h2>
@@ -124,21 +120,21 @@ function FullTableCard({ region: r }: { region: Region }) {
 
 function ModeRow({ href, title, text, art }: { href: string; title: string; text: string; art: ReactNode }) {
   return (
-    <a href={href} className="card card-link flex items-center gap-4 p-4">
-      <div className="grid h-20 w-24 shrink-0 place-items-center rounded-control bg-surface-2 sm:w-28" aria-hidden>
+    <a href={href} className="card card-link flex items-center gap-4 p-4 md:flex-col md:items-stretch md:gap-0">
+      <div className="grid h-20 w-24 shrink-0 place-items-center rounded-control bg-surface-2 sm:w-28 md:h-28 md:w-full" aria-hidden>
         {art}
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 md:mt-4">
         <h3 className="text-base font-medium">{title}</h3>
         <p className="mt-1 text-sm text-ink-2">{text}</p>
       </div>
-      <ChevronRight size={18} strokeWidth={1.5} className="shrink-0 text-ink-3" aria-hidden />
+      <ChevronRight size={18} strokeWidth={1.5} className="shrink-0 text-ink-3 md:hidden" aria-hidden />
     </a>
   );
 }
 
 /** A symbol and the name it pairs with, as the two cards of a match. */
-function MatchArt() {
+export function MatchArt() {
   return (
     <span className="flex items-center gap-2">
       <ElementChip element={el('Fe')} size={36} />
@@ -159,7 +155,7 @@ function LifeArt() {
 }
 
 /** A blank square on the chart and the four answer keys. */
-function QuizArt() {
+export function QuizArt() {
   return (
     <span className="flex items-center gap-2">
       <span className="slot grid h-9 w-9 place-items-center text-sm text-ink-3" style={{ borderRadius: tileRadius(36) }}>

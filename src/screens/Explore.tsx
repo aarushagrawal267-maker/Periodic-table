@@ -193,8 +193,9 @@ export function Explore({ symbol }: { symbol?: string }) {
         />
       </div>
 
-      {/* The key, printed under the table like a wall chart's legend. */}
-      <div className="mt-4">
+      {/* The key, printed under the table like a wall chart's legend: what the colours mean, then the swatches. */}
+      <div className="mt-6 border-t border-line pt-4">
+        <p className="mb-2 max-w-2xl text-sm text-ink-2">{L.describe}</p>
         {lens === 'category' ? (
           <ul className="-mx-2 grid grid-cols-2 gap-x-4 sm:grid-cols-3 lg:grid-cols-5" aria-label="Categories" onMouseLeave={() => setHoverCat(null)}>
             {CATEGORIES.map((c) => (
@@ -251,7 +252,6 @@ export function Explore({ symbol }: { symbol?: string }) {
             <NoData label="No data" />
           </div>
         )}
-        <p className="mt-3 max-w-2xl text-sm text-ink-3">{L.describe}</p>
       </div>
     </div>
   );

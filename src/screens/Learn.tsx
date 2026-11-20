@@ -42,15 +42,11 @@ export function LearnPath() {
       <div className="mt-8 lg:mt-0">
         {current && <UpNext chapter={current} index={CHAPTERS.indexOf(current)} />}
         {due.length > 0 && <ReviewBanner due={due} />}
-        <h2 className="label mb-2">All chapters</h2>
+        <h2 className="t-heading mb-4">All chapters</h2>
         <ol className="border-b border-line">
-          {CHAPTERS.map((c, i) =>
-            chapters[c.id] || c === current ? (
-              <CompactRow key={c.id} chapter={c} index={i} stars={chapters[c.id] ?? 0} current={c === current} />
-            ) : (
-              <ChapterRow key={c.id} chapter={c} index={i} />
-            ),
-          )}
+          {CHAPTERS.map((c, i) => (
+            <ChapterRow key={c.id} chapter={c} index={i} stars={chapters[c.id] ?? 0} current={c === current} />
+          ))}
         </ol>
       </div>
     </div>
@@ -61,7 +57,7 @@ export function LearnPath() {
 function ReviewBanner({ due }: { due: number[] }) {
   const label = `${due.length} ${due.length === 1 ? 'element' : 'elements'} ready for a quick review`;
   return (
-    <a href="#/learn/review" className="card card-link group mb-10 flex items-center gap-4 p-5">
+    <a href="#/learn/review" className="card card-link group mb-10 flex items-center gap-4 p-5 sm:p-6">
       <span className="min-w-0 flex-1">
         <span className="block font-medium">{label}</span>
         <span className="mt-1 block text-sm text-ink-2">A few cards, then a short game on the table</span>
@@ -108,54 +104,35 @@ function UpNext({ chapter: c, index }: { chapter: Chapter; index: number }) {
   );
 }
 
-/** A chapter you have done (or the one lifted above): number, title and its stars, one line. */
-function CompactRow({ chapter: c, index, stars, current }: { chapter: Chapter; index: number; stars: number; current: boolean }) {
+/**
+ * One row of the contents page, the same for every chapter: number, title, one line on what it covers,
+ * and its state on the right (stars when done, "Up next", or how long it takes). Every row is one height.
+ */
+function ChapterRow({ chapter: c, index, stars, current }: { chapter: Chapter; index: number; stars: number; current: boolean }) {
   return (
     <li className="border-t border-line">
       <a
         href={`#/learn/${c.id}`}
-        className="group -mx-4 flex min-h-12 items-center gap-4 px-4 py-3 transition-colors hover:bg-surface sm:mx-0 sm:gap-6 sm:rounded-control sm:px-5"
+        className="group -mx-4 flex min-h-[72px] items-center gap-4 px-4 py-3 transition-colors hover:bg-surface sm:mx-0 sm:gap-6 sm:rounded-control sm:px-5"
         aria-label={`Chapter ${index + 1}: ${c.title}${stars ? `, completed with ${stars} stars` : ''}`}
       >
         <span aria-hidden className={`mono w-6 shrink-0 text-[15px] leading-6 ${current ? 'text-accent' : 'text-ink-3'}`}>
           {index + 1}
         </span>
-        <span className="min-w-0 flex-1 text-[15px] font-medium leading-6">{c.title}</span>
-        {current ? <span className="text-sm text-ink-2">Up next</span> : <ChapterStars stars={stars} />}
-      </a>
-    </li>
-  );
-}
-
-/** One entry on the contents page still to come: number, title, what it covers. */
-function ChapterRow({ chapter: c, index }: { chapter: Chapter; index: number }) {
-  const shown = c.numbers.slice(0, 8);
-  return (
-    <li className="border-t border-line">
-      <a
-        href={`#/learn/${c.id}`}
-        className="group -mx-4 flex gap-4 px-4 py-5 transition-colors hover:bg-surface sm:mx-0 sm:gap-6 sm:rounded-card sm:px-5"
-        aria-label={`Chapter ${index + 1}: ${c.title}`}
-      >
-        <span aria-hidden className="mono w-6 shrink-0 text-[15px] leading-6 text-ink-3">
-          {index + 1}
+        <span className="min-w-0 flex-1">
+          <span className="block text-[15px] font-medium leading-6">{c.title}</span>
+          <span className="mt-0.5 block truncate text-sm text-ink-2">{c.blurb}</span>
         </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-4">
-            <h3 className="text-[17px] font-medium leading-6">{c.title}</h3>
-            <ChevronRight aria-hidden size={18} strokeWidth={1.5} className="my-[3px] shrink-0 text-ink-3 transition-colors group-hover:text-ink" />
-          </div>
-          <p className="mt-1 max-w-2xl text-sm text-ink-2">{c.blurb}</p>
-          <span aria-hidden className="mt-3 flex flex-wrap items-center gap-1">
-            {shown.map((n) => (
-              <ElementChip key={n} element={byNumber(n)} size={28} />
-            ))}
-            {c.numbers.length > shown.length && <span className="meta pl-1">+{c.numbers.length - shown.length}</span>}
+        {stars ? (
+          <ChapterStars stars={stars} />
+        ) : current ? (
+          <span className="shrink-0 text-sm text-ink-2">Up next</span>
+        ) : (
+          <span aria-hidden className="meta hidden shrink-0 sm:block">
+            {c.numbers.length} elements · {minutes(c)} min
           </span>
-          <span aria-hidden className="meta mt-3 block">
-            {c.numbers.length} elements · {minutes(c)} min{c.mnemonic ? ' · memory trick' : ''}
-          </span>
-        </div>
+        )}
+        <ChevronRight aria-hidden size={16} strokeWidth={1.5} className="shrink-0 text-ink-3 transition-colors group-hover:text-ink" />
       </a>
     </li>
   );

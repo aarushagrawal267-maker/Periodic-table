@@ -1,6 +1,7 @@
 import { formatDate } from '../lib/date';
 import { ArrowRight, Lock, Star } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
+import { SectionHeader } from '../components/SectionHeader';
 import { ElementChip, ElementTile, tileRadius } from '../components/ElementTile';
 import { Icon, TIER_COLOR } from '../components/Icon';
 import { PeriodicGrid } from '../components/PeriodicGrid';
@@ -39,8 +40,8 @@ export function ProgressScreen() {
       <h1 className="t-title">Your progress</h1>
 
       {/* Numbers first: a label, a figure and what it is measured against. */}
-      <section aria-label="Summary" className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="card col-span-2 flex flex-col p-5">
+      <section aria-label="Summary" className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="card col-span-2 flex flex-col p-5 lg:min-h-36">
           <div className="flex items-baseline justify-between gap-4">
             <p className="label">Level</p>
             <p className="meta">{fmt(p.xp)} XP in total</p>
@@ -69,7 +70,7 @@ export function ProgressScreen() {
       <TeacherSummary />
 
       {/* The one main chart: mastery across the table. The wall chart prints itself in as you learn. */}
-      <section className="mt-12" aria-labelledby="mastery-map">
+      <section className="mt-16" aria-labelledby="mastery-map">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
           <div>
             <h2 id="mastery-map" className="t-heading">
@@ -133,37 +134,35 @@ export function ProgressScreen() {
       </section>
 
       {/* min-w-0 lets the columns shrink at 320px instead of pushing the page sideways (WCAG 1.4.10). */}
-      <section className="mt-12 grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <section className="mt-16 grid gap-16">
         <div className="min-w-0">
-          <h2 className="t-heading">Region records</h2>
-          <div className="card mt-4 p-2">
-            <div className="flex items-center gap-3 px-3 pb-1 pt-2 text-xs text-ink-3" aria-hidden>
-              <span className="flex-1">Stars by difficulty</span>
-              <span className="flex gap-1 sm:gap-2">
-                {DIFFICULTIES.map((d) => (
-                  <span key={d.id} className="w-12 text-right sm:w-14">
-                    {d.name}
-                  </span>
-                ))}
-              </span>
+          <SectionHeader title="Region records" sub="Your best stars in each region, by difficulty" />
+          <div className="card p-2">
+            {/* One column template for the header and every row, so names and stars sit in straight columns at every width. */}
+            <div className="grid grid-cols-[minmax(0,1fr)_repeat(3,3rem)] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_repeat(3,3.5rem)] lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] lg:gap-6 px-3 pb-1 pt-2 text-xs text-ink-3" aria-hidden>
+              <span>Stars by difficulty</span>
+              {DIFFICULTIES.map((d) => (
+                <span key={d.id} className="text-right lg:text-left">
+                  {d.name}
+                </span>
+              ))}
             </div>
             <ul>
               {REGIONS.map((r) => (
                 <li key={r.id}>
                   <a
                     href={`#/play/${r.id}`}
-                    className="row rounded-[8px] px-3"
+                    className="row grid grid-cols-[minmax(0,1fr)_repeat(3,3rem)] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_repeat(3,3.5rem)] lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] lg:gap-6 rounded-[8px] px-3"
                     aria-label={`${r.name}: ${DIFFICULTIES.map((d) => {
                       const b = p.best[`${r.id}:${d.id}`];
                       return `${d.name} ${b ? `${b.stars} ${b.stars === 1 ? 'star' : 'stars'}` : 'not cleared'}`;
                     }).join(', ')}`}
                   >
-                    <span className="min-w-0 flex-1 text-[15px] leading-5">{r.name}</span>
-                    <span className="flex gap-1 sm:gap-2">
-                      {DIFFICULTIES.map((d) => {
+                    <span className="min-w-0 truncate text-[15px] leading-5">{r.name}</span>
+                    {DIFFICULTIES.map((d) => {
                         const b = p.best[`${r.id}:${d.id}`];
                         return (
-                          <span key={d.id} className="num flex w-12 items-center sm:w-14 justify-end gap-1 text-sm text-ink-2" title={`${d.name}: ${b ? `${fmt(b.score)} pts` : 'not cleared'}`}>
+                          <span key={d.id} className="num flex items-center justify-end gap-1 text-sm text-ink-2 lg:justify-start" title={`${d.name}: ${b ? `${fmt(b.score)} pts` : 'not cleared'}`}>
                             {b ? (
                               <>
                                 <Star size={14} strokeWidth={1.5} aria-hidden style={{ fill: 'var(--star)', color: 'var(--star-line)' }} />
@@ -175,7 +174,6 @@ export function ProgressScreen() {
                           </span>
                         );
                       })}
-                    </span>
                   </a>
                 </li>
               ))}
@@ -185,15 +183,12 @@ export function ProgressScreen() {
         </div>
 
         <div className="min-w-0">
-          <div className="flex items-baseline justify-between gap-4">
-            <h2 className="t-heading">Achievements</h2>
-            <span className="meta">{unlocked ? `${unlocked} of ${ACHIEVEMENTS.length}` : `${ACHIEVEMENTS.length} to discover`}</span>
-          </div>
-          <ul className="card mt-4 grid p-2 sm:grid-cols-2 sm:gap-x-2">
+          <SectionHeader title="Achievements" aside={<span className="meta">{unlocked ? `${unlocked} of ${ACHIEVEMENTS.length}` : `${ACHIEVEMENTS.length} to discover`}</span>} />
+          <ul className="card grid p-2 sm:auto-rows-fr sm:grid-cols-2 sm:gap-x-2 xl:grid-cols-3">
             {ACHIEVEMENTS.map((a) => {
               const at = p.achievements[a.id];
               return (
-                <li key={a.id} className="flex min-h-14 items-center gap-3 px-3 py-2">
+                <li key={a.id} className="flex min-h-16 items-center gap-3 px-3 py-2">
                   <span className="grid w-5 shrink-0 place-items-center">{at ? <Icon name={a.icon} size={18} className="text-ink-2" /> : <Lock size={16} strokeWidth={1.5} aria-hidden className="text-ink-3" />}</span>
                   <div className="min-w-0 flex-1">
                     <p className={`flex items-center gap-2 text-[15px] leading-6 ${at ? 'text-ink' : 'text-ink-2'}`}>
@@ -218,7 +213,7 @@ export function ProgressScreen() {
 
 function Stat({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div className="card flex flex-col p-5">
+    <div className="card flex flex-col p-5 lg:min-h-36">
       <p className="label">{label}</p>
       <p className="num mt-2 text-[28px] font-medium leading-none">{value}</p>
       <p className="meta mt-auto pt-3">{note}</p>
@@ -253,7 +248,7 @@ function TeacherSummary() {
   const done = CHAPTERS.filter((c) => chapters[c.id]);
   const date = formatDate(new Date(), true);
   return (
-    <section className="card mt-8 p-5 sm:p-6" aria-labelledby="teacher-summary">
+    <section className="card mt-16 p-5 sm:p-6" aria-labelledby="teacher-summary">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="teacher-summary" className="t-heading">
           Show my teacher

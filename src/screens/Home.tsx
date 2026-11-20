@@ -1,10 +1,11 @@
 import { motion } from 'motion/react';
-import { ArrowRight, BarChart3, CalendarDays, ChevronRight, GraduationCap, ListChecks, RefreshCw, Shuffle, Star } from 'lucide-react';
+import { ArrowRight, BarChart3, CalendarDays, ChevronRight, GraduationCap, RefreshCw, Star } from 'lucide-react';
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { goalLabel, useDailyGoal } from '../components/DailyGoal';
 import { ElementChip, ElementTile } from '../components/ElementTile';
 import { MiniTable } from '../components/MiniTable';
 import { PeriodicGrid } from '../components/PeriodicGrid';
+import { SectionHeader } from '../components/SectionHeader';
 import { TrailSquares } from '../components/Results';
 import { Ring } from '../components/Stats';
 import { DUR, STAGGER, rise, tween } from '../components/motion';
@@ -20,6 +21,7 @@ import { levelFromXp, titleForLevel } from '../lib/scoring';
 import { liveStreak, masteredCount, useProgress, type Mastery } from '../store/progress';
 import { useUi } from '../store/ui';
 import { Countdown } from './Daily';
+import { MatchArt, QuizArt } from './Play';
 
 /** Hydrogen to calcium: the first two chapters of the learning path. */
 const FIRST_CHAPTERS = CHAPTERS.slice(0, 2);
@@ -114,30 +116,26 @@ export function Home() {
 
       {/* Today: the goal, a review if one is due, the next lesson and the daily, as one strip below the hero. */}
       <section aria-labelledby="today-title" className={`${PAGE} mt-16`}>
-        <TodayHeading id="today-title" />
-        <div className="mt-3">{today}</div>
+        <SectionHeader id="today-title" title="Today" aside={<span className="meta">{formatDate()}</span>} />
+        {today}
       </section>
 
       {/* Regions */}
       <section aria-labelledby="regions-title" className={`${PAGE} mt-16`}>
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h2 id="regions-title" className="t-heading">
-              Pick a region
-            </h2>
-            <p className="mt-1 text-sm text-ink-2">Start small, then take on the whole table</p>
-          </div>
-          <a href="#/play" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-medium text-ink-2 transition-colors hover:text-ink">
-            All modes <ArrowRight size={16} strokeWidth={1.5} aria-hidden />
-          </a>
-        </div>
-        {/* A sideways row on phones and tablets; all seven in a 4 + 3 grid from lg, nothing hidden. */}
-        <div className="no-scrollbar -mx-4 mt-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-1 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-48px),transparent)] sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0 lg:pb-0 lg:[mask-image:none]">
+        <SectionHeader id="regions-title" title="Pick a region" sub="Start small, then take on the whole table" action={{ href: '#/play', label: 'All modes' }} />
+        {/* A sideways row on phones and tablets. From lg, two even rows of four: the full table takes two places. */}
+        <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-1 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-48px),transparent)] sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0 lg:pb-0 lg:[mask-image:none]">
           {REGIONS.map((r) => {
             const bestStars = Math.max(0, ...Object.entries(p.best).filter(([k]) => k.startsWith(r.id + ':')).map(([, v]) => v.stars));
+            const wide = r.id === 'full';
             return (
-              <a key={r.id} href={`#/play/${r.id}`} className="card card-link relative w-64 shrink-0 snap-start p-4 lg:w-auto">
-                <MiniTable highlight={new Set(r.numbers)} className="w-full" />
+              <a
+                key={r.id}
+                href={`#/play/${r.id}`}
+                className={`card card-link relative w-64 shrink-0 snap-start p-4 lg:w-auto ${wide ? 'lg:col-span-2 lg:flex lg:items-end lg:gap-6' : ''}`}
+              >
+                <MiniTable highlight={new Set(r.numbers)} className={wide ? 'w-full lg:w-[calc(50%-12px)] lg:shrink-0' : 'w-full'} />
+                <span className={`block ${wide ? 'lg:min-w-0 lg:flex-1' : ''}`}>
                 <span className="mt-4 flex items-baseline justify-between gap-3">
                   <span className="text-balance text-[15px] font-medium">{r.name}</span>
                   <span className="meta shrink-0">{r.short}</span>
@@ -152,6 +150,7 @@ export function Home() {
                     />
                   ))}
                 </span>
+                </span>
                 <span className="sr-only">{bestStars ? `, best ${bestStars} of 3 stars` : ', not played yet'}</span>
               </a>
             );
@@ -160,34 +159,37 @@ export function Home() {
       </section>
 
       <section aria-labelledby="eotd-title" className={`${PAGE} mt-16`}>
+        <SectionHeader id="eotd-title" title="Element of the day" />
         <ElementOfTheDay e={featured} />
       </section>
 
-      {/* More ways to practise: one wide card with real objects, two compact ones beside it. */}
-      <section aria-label="More ways to practise" className={`${PAGE} mt-16 grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]`}>
-        <a href="#/life" className="card card-link flex flex-col p-5 sm:p-6">
-          <h2 className="t-heading">In real life</h2>
-          <p className="mt-1 max-w-lg text-[15px] leading-6 text-ink-2">What&rsquo;s inside your phone? Why are fireworks red? Spot the elements hiding in everyday things.</p>
-          <ul className="mt-6 divide-y divide-line border-y border-line" aria-hidden>
-            {LIFE_SAMPLES.map((t) => (
-              <li key={t.id} className="flex items-center justify-between gap-4 py-3">
-                <span className="text-sm text-ink-2">{t.name}</span>
-                <span className="flex gap-1">
-                  {t.contains.map(([s]) => (
-                    <ElementChip key={s} element={bySymbol.get(s.toLowerCase())!} size={32} />
-                  ))}
-                </span>
-              </li>
-            ))}
-          </ul>
-          <ActionLine className="mt-6">Spot the elements</ActionLine>
-        </a>
-        <div className="grid gap-4">
-          <PracticeCard href="#/quiz" icon={<ListChecks size={18} strokeWidth={1.5} />} title="Quick quiz" action="Take a quiz">
-            Ten fast questions on symbols, numbers, families and facts, weighted towards the elements you haven&rsquo;t nailed yet.
+      {/* More ways to practise: three cards with one anatomy, title, line, content, and the action on one shared bottom line. */}
+      <section aria-labelledby="practise-title" className={`${PAGE} mt-16`}>
+        <SectionHeader id="practise-title" title="More ways to practise" sub="Quick rounds for when you have five minutes" />
+        <div className="grid gap-4 md:grid-cols-3">
+          <PracticeCard href="#/life" title="In real life" action="Spot the elements" body="What’s inside your phone? Why are fireworks red? Spot the elements hiding in everyday things.">
+            <ul className="flex h-24 flex-col divide-y divide-line border-y border-line" aria-hidden>
+              {LIFE_SAMPLES.map((t) => (
+                <li key={t.id} className="flex flex-1 items-center justify-between gap-4">
+                  <span className="text-sm text-ink-2">{t.name}</span>
+                  <span className="flex gap-1">
+                    {t.contains.map(([sym]) => (
+                      <ElementChip key={sym} element={bySymbol.get(sym.toLowerCase())!} size={28} />
+                    ))}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </PracticeCard>
-          <PracticeCard href="#/match" icon={<Shuffle size={18} strokeWidth={1.5} />} title="Match pairs" action="Find the pairs">
-            A relaxed memory game. Flip the cards and pair each symbol with its name. No rush.
+          <PracticeCard href="#/quiz" title="Quick quiz" action="Take a quiz" body="Ten fast questions on symbols, numbers, families and facts, weighted towards the elements you haven’t nailed yet.">
+            <span aria-hidden className="grid h-24 place-items-center rounded-control bg-surface-2">
+              <QuizArt />
+            </span>
+          </PracticeCard>
+          <PracticeCard href="#/match" title="Match pairs" action="Find the pairs" body="A relaxed memory game. Flip the cards and pair each symbol with its name. No rush.">
+            <span aria-hidden className="grid h-24 place-items-center rounded-control bg-surface-2">
+              <MatchArt />
+            </span>
           </PracticeCard>
         </div>
       </section>
@@ -200,18 +202,6 @@ export function Home() {
 }
 
 /* ------------------------------------------------------------------ today */
-
-function TodayHeading({ id, className = '' }: { id?: string; className?: string }) {
-  const date = formatDate();
-  return (
-    <div className={`flex items-baseline justify-between gap-4 ${className}`}>
-      <h2 id={id} className={id ? 't-heading' : 'text-[15px] font-medium'}>
-        Today
-      </h2>
-      <span className="meta">{date}</span>
-    </div>
-  );
-}
 
 interface LevelInfo {
   level: number;
@@ -424,10 +414,13 @@ function FirstTwenty({ done, mastery }: { done: number; mastery: Record<number, 
             </div>
           )}
         </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <span className="text-sm text-ink-2">Hydrogen to calcium</span>
+          <a href="#/explore" className="-my-3 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-ink transition-colors hover:text-ink-2">
+            Explore the full periodic table <ArrowRight size={16} strokeWidth={1.5} aria-hidden />
+          </a>
+        </div>
       </div>
-      <a href="#/explore" className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-ink-2 transition-colors hover:text-ink">
-        Explore the full periodic table <ArrowRight size={16} strokeWidth={1.5} aria-hidden />
-      </a>
     </div>
   );
 }
@@ -538,10 +531,7 @@ function ElementOfTheDay({ e }: { e: Element }) {
         <ElementTile element={e} size={112} />
       </div>
       <div className="min-w-0">
-        <p className="label">Element of the day</p>
-        <h2 id="eotd-title" className="t-heading mt-1">
-          {e.name}
-        </h2>
+        <h3 className="t-heading">{e.name}</h3>
         <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2">
           <span className="flex items-center gap-2">
             <span className="dot" style={{ '--c': c } as CSSProperties} aria-hidden />
@@ -590,17 +580,13 @@ function ActionLine({ children, className = '' }: { children: ReactNode; classNa
   );
 }
 
-function PracticeCard({ href, icon, title, action, children }: { href: string; icon: ReactNode; title: string; action: string; children: ReactNode }) {
+function PracticeCard({ href, title, action, body, children }: { href: string; title: string; action: string; body: string; children?: ReactNode }) {
   return (
-    <a href={href} className="card card-link flex gap-3 p-5">
-      <span aria-hidden className="grid h-6 w-6 shrink-0 place-items-center text-ink-2">
-        {icon}
-      </span>
-      <span className="min-w-0">
-        <span className="block text-base font-medium leading-6">{title}</span>
-        <span className="mt-1 block text-sm text-ink-2">{children}</span>
-        <ActionLine className="mt-4">{action}</ActionLine>
-      </span>
+    <a href={href} className="card card-link flex flex-col p-5">
+      <span className="block text-base font-medium leading-6">{title}</span>
+      <span className="mt-1 block text-sm text-ink-2">{body}</span>
+      {children && <span className="mt-auto block pt-4">{children}</span>}
+      <ActionLine className="mt-6">{action}</ActionLine>
     </a>
   );
 }
@@ -613,17 +599,15 @@ function HowItWorks() {
   ];
   return (
     <section aria-labelledby="how-title" className={`${PAGE} mt-16`}>
-      <h2 id="how-title" className="t-heading">
-        How it works
-      </h2>
-      <ol className="mt-4 grid gap-6 border-t border-line pt-6 md:grid-cols-3 md:gap-8">
+      <SectionHeader id="how-title" title="How it works" />
+      <ol className="grid gap-6 border-t border-line pt-6 md:grid-cols-3 md:gap-8">
         {steps.map((s, i) => (
-          <li key={s.title} className="flex gap-3">
-            <span className="mono w-4 shrink-0 text-sm leading-6 text-ink-3">{i + 1}</span>
-            <div>
-              <h3 className="text-base font-medium leading-6">{s.title}</h3>
-              <p className="mt-1 text-sm text-ink-2">{s.body}</p>
-            </div>
+          <li key={s.title}>
+            <h3 className="text-base font-medium leading-6">
+              <span className="mono mr-3 text-sm text-ink-3">{i + 1}</span>
+              {s.title}
+            </h3>
+            <p className="mt-1 text-sm text-ink-2">{s.body}</p>
           </li>
         ))}
       </ol>
@@ -639,23 +623,16 @@ function ForTeachers() {
     { title: 'Easy to check', body: 'Students can open Progress and show you a summary of the elements they have started and mastered.' },
   ];
   return (
-    <section aria-labelledby="teachers-title" className={`${PAGE} mt-20`}>
-      <div className="grid gap-6 border-t border-line pt-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-16">
-        <div>
-          <p className="label">For teachers and parents</p>
-          <h2 id="teachers-title" className="mt-1 text-base font-medium leading-6">
-            Free, private, and built around short practice
-          </h2>
-        </div>
-        <dl className="grid gap-5 sm:grid-cols-3 sm:gap-8">
-          {points.map((pt) => (
-            <div key={pt.title}>
-              <dt className="text-sm font-medium">{pt.title}</dt>
-              <dd className="mt-1 text-sm text-ink-2">{pt.body}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
+    <section aria-labelledby="teachers-title" className={`${PAGE} mt-16`}>
+      <SectionHeader id="teachers-title" title="For teachers and parents" sub="Free, private, and built around short practice" />
+      <dl className="grid gap-6 border-t border-line pt-6 md:grid-cols-3 md:gap-8">
+        {points.map((pt) => (
+          <div key={pt.title}>
+            <dt className="text-base font-medium leading-6">{pt.title}</dt>
+            <dd className="mt-1 text-sm text-ink-2">{pt.body}</dd>
+          </div>
+        ))}
+      </dl>
     </section>
   );
 }
