@@ -1,0 +1,8 @@
+{
+  "name": "periodica-social-publish",
+  "private": true,
+  "description": "Posting scripts for Periodica's social accounts. No dependencies. `main` lets `node --test social/publish/` run the whole suite (Node 22 treats a directory argument as a module).",
+  "type": "module",
+  "main": "test/all.mjs",
+  "engines": { "node": ">=22" }
+}
