@@ -1,0 +1,228 @@
+/*
+ * The reel stage: one 1080x1920 frame printed on Periodica's warm dark ramp.
+ * Colour tokens are injected from src/styles/index.css at render time (see lib/data.mjs readTokens).
+ * Sizes are the app's own, scaled for a 1080 px wide frame that a phone shows about 390 pt wide (x 2.77).
+ * Nothing here animates by itself: stage.js sets every moving property from the time variable.
+ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Figtree Variable', sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  font-kerning: normal;
+}
+
+#stage {
+  position: relative;
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.abs {
+  position: absolute;
+}
+
+.mono {
+  font-family: 'Geist Mono Variable', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Text roles */
+.ink {
+  color: var(--ink);
+}
+.ink-2 {
+  color: var(--ink-2);
+}
+.headline {
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.title {
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+}
+.label {
+  font-size: 40px;
+  line-height: 52px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.body {
+  font-weight: 400;
+  line-height: 1.3;
+  text-wrap: pretty;
+}
+
+/* Brand row: the app's LogoMark and wordmark. */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1;
+}
+
+/* The element square, as the wall chart prints it (src/styles/index.css .tile). */
+.tile {
+  --c: var(--accent);
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--c) var(--tile-tint), var(--surface));
+  border: 3px solid color-mix(in oklab, var(--c) var(--tile-edge), transparent);
+  color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+  transform-origin: 0 0;
+}
+.tile-number {
+  position: absolute;
+  font-family: 'Geist Mono Variable', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  line-height: 1;
+}
+.tile-symbol {
+  font-weight: 500;
+  line-height: 1;
+}
+.tile-name {
+  color: color-mix(in oklab, var(--ink-2) 60%, var(--ink));
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* An empty place on the table (.slot). */
+.slot {
+  position: absolute;
+  background: var(--cell-empty);
+  border: 4px dashed var(--slot-line);
+  display: grid;
+  place-items: center;
+  color: var(--ink-2);
+}
+
+/* Card and row surfaces. */
+.card {
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 40px;
+}
+.raised {
+  background: var(--surface-2);
+}
+
+.keycap {
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 16px;
+  background: var(--surface-2);
+  border: 2px solid var(--line-strong);
+  color: var(--ink-2);
+  font-family: 'Geist Mono Variable', monospace;
+  font-weight: 500;
+}
+
+.dot {
+  display: inline-block;
+  flex: none;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+/* Small printed chip with the corner number (ElementChip). */
+.chip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: color-mix(in oklab, var(--c) var(--tile-tint), var(--surface));
+  border: 2px solid color-mix(in oklab, var(--c) var(--tile-edge), transparent);
+  color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Mini table squares (MiniTable): category tint, quieter than a tile. */
+.mini {
+  position: absolute;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--c) 34%, var(--surface));
+}
+.mini-hit {
+  position: absolute;
+  border-radius: 10px;
+  background: var(--c);
+  outline: 4px solid var(--ink);
+  outline-offset: 4px;
+  display: grid;
+  place-items: center;
+  color: var(--bg);
+  font-weight: 600;
+}
+
+/* Progress meter (.meter): cobalt fill on a hairline track, moved with scaleX only. */
+.meter {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--line-strong);
+}
+.meter-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: var(--accent);
+  transform-origin: 0 50%;
+}
+
+/* Phone frame around a real screenshot of the app. */
+.shot {
+  position: absolute;
+  overflow: hidden;
+  border-radius: 40px;
+  border: 3px solid var(--line-strong);
+  background: var(--bg);
+}
+.shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+svg.icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
