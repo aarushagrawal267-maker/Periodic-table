@@ -130,7 +130,8 @@ function titleFor(route: Route) {
   const t = (name: string) => `${name} · ${SITE}`;
   switch (route.name) {
     case 'home':
-      return `${SITE} · Learn the periodic table`;
+      // Matches <title> in index.html, which search engines and link previews read (keep the two in step).
+      return t('Periodic table game and quiz to learn the elements');
     case 'play':
       return t('Play');
     case 'game':

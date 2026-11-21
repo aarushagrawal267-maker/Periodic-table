@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<!-- The Open Graph image (public/og.png), 1200x630. Render with: node scripts/og-image.mjs -->
+<title>Periodica social card</title>
+<style>
+  @font-face {
+    font-family: 'Figtree Variable';
+    src: url('../node_modules/@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2') format('woff2-variations');
+    font-weight: 300 900;
+  }
+  @font-face {
+    font-family: 'Geist Mono Variable';
+    src: url('../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2') format('woff2-variations');
+    font-weight: 100 900;
+  }
+  :root {
+    --bg: #161513;
+    --surface: #1c1a18;
+    --ink: #efe9de;
+    --ink-2: #aaa398;
+    --ink-3: #969085;
+    --accent: #6ea3ff;
+    --accent-soft: rgb(110 163 255 / 0.12);
+    --tile-tint: 16%;
+    --tile-edge: 42%;
+    --cell-ink-mix: 66%;
+    --s: 124px;
+    --g: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; background: var(--bg); overflow: hidden; }
+  body {
+    font-family: 'Figtree Variable', sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    display: grid;
+    place-items: center;
+  }
+  .table {
+    display: grid;
+    grid-template-columns: repeat(8, var(--s));
+    grid-template-rows: repeat(3, var(--s));
+    gap: var(--g);
+  }
+  .tile {
+    position: relative;
+    border-radius: 17px;
+    background: color-mix(in oklab, var(--c) var(--tile-tint), var(--surface));
+    border: 1px solid color-mix(in oklab, var(--c) var(--tile-edge), transparent);
+    color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .num {
+    position: absolute; left: 11px; top: 10px;
+    font-family: 'Geist Mono Variable', monospace; font-size: 19px; line-height: 1; font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+  .sym { font-size: 45px; font-weight: 500; line-height: 1; margin-top: 5px; }
+  .name { font-size: 16px; line-height: 1; margin-top: 8px; color: color-mix(in oklab, var(--ink-2) 60%, var(--ink)); }
+  .slot {
+    border-radius: 17px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  .title {
+    grid-column: 2 / 8;
+    grid-row: 1;
+    display: flex; flex-direction: column; justify-content: center;
+    padding-left: 24px;
+  }
+  .mark { display: flex; align-items: center; gap: 18px; }
+  .word { font-size: 64px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; }
+  .line { font-size: 30px; line-height: 1.25; color: var(--ink-2); margin-top: 12px; font-weight: 400; }
+</style>
+</head>
+<body>
+  <div class="table" id="t">
+    <div class="title">
+      <div class="mark">
+        <svg width="56" height="56" viewBox="0 0 28 28" aria-hidden="true">
+          <rect x="0.75" y="0.75" width="26.5" height="26.5" rx="6.25" fill="none" stroke="#efe9de" stroke-width="1.5"/>
+          <text x="14" y="18.5" text-anchor="middle" font-family="Figtree Variable" font-size="11" font-weight="600" fill="#efe9de">Pa</text>
+        </svg>
+        <span class="word">Periodica</span>
+      </div>
+      <p class="line">Learn the periodic table by playing. Free, no sign-up.</p>
+    </div>
+  </div>
+<script>
+  const CAT = {
+    'alkali-metal': '#ff5d73', 'alkaline-earth-metal': '#ff9f43', 'transition-metal': '#f7c948',
+    'post-transition-metal': '#a3e635', metalloid: '#2dd4bf', nonmetal: '#60a5fa', halogen: '#a78bfa',
+    'noble-gas': '#e879f9',
+  };
+  const E = [
+    [1, 'H', 'Hydrogen', 'nonmetal', 1, 1], [2, 'He', 'Helium', 'noble-gas', 1, 8],
+    [3, 'Li', 'Lithium', 'alkali-metal', 2, 1], [4, 'Be', 'Beryllium', 'alkaline-earth-metal', 2, 2],
+    [5, 'B', 'Boron', 'metalloid', 2, 3], [6, 'C', 'Carbon', 'nonmetal', 2, 4], [7, 'N', 'Nitrogen', 'nonmetal', 2, 5],
+    [8, 'O', 'Oxygen', 'nonmetal', 2, 6], [9, 'F', 'Fluorine', 'halogen', 2, 7], [10, 'Ne', 'Neon', 'noble-gas', 2, 8],
+    [11, 'Na', 'Sodium', 'alkali-metal', 3, 1], [12, 'Mg', 'Magnesium', 'alkaline-earth-metal', 3, 2],
+    [13, 'Al', 'Aluminium', 'post-transition-metal', 3, 3], [14, 'Si', 'Silicon', 'metalloid', 3, 4],
+    [15, 'P', 'Phosphorus', 'nonmetal', 3, 5], [16, 'S', 'Sulfur', 'nonmetal', 3, 6],
+    [17, 'Cl', 'Chlorine', 'halogen', 3, 7], [18, 'Ar', 'Argon', 'noble-gas', 3, 8],
+  ];
+  // One empty place on the table, the hint target of the puzzle: the student places it.
+  const EMPTY = 17;
+  const t = document.getElementById('t');
+  for (const [n, sym, name, cat, row, col] of E) {
+    const d = document.createElement('div');
+    d.style.gridRow = row; d.style.gridColumn = col;
+    if (n === EMPTY) { d.className = 'slot'; t.appendChild(d); continue; }
+    d.className = 'tile';
+    d.style.setProperty('--c', CAT[cat]);
+    d.innerHTML = `<span class="num">${n}</span><span class="sym">${sym}</span><span class="name">${name}</span>`;
+    t.appendChild(d);
+  }
+</script>
+</body>
+</html>

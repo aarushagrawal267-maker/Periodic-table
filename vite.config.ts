@@ -44,9 +44,14 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
+        // `id` equals the resolved start_url, which is what browsers used before it was set, so installed copies keep their identity.
+        id: './',
         name: 'Periodica · Learn the periodic table',
         short_name: 'Periodica',
-        description: 'Learn the periodic table in three-minute lessons and quick games',
+        description: 'Learn and memorize the periodic table in three-minute lessons, puzzles and quizzes. Free, no sign-up, works offline.',
+        lang: 'en',
+        dir: 'ltr',
+        categories: ['education', 'games'],
         theme_color: '#161513',
         background_color: '#161513',
         display: 'standalone',
@@ -61,6 +66,9 @@ export default defineConfig({
         // The Firebase SDK chunk is only for accounts (docs/ACCOUNTS.md 8.3): not precached for every
         // guest, but cached after first use so a signed-in device can start offline.
         globIgnores: ['**/firebase-sdk-*.js'],
+        // Files for crawlers, AI assistants and link previews: not precached, and opening one in a browser that has the
+        // service worker shows the file from the network instead of the app shell.
+        navigateFallbackDenylist: [/\/(robots\.txt|sitemap\.xml|llms\.txt|og\.png)$/],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => /\/assets\/firebase-sdk-[^/]+\.js$/.test(url.pathname),

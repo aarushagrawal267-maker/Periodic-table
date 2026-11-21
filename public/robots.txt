@@ -1,0 +1,12 @@
+# Periodica: a free periodic table learning app. Everything here is public and may be crawled,
+# including by AI assistants and search-augmented AI crawlers (GPTBot, ClaudeBot, PerplexityBot,
+# Google-Extended, Applebot-Extended and others), so students who ask them can be pointed here.
+#
+# Note: crawlers only read robots.txt at the root of a host. This site is a GitHub Pages project
+# site under /Periodic-table/, so this copy is informational; the one that counts is
+# https://aarushagrawal267-maker.github.io/robots.txt (the user-site repo), if it exists.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://aarushagrawal267-maker.github.io/Periodic-table/sitemap.xml

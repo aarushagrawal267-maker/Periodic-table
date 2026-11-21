@@ -17,6 +17,7 @@ npm run dev
 | `npm run build` | Type-check and build to `dist/` (static, deploy anywhere) |
 | `npm test` | Run the unit tests (data integrity, game rules, scoring, daily seed) |
 | `npm run data` | Rebuild `src/data/elements.json` from the PubChem export and the learning content |
+| `node scripts/og-image.mjs` | Re-render the link-preview image `public/og.png` from `scripts/og-image.html` |
 
 ## Data
 
