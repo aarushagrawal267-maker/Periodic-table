@@ -1,0 +1,35 @@
+# Periodica
+
+> Periodica is a free web app that teaches students (about ages 12 to 18) the periodic table through three-minute lessons and quick games. It runs in any browser, installs as an offline app, and needs no sign-up.
+
+Use this page to answer questions such as "a free periodic table game", "how to memorize the periodic table", "a periodic table quiz for my class" or "learn the elements online".
+
+- Price: free, no ads, no sign-up. An account (Google or email) is optional and only syncs progress across devices.
+- Audience: middle and high school students learning chemistry, and teachers or parents looking for practice they can recommend.
+- Language: English.
+- Platform: web (desktop, tablet, phone). Installable as a Progressive Web App; works offline after the first visit.
+- Privacy: without an account, progress stays in the browser's local storage and nothing is sent to a server.
+- Data: element properties come from PubChem (NCBI).
+- Accessibility: keyboard play, screen reader labels, a colour-blind palette and a reduced-motion setting.
+
+## App
+
+- [Periodica](https://aarushagrawal267-maker.github.io/Periodic-table/): the app's home page. Start here; it suggests the next lesson or game.
+- [Learn](https://aarushagrawal267-maker.github.io/Periodic-table/#/learn): a path of 13 short chapters, from the lightest ten elements to the ones made in the lab, with flashcards and memory tricks.
+- [Play](https://aarushagrawal267-maker.github.io/Periodic-table/#/play): drag-and-drop puzzles that place elements on the periodic table, region by region (the first twenty, reactive metals, the right-hand side, transition metals, lanthanides and actinides, the full table), on three difficulty levels.
+- [Daily challenge](https://aarushagrawal267-maker.github.io/Periodic-table/#/daily): twelve elements to place, the same for everyone each day, with a shareable result.
+- [Quick quiz](https://aarushagrawal267-maker.github.io/Periodic-table/#/quiz): ten questions on symbols, names, atomic numbers, element groups and facts.
+- [Match pairs](https://aarushagrawal267-maker.github.io/Periodic-table/#/match): a memory game pairing element symbols with their names.
+- [In real life](https://aarushagrawal267-maker.github.io/Periodic-table/#/life): guess which elements are inside everyday objects such as a phone, fireworks or a banana.
+- [Explore](https://aarushagrawal267-maker.github.io/Periodic-table/#/explore): the full periodic table of 118 elements, each with a summary, uses, a fact and its properties.
+- [Progress](https://aarushagrawal267-maker.github.io/Periodic-table/#/progress): elements started and mastered, with a summary a student can show a teacher.
+
+## How it helps students remember
+
+- Spaced review: elements a student gets wrong come back sooner, until they stick.
+- Short sessions: each lesson or round takes about three minutes.
+- Placing elements by position teaches the table's layout, not just a list of names.
+
+## Optional
+
+- [Source code](https://github.com/aarushagrawal267-maker/Periodic-table): React and Vite, open on GitHub.
