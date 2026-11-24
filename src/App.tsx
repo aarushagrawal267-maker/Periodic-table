@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
-import { lazy, Suspense, useEffect, type MouseEvent } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, type MouseEvent } from 'react';
 import { ElementDetailSheet } from './components/ElementDetail';
 import { Shell } from './components/Shell';
 import { SettingsSheet } from './components/SettingsSheet';
@@ -18,6 +18,7 @@ import { PlayHub, RegionGame } from './screens/Play';
 import { ProgressScreen } from './screens/Progress';
 import { Quiz } from './screens/Quiz';
 import { useSettings } from './store/settings';
+import { useUi } from './store/ui';
 
 // The account screen and its forms load on first visit, so the guest bundle stays as it was (docs/ACCOUNTS.md 9).
 // A build without accounts has only the "not set up yet" note. The env check is written out, rather than
@@ -40,6 +41,15 @@ export function App() {
 
   const immersive = route.name === 'game' || route.name === 'daily' || route.name === 'quiz' || route.name === 'life' || route.name === 'match' || (route.name === 'learn' && !!route.chapter);
   const key = route.name === 'game' ? `game-${route.region}` : route.name === 'learn' ? `learn-${route.chapter ?? ''}` : route.name;
+
+  // The element card and Settings are app-wide dialogs. Leaving the screen (browser or Android back, a link) closes
+  // them, so a dialog never sits over a screen it was not opened on. A layout effect runs before the new screen's own
+  // effects, so a screen that opens a card as it mounts (#/explore/Au) still shows it.
+  useLayoutEffect(() => {
+    const ui = useUi.getState();
+    if (ui.detail !== null) ui.openDetail(null);
+    if (ui.settingsOpen) ui.setSettings(false);
+  }, [key]);
 
   // Each screen has its own title, so screen-reader users and browser tabs know where they are (WCAG 2.4.2).
   const title = titleFor(route);
