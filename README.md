@@ -56,6 +56,8 @@ npm run dev
 
 Open the address Vite prints (usually http://localhost:5173/).
 
+The finished app lives on the `main` branch. If your clone opens on an older branch (`git branch` shows something other than `main`), run `git checkout main` before `npm install`.
+
 To build the static site and preview it:
 
 ```bash
@@ -91,7 +93,7 @@ Without any configuration the app is guest-only and makes no network calls. To t
 - `tests-emulator/` and `e2e-accounts/`: Firestore rules, sync and account flows against the Firebase emulators.
 - `social/publish/test/`: Node test runner tests for the posting scripts.
 
-CI (`.github/workflows/ci.yml`) runs the unit tests and the build on every push. `.github/workflows/deploy.yml` tests, builds and publishes `dist/` to the `gh-pages` branch on every push to `main`.
+CI (`.github/workflows/ci.yml`) runs on every push and pull request in three jobs: unit tests plus type-check and build, the Playwright browser tests, and the Firebase emulator account tests. `.github/workflows/deploy.yml` tests, builds and publishes `dist/` to the `gh-pages` branch on every push to `main`.
 
 ## Tech stack
 
