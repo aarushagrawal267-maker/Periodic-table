@@ -74,3 +74,24 @@ test('going back with Settings open closes it and focuses the new screen heading
   // Not left on the Settings button in the header, where the sheet hands focus back as it closes.
   await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements\./ })).toBeFocused();
 });
+
+test('at tablet widths the header fits: no sideways scroll and Settings stays on screen', async ({ page }) => {
+  // A returning student: large XP and most of today's goal, so every header label is at its widest.
+  await page.goto('./');
+  await page.evaluate(() => {
+    const key = new Date().toISOString().slice(0, 10);
+    localStorage.setItem('periodica-progress', JSON.stringify({ version: 2, state: { xp: 98765, today: { key, xp: 140 } } }));
+  });
+  for (const width of [768, 900, 1024]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.reload();
+    await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements\./ })).toBeVisible();
+    const fit = await page.evaluate(() => ({
+      scroll: document.documentElement.scrollWidth,
+      viewport: document.documentElement.clientWidth,
+      settingsRight: document.querySelector('header button[aria-label="Settings"]')!.getBoundingClientRect().right,
+    }));
+    expect(fit.scroll, `page width at ${width}px`).toBeLessThanOrEqual(fit.viewport);
+    expect(fit.settingsRight, `Settings button at ${width}px`).toBeLessThanOrEqual(fit.viewport);
+  }
+});

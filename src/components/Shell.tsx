@@ -20,10 +20,10 @@ const NAV = [
 
 /**
  * Widths at which the header has room for the daily goal ring, by what the account entry shows. From md to lg the
- * top nav takes the room, so beside an account control the ring waits for lg (the header is no wider than without one).
+ * top nav takes the room, so the ring waits for lg there (at 768px the header would otherwise push Settings off screen).
  */
 const GOAL_SHOWN = {
-  none: 'hidden min-[375px]:contents',
+  none: 'hidden min-[375px]:max-md:contents lg:contents',
   guest: 'hidden min-[375px]:max-[399px]:contents min-[460px]:max-md:contents lg:contents',
   avatar: 'hidden min-[430px]:max-md:contents lg:contents',
 } as const;
@@ -78,7 +78,7 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
   return (
     <div className="relative z-10 flex min-h-dvh flex-col">
       <header className="sticky top-0 z-40 border-b border-line bg-bg">
-        <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4 sm:px-6 md:h-16 md:gap-8">
+        <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4 sm:px-6 md:h-16 md:gap-4 lg:gap-8">
           <Logo compact={account === 'avatar'} />
           <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
             {NAV.map((n) => {
@@ -88,7 +88,7 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
                   key={n.path}
                   href={`#${n.path}`}
                   aria-current={on ? 'page' : undefined}
-                  className={`flex h-9 items-center rounded-control px-3 text-[15px] font-medium transition-colors duration-150 ease-out ${on ? 'bg-surface-2 text-ink shadow-[var(--highlight)]' : 'text-ink-2 hover:text-ink'}`}
+                  className={`flex h-9 items-center rounded-control px-2 text-[15px] font-medium lg:px-3 transition-colors duration-150 ease-out ${on ? 'bg-surface-2 text-ink shadow-[var(--highlight)]' : 'text-ink-2 hover:text-ink'}`}
                 >
                   {n.label}
                 </a>
@@ -119,7 +119,7 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
               <Ring value={lvl.progress} size={28} stroke={2.5}>
                 <span className="mono text-[11px] leading-none text-ink">{lvl.level}</span>
               </Ring>{' '}
-              <span className="mono hidden text-[13px] text-ink-2 sm:inline">{xp.toLocaleString('en-US')} XP</span>
+              <span className="mono hidden whitespace-nowrap text-[13px] text-ink-2 sm:max-md:inline lg:inline">{xp.toLocaleString('en-US')} XP</span>
             </a>
             <HeaderAccount />
             <button onClick={() => setSettings(true)} className="icon-btn max-md:-mr-3" aria-label="Settings">
