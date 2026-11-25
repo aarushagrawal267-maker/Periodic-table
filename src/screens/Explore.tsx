@@ -145,6 +145,8 @@ export function Explore({ symbol }: { symbol?: string }) {
           role="tablist"
           aria-label="Colour the table by"
           onKeyDown={(ev) => {
+            // Leave browser shortcuts alone (Alt+Left is Back).
+            if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
             const i = LENSES.findIndex((l) => l.id === lens);
             const to =
               ev.key === 'ArrowRight' ? (i + 1) % LENSES.length

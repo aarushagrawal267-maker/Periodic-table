@@ -29,6 +29,16 @@ test('explore: an element link opens its card, and going back closes it with the
   await page.goBack();
   await expect(page.getByRole('heading', { level: 1, name: /Learn the first 20 elements/ })).toBeVisible();
   await expect(dialog).toHaveCount(0);
+  // Once the card has faded out, focus goes to the new screen's heading, as after any other screen change.
+  await expect(page.locator('#main h1')).toBeFocused();
+});
+
+test('explore: leaving for a full-screen game with the card open closes it and focuses the game heading', async ({ page }) => {
+  await page.goto('./#/explore/Au');
+  await expect(page.getByRole('dialog', { name: 'Gold details' })).toBeVisible();
+  await page.goto('./#/quiz');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 1, name: 'Quick quiz' })).toBeFocused();
 });
 
 test('explore: the lens tabs are one Tab stop, and the arrow keys, Home and End choose a lens', async ({ page }) => {
@@ -41,6 +51,10 @@ test('explore: the lens tabs are one Tab stop, and the arrow keys, Home and End 
   await page.getByRole('textbox', { name: 'Search elements' }).focus();
   await page.keyboard.press('Tab');
   await expect(category).toBeFocused();
+
+  // Browser shortcuts (Alt+Left is Back) are not lens keys.
+  await page.keyboard.press('Alt+ArrowRight');
+  await expect(category).toHaveAttribute('aria-selected', 'true');
 
   await page.keyboard.press('ArrowRight');
   const state = tabs.getByRole('tab', { name: 'State' });

@@ -4,6 +4,7 @@ import { useProgress } from '../store/progress';
 import { useUi } from '../store/ui';
 import { AccountDataSummary, useSignedIn } from './account/AccountData';
 import { ConfirmBlock } from './account/ConfirmBlock';
+import { focusHeadingWhenSheetCloses } from './focusAfterSheet';
 import { Sheet } from './Sheet';
 import { Switch } from './Switch';
 
@@ -33,7 +34,8 @@ export function SettingsSheet() {
   /** A link to the account screen: the sheet closes and the account screen's heading takes focus. */
   const toAccount = () => {
     setOpen(false);
-    focusHeadingWhenSheetCloses('#/account');
+    // The current screen's heading is the target only when the link leads to the screen already open.
+    focusHeadingWhenSheetCloses(window.location.hash === '#/account' ? null : document.querySelector('#main h1'));
   };
 
   return (
@@ -105,29 +107,6 @@ export function SettingsSheet() {
       </div>
     </Sheet>
   );
-}
-
-/**
- * The sheet hands focus back to the Settings button as it closes, and the new screen's heading does not take it
- * while the sheet is still fading out (App's RouteFocus leaves an open dialog alone). Once the sheet is gone and
- * the screen has loaded, move focus to its heading, unless the student has already moved it somewhere else.
- */
-function focusHeadingWhenSheetCloses(hash: string) {
-  const until = performance.now() + 2000;
-  // The current screen's heading is the target only when the link leads to the screen already open.
-  const previous = window.location.hash === hash ? null : document.querySelector('#main h1');
-  const step = () => {
-    const h1 = document.querySelector<HTMLElement>('#main h1');
-    if (document.querySelector('[aria-modal="true"]') || !h1 || h1 === previous) {
-      if (performance.now() < until) requestAnimationFrame(step);
-      return;
-    }
-    const a = document.activeElement;
-    if (a && a !== document.body && !a.closest('header')) return;
-    if (!h1.hasAttribute('tabindex')) h1.tabIndex = -1;
-    h1.focus({ preventScroll: true });
-  };
-  requestAnimationFrame(step);
 }
 
 /**

@@ -60,3 +60,17 @@ test('an unknown lesson or puzzle link shows an ordinary page, with the navigati
   await expect(page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
   await expect(page).toHaveTitle(/^Periodic table game and quiz/);
 });
+
+test('going back with Settings open closes it and focuses the new screen heading', async ({ page }) => {
+  await page.goto('./#/');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await page.goto('./#/progress');
+  await expect(page.getByRole('heading', { level: 1, name: 'Your progress' })).toBeVisible();
+  await page.getByRole('button', { name: 'Settings' }).first().click();
+  await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+
+  await page.goBack();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  // Not left on the Settings button in the header, where the sheet hands focus back as it closes.
+  await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements\./ })).toBeFocused();
+});

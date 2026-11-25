@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
-import { lazy, Suspense, useEffect, useLayoutEffect, type MouseEvent } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, type MouseEvent } from 'react';
 import { ElementDetailSheet } from './components/ElementDetail';
+import { focusHeadingWhenSheetCloses } from './components/focusAfterSheet';
 import { Shell } from './components/Shell';
 import { SettingsSheet } from './components/SettingsSheet';
 import { Toasts } from './components/Toasts';
@@ -53,10 +54,20 @@ export function App() {
   // The element card and Settings are app-wide dialogs. Leaving the screen (browser or Android back, a link) closes
   // them, so a dialog never sits over a screen it was not opened on. A layout effect runs before the new screen's own
   // effects, so a screen that opens a card as it mounts (#/explore/Au) still shows it.
+  // The new screen's heading then takes focus once the sheet has faded out; RouteFocus skips while a dialog is open.
+  const wasImmersive = useRef(immersive);
   useLayoutEffect(() => {
+    // Switching between the immersive and the page layout replaces the whole screen at once, so the heading on the
+    // page is already the new one. Otherwise the old screen is still fading out and its heading is not the target.
+    const sameLayout = wasImmersive.current === immersive;
+    wasImmersive.current = immersive;
     const ui = useUi.getState();
+    if (ui.detail === null && !ui.settingsOpen) return;
+    const previous = sameLayout ? document.querySelector('#main h1') : null;
     if (ui.detail !== null) ui.openDetail(null);
     if (ui.settingsOpen) ui.setSettings(false);
+    focusHeadingWhenSheetCloses(previous);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- immersive only changes along with key
   }, [key]);
 
   // Each screen has its own title, so screen-reader users and browser tabs know where they are (WCAG 2.4.2).
