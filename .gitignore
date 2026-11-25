@@ -10,3 +10,25 @@ ui-debug.log
 e2e-accounts/.dist
 e2e-accounts/.results
 e2e-accounts/.report
+
+# Secrets: never commit these. .env.example and .env.emulators (demo values) are tracked on purpose,
+# and a .env.production with the public Firebase web config may be committed (docs/ACCOUNTS.md 10).
+.env
+*.pem
+*.p12
+*.key
+service-account*.json
+*firebase-adminsdk*.json
+client_secret*.json
+
+# Python virtualenvs and caches
+.venv/
+venv/
+__pycache__/
+
+# Data dumps and local databases
+*.sqlite
+*.sqlite3
+*.db
+*.sql
+*.dump
