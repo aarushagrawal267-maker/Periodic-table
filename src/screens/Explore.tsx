@@ -139,12 +139,35 @@ export function Explore({ symbol }: { symbol?: string }) {
         (a flex row, so the end padding scrolls too). py-1 leaves room for the focus ring, so mt-5 lands it 24px under the search.
       */}
       <div className="no-scrollbar -mx-4 mt-5 flex scroll-px-4 overflow-x-auto px-4 py-1 sm:-mx-6 sm:mt-6 sm:scroll-px-6 sm:px-6">
-        <div className="seg shrink-0" role="tablist" aria-label="Colour the table by">
+        {/* Tabs pattern (WAI-ARIA APG): one Tab stop, and the arrow keys, Home and End choose a lens. */}
+        <div
+          className="seg shrink-0"
+          role="tablist"
+          aria-label="Colour the table by"
+          onKeyDown={(ev) => {
+            const i = LENSES.findIndex((l) => l.id === lens);
+            const to =
+              ev.key === 'ArrowRight' ? (i + 1) % LENSES.length
+              : ev.key === 'ArrowLeft' ? (i - 1 + LENSES.length) % LENSES.length
+              : ev.key === 'Home' ? 0
+              : ev.key === 'End' ? LENSES.length - 1
+              : -1;
+            if (to < 0) return;
+            ev.preventDefault();
+            setLens(LENSES[to].id);
+            const tab = document.getElementById(`lens-${LENSES[to].id}`);
+            tab?.focus();
+            tab?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+          }}
+        >
           {LENSES.map((l) => (
             <button
               key={l.id}
+              id={`lens-${l.id}`}
               role="tab"
               aria-selected={lens === l.id}
+              aria-controls="explore-table"
+              tabIndex={lens === l.id ? 0 : -1}
               onClick={(ev) => {
                 setLens(l.id);
                 // A lens half under the screen edge slides fully into view when chosen.
@@ -161,7 +184,7 @@ export function Explore({ symbol }: { symbol?: string }) {
       {/* PeriodicGrid shows its own "Swipe for more" cue when the table is wider than the screen. */}
       {/* On phones the table scrolls edge to edge and pads its content 16px, like the lenses above it. */}
       {/* One Tab stop for the whole table; arrow keys move between elements. */}
-      <div className="relative -mx-4 mt-4 sm:mx-0 sm:mt-6" data-roving role="group" aria-label="Periodic table. Use the arrow keys to move between elements.">
+      <div id="explore-table" className="relative -mx-4 mt-4 sm:mx-0 sm:mt-6" data-roving role="group" aria-label="Periodic table. Use the arrow keys to move between elements.">
         <PeriodicGrid
           minCell={38}
           maxCell={74}

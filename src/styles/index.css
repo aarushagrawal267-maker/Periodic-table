@@ -461,9 +461,11 @@
   .field:hover {
     border-color: var(--ink-3);
   }
+  /* The border thickens to 2px as well as turning blue, so focus does not rest on a hue change alone (WCAG 2.4.7). */
   .field:focus {
     outline: none;
     border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
   }
 
   /* Small quiet tag. */

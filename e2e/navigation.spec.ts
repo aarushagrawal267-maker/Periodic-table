@@ -47,3 +47,16 @@ test.describe('home and navigation', { tag: '@phone' }, () => {
     expect(consoleErrors).toEqual([]);
   });
 });
+
+test('an unknown lesson or puzzle link shows an ordinary page, with the navigation and a main landmark', async ({ page }) => {
+  await page.goto('./#/learn/no-such-chapter');
+  await expect(page.getByRole('heading', { level: 1, name: 'Learn it, then play it' })).toBeVisible();
+  await expect(page.getByRole('main')).toHaveCount(1);
+  await expect(page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Learn' })).toHaveAttribute('aria-current', 'page');
+
+  await page.goto('./#/play/no-such-region');
+  await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements\./ })).toBeVisible();
+  await expect(page.getByRole('main')).toHaveCount(1);
+  await expect(page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
+  await expect(page).toHaveTitle(/^Periodic table game and quiz/);
+});

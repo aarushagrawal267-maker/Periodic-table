@@ -4,8 +4,8 @@ import { ElementDetailSheet } from './components/ElementDetail';
 import { Shell } from './components/Shell';
 import { SettingsSheet } from './components/SettingsSheet';
 import { Toasts } from './components/Toasts';
-import { CHAPTERS } from './lib/chapters';
-import { REGIONS } from './lib/regions';
+import { CHAPTERS, chapterById } from './lib/chapters';
+import { regionById } from './lib/regions';
 import { useRoute, type Route } from './lib/router';
 import { DUR, EASE } from './components/motion';
 import { Daily } from './screens/Daily';
@@ -39,7 +39,15 @@ export function App() {
     root.classList.toggle('reduce-motion', reduceMotion);
   }, [colorblind, reduceMotion]);
 
-  const immersive = route.name === 'game' || route.name === 'daily' || route.name === 'quiz' || route.name === 'life' || route.name === 'match' || (route.name === 'learn' && !!route.chapter);
+  // A puzzle or lesson link with an unknown id (mistyped, or saved before a rename) shows Home or the Learn path instead.
+  // Those are ordinary pages, so they keep the header, the navigation and the <main> landmark.
+  const immersive =
+    (route.name === 'game' && !!regionById(route.region)) ||
+    route.name === 'daily' ||
+    route.name === 'quiz' ||
+    route.name === 'life' ||
+    route.name === 'match' ||
+    (route.name === 'learn' && !!route.chapter && (route.chapter === 'review' || !!chapterById(route.chapter)));
   const key = route.name === 'game' ? `game-${route.region}` : route.name === 'learn' ? `learn-${route.chapter ?? ''}` : route.name;
 
   // The element card and Settings are app-wide dialogs. Leaving the screen (browser or Android back, a link) closes
@@ -102,7 +110,8 @@ export function App() {
         <a href="#main" onClick={skipToMain} className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-control focus:bg-surface-2 focus:px-4 focus:py-3 focus:text-ink focus:shadow-[var(--shadow-md)]">
           Skip to content
         </a>
-        <Shell immersive={immersive} route={route.name}>
+        {/* An unknown puzzle shows Home, so the navigation marks Home as the current page, not Play. */}
+        <Shell immersive={immersive} route={route.name === 'game' && !regionById(route.region) ? 'home' : route.name}>
           <AnimatePresence mode="wait">
             <motion.div
               key={key}
@@ -136,7 +145,7 @@ function skipToMain(e: MouseEvent) {
 
 const SITE = 'Periodica';
 
-function titleFor(route: Route) {
+function titleFor(route: Route): string {
   const t = (name: string) => `${name} · ${SITE}`;
   switch (route.name) {
     case 'home':
@@ -144,8 +153,11 @@ function titleFor(route: Route) {
       return t('Periodic table game and quiz to learn the elements');
     case 'play':
       return t('Play');
-    case 'game':
-      return t(REGIONS.find((r) => r.id === route.region)?.name ?? 'Play');
+    case 'game': {
+      // An unknown puzzle shows Home (RegionGame), so it takes Home's title.
+      const region = regionById(route.region);
+      return region ? t(region.name) : titleFor({ name: 'home' });
+    }
     case 'daily':
       return t('Daily challenge');
     case 'quiz':
