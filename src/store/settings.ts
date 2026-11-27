@@ -11,6 +11,8 @@ interface SettingsState {
   reduceMotion: boolean;
   colorblind: boolean;
   difficulty: Difficulty;
+  /** Size of the puzzle board, 1 = fit to the screen. */
+  boardZoom: number;
   set: (patch: Partial<Omit<SettingsState, 'set'>>) => void;
 }
 
@@ -23,11 +25,14 @@ export const useSettings = create<SettingsState>()(
       reduceMotion: typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches,
       colorblind: false,
       difficulty: 'standard',
+      boardZoom: 1,
       set: (patch) => set(patch),
     }),
     { name: 'periodica-settings', version: 1 },
   ),
 );
+
+export const BOARD_ZOOM_STEPS = [0.6, 0.75, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2] as const;
 
 export const DIFFICULTIES: { id: Difficulty; name: string; desc: string }[] = [
   { id: 'learner', name: 'Learner', desc: 'Atomic numbers on tiles and colour hints on the table.' },

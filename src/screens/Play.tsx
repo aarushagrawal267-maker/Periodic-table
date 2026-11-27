@@ -1,9 +1,10 @@
 import { motion } from 'motion/react';
-import { ArrowRight, BrainCircuit, Star } from 'lucide-react';
+import { ArrowRight, BrainCircuit, Star, Timer } from 'lucide-react';
 import { useMemo, useState, type CSSProperties } from 'react';
 import { DifficultyPicker } from '../components/DifficultyPicker';
 import { ElementTile } from '../components/ElementTile';
 import { MiniTable } from '../components/MiniTable';
+import { CHALLENGE_LEVELS, challengeCleared } from '../lib/challenge';
 import { bySymbol, catVar } from '../lib/elements';
 import { REGIONS, regionById, type Region } from '../lib/regions';
 import { go } from '../lib/router';
@@ -36,6 +37,7 @@ export function PlayHub() {
         {REGIONS.map((r, i) => (
           <RegionCard key={r.id} region={r} index={i} />
         ))}
+        <ChallengeCard index={REGIONS.length} />
         <motion.a
           href="#/match"
           className="card group flex flex-col justify-between overflow-hidden p-6 transition-colors hover:bg-surface-2"
@@ -117,6 +119,47 @@ export function PlayHub() {
         </motion.a>
       </div>
     </div>
+  );
+}
+
+function ChallengeCard({ index }: { index: number }) {
+  const best = useProgress((s) => s.best);
+  const cleared = CHALLENGE_LEVELS.filter((l) => challengeCleared(best, l.id)).length;
+  return (
+    <motion.a
+      href="#/challenge"
+      className="card card-hover group relative flex flex-col overflow-hidden p-6"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.04 }}
+    >
+      <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl transition-opacity group-hover:opacity-40" style={{ background: 'var(--accent-2)' }} />
+      <div className="relative grid aspect-[207/107] w-full grid-cols-6 items-end gap-1.5" aria-hidden>
+        {CHALLENGE_LEVELS.map((l, i) => (
+          <div
+            key={l.id}
+            className="rounded-lg border border-line"
+            style={{
+              height: `${30 + (i / (CHALLENGE_LEVELS.length - 1)) * 70}%`,
+              background: i < cleared ? 'var(--grad)' : 'color-mix(in oklab, var(--accent-2) 12%, transparent)',
+            }}
+          />
+        ))}
+      </div>
+      <div className="relative mt-5 flex flex-1 flex-col">
+        <div className="flex items-center gap-2">
+          <Timer size={18} className="text-accent-2" />
+          <h2 className="font-display text-xl font-semibold">Timed Challenge</h2>
+        </div>
+        <p className="mt-1 text-sm text-ink-2">Six levels against the clock, from 10 elements to all 118. Pause any time.</p>
+        <span className="mt-auto inline-flex items-center justify-between gap-1 border-t border-line pt-4 text-sm font-semibold text-accent-2">
+          <span className="inline-flex items-center gap-1">
+            Play <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+          </span>
+          <span className="text-xs font-medium text-ink-3">{cleared}/6 levels cleared</span>
+        </span>
+      </div>
+    </motion.a>
   );
 }
 

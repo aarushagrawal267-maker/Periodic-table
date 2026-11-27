@@ -15,7 +15,7 @@ export interface Mastery {
 }
 
 export interface RoundSummary {
-  kind: 'place' | 'quiz' | 'daily' | 'lesson' | 'life' | 'match';
+  kind: 'place' | 'quiz' | 'daily' | 'lesson' | 'life' | 'match' | 'challenge';
   regionId?: string;
   dailyKey?: string;
   difficulty: Difficulty;
@@ -31,6 +31,8 @@ export interface RoundSummary {
   results: Record<number, boolean>;
   /** Emoji-ready sequence of outcomes, in play order. */
   trail: ('hit' | 'miss' | 'hint')[];
+  /** Set when a timed round ran out of time. */
+  timedOut?: boolean;
 }
 
 export interface DailyResult {
@@ -113,10 +115,16 @@ export const useProgress = create<ProgressState>()(
           mastery[n] = { s, c: m.c + (ok ? 1 : 0), w: m.w + (ok ? 0 : 1), t: now };
         }
 
-        const key = r.kind === 'place' ? `${r.regionId}:${r.difficulty}` : `${r.kind}:${r.regionId ?? r.dailyKey ?? r.difficulty}`;
+        const key =
+          r.kind === 'place'
+            ? `${r.regionId}:${r.difficulty}`
+            : r.kind === 'challenge'
+              ? challengeBestKey(r.regionId ?? '', r.difficulty)
+              : `${r.kind}:${r.regionId ?? r.dailyKey ?? r.difficulty}`;
         const prev = p.best[key];
         const newBest = r.completed && (!prev || r.score > prev.score);
-        const best = newBest && r.kind === 'place' ? { ...p.best, [key]: { score: r.score, stars: r.stars, timeMs: r.timeMs } } : p.best;
+        const keepsBest = r.kind === 'place' || r.kind === 'challenge';
+        const best = newBest && keepsBest ? { ...p.best, [key]: { score: r.score, stars: r.stars, timeMs: r.timeMs } } : p.best;
 
         const chapters =
           r.kind === 'lesson' && r.regionId && r.completed ? { ...p.chapters, [r.regionId]: Math.max(p.chapters[r.regionId] ?? 0, r.stars) } : p.chapters;
@@ -169,6 +177,12 @@ export const useProgress = create<ProgressState>()(
     { name: 'periodica-progress', version: 2, migrate: (old) => ({ ...initial, ...(old as object) }) as ProgressState },
   ),
 );
+
+/**
+ * Best-score key for a Timed Challenge level. It deliberately has no ':' so it
+ * can never be mistaken for a region key ("region:difficulty") by achievements.
+ */
+export const challengeBestKey = (levelId: string, difficulty: Difficulty) => `challenge/${levelId}/${difficulty}`;
 
 export const xpToday = (t: ProgressData['today'], key = todayKey()) => (t.key === key ? t.xp : 0);
 

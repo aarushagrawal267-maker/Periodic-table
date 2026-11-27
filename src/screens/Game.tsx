@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowLeft, Heart, Lightbulb, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Heart, Lightbulb, Pause, Play, Shuffle, Timer, Volume2, VolumeX, ZoomIn, ZoomOut } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react';
 import { ElementTile } from '../components/ElementTile';
 import { PeriodicGrid, type CellRect } from '../components/PeriodicGrid';
@@ -7,15 +7,15 @@ import { AnimatedNumber, Elapsed } from '../components/Stats';
 import { Sheet } from '../components/Sheet';
 import { Results } from '../components/Results';
 import { ELEMENTS, byNumber, catVar, type Element } from '../lib/elements';
-import { createGame, gameReducer, hand, summarize, EXPERT_LIVES } from '../lib/game';
+import { createGame, gameReducer, hand, summarize, timeLeft, EXPERT_LIVES, type GameState } from '../lib/game';
 import { haptic, sfx } from '../lib/feedback';
-import { multiplier } from '../lib/scoring';
+import { formatTime, multiplier } from '../lib/scoring';
 import { useProgress, type RoundOutcome, type RoundSummary } from '../store/progress';
-import { useSettings, type Difficulty } from '../store/settings';
+import { BOARD_ZOOM_STEPS, useSettings, type Difficulty } from '../store/settings';
 import { announceAchievements, useUi } from '../store/ui';
 
 export interface GameConfig {
-  kind: 'place' | 'daily' | 'lesson';
+  kind: 'place' | 'daily' | 'lesson' | 'challenge';
   title: string;
   subtitle: string;
   targets: number[];
@@ -25,6 +25,8 @@ export interface GameConfig {
   regionId?: string;
   dailyKey?: string;
   order?: number[];
+  /** Optional time limit for the round, in ms. When it runs out the round ends: "Time's up!" */
+  timeLimitMs?: number;
 }
 
 interface Props {
@@ -33,10 +35,12 @@ interface Props {
   onReplay?: () => void;
   onNext?: () => void;
   nextLabel?: string;
+  /** Replaces the results headline and message when the round is completed. */
+  finale?: { headline: string; message: string };
 }
 
-export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
-  const [state, dispatch] = useReducer(gameReducer, config, (c) => createGame(c.targets, c.difficulty, c.order));
+export function Game({ config, onExit, onReplay, onNext, nextLabel, finale }: Props) {
+  const [state, dispatch] = useReducer(gameReducer, config, (c) => createGame(c.targets, c.difficulty, { order: c.order, timeLimitMs: c.timeLimitMs }));
   const [result, setResult] = useState<{ summary: RoundSummary; outcome: RoundOutcome } | null>(null);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [announce, setAnnounce] = useState('');
@@ -52,6 +56,26 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
   const tiles = hand(state);
   const learner = config.difficulty === 'learner';
   const expert = config.difficulty === 'expert';
+  const timed = state.timeLimitMs > 0;
+  const paused = state.phase === 'paused';
+  // The daily challenge deals the same tiles in the same order to everyone, so it keeps its order.
+  const canShuffle = config.kind !== 'daily';
+  const boardZoom = useSettings((s) => s.boardZoom);
+  const togglePause = useCallback(() => {
+    if (state.phase === 'playing') {
+      dispatch({ type: 'pause', now: Date.now() });
+      sfx.pick();
+    } else if (state.phase === 'paused') {
+      dispatch({ type: 'resume', now: Date.now() });
+      sfx.pick();
+    }
+  }, [state.phase]);
+  const shuffleTray = useCallback(() => {
+    if (state.phase !== 'playing' || state.queue.length < 2) return;
+    dispatch({ type: 'shuffle' });
+    sfx.pick();
+    setAnnounce('Tiles shuffled.');
+  }, [state.phase, state.queue.length]);
 
   // Countdown, then start.
   const [count, setCount] = useState(reduceMotion ? 0 : 3);
@@ -65,6 +89,14 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
     const t = setTimeout(() => setCount((c) => c - 1), 650);
     return () => clearTimeout(t);
   }, [count, state.phase]);
+
+  // Time limit: end the round when the clock runs out. Re-armed on resume.
+  useEffect(() => {
+    if (!timed || state.phase !== 'playing') return;
+    const t = setTimeout(() => dispatch({ type: 'timeout', now: Date.now() }), timeLeft(state, Date.now()));
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timed, state.phase, state.startedAt]);
 
   // Feedback for every placement attempt.
   useEffect(() => {
@@ -154,8 +186,18 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
   // ---- Keyboard ----
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
-      if (state.phase !== 'playing' || e.metaKey || e.ctrlKey || e.altKey) return;
-      if ((e.target as HTMLElement).closest('[role="dialog"]')) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const dialog = (e.target as HTMLElement).closest('[role="dialog"]');
+      if (dialog && !dialog.hasAttribute('data-pause-screen')) return;
+      if (e.key.toLowerCase() === 'p' && (state.phase === 'playing' || state.phase === 'paused')) {
+        togglePause();
+        return;
+      }
+      if (state.phase !== 'playing') return;
+      if (e.key.toLowerCase() === 's' && canShuffle) {
+        shuffleTray();
+        return;
+      }
       const i = Number(e.key) - 1;
       if (i >= 0 && i < tiles.length) {
         dispatch({ type: 'select', number: tiles[i] });
@@ -165,7 +207,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [state.phase, tiles]);
+  }, [state.phase, tiles, togglePause, shuffleTray, canShuffle]);
 
   const onSlotKey = (e: KeyboardEvent<HTMLButtonElement>) => {
     const dirs: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
@@ -283,7 +325,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
       {/* HUD */}
       <header className="glass sticky top-0 z-30 border-x-0 border-t-0">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-3 py-2.5 sm:px-6">
-          <button onClick={() => (state.phase === 'playing' && state.placed.length ? setConfirmLeave(true) : onExit())} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave round">
+          <button onClick={() => ((state.phase === 'playing' || paused) && state.placed.length ? setConfirmLeave(true) : onExit())} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave round">
             <ArrowLeft size={18} />
           </button>
           <div className="min-w-0 flex-1">
@@ -308,18 +350,38 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
                 ))}
               </div>
             )}
-            <div className={`hidden text-right ${learner ? '' : 'sm:block'}`}>
-              <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Time</div>
-              <div className="font-display text-sm font-semibold">
-                <Elapsed start={state.startedAt} end={state.endedAt} running={state.phase === 'playing'} />
+            {timed ? (
+              <div className="text-right" data-testid="time-left">
+                <div className="flex items-center justify-end gap-1 text-[10px] font-medium uppercase tracking-wider text-ink-3">
+                  <Timer size={11} /> Left
+                </div>
+                <div className="font-display text-sm font-semibold">
+                  <Countdown state={state} />
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className={`hidden text-right ${learner ? '' : 'sm:block'}`}>
+                <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Time</div>
+                <div className="font-display text-sm font-semibold">
+                  <Elapsed start={state.startedAt} end={paused ? state.pausedAt : state.endedAt} running={state.phase === 'playing'} />
+                </div>
+              </div>
+            )}
             <div className="text-right">
               <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Score</div>
               <div className="font-display text-sm font-semibold sm:text-base">
                 <AnimatedNumber value={state.score} />
               </div>
             </div>
+            <button
+              onClick={togglePause}
+              disabled={state.phase !== 'playing' && !paused}
+              className="btn-ghost grid h-10 w-10 place-items-center rounded-full disabled:opacity-40"
+              aria-label={paused ? 'Resume (P)' : 'Pause (P)'}
+              title={paused ? 'Resume (P)' : 'Pause (P)'}
+            >
+              {paused ? <Play size={17} /> : <Pause size={17} />}
+            </button>
             <button onClick={() => setSettings({ sound: !sound })} className="btn-ghost hidden h-10 w-10 place-items-center rounded-full sm:grid" aria-label={sound ? 'Mute sounds' : 'Unmute sounds'}>
               {sound ? <Volume2 size={17} /> : <VolumeX size={17} />}
             </button>
@@ -330,12 +392,27 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
       {/* Board */}
       <main className="relative z-10 flex flex-1 flex-col justify-center px-1 py-4 sm:px-6">
         <div className="relative mx-auto w-full max-w-7xl">
+          <div className="mb-1 flex items-center justify-center gap-2 px-2">
+            <ZoomControl />
+            {canShuffle && (
+              <button
+                onClick={shuffleTray}
+                disabled={state.phase !== 'playing' || state.queue.length < 2}
+                className="btn-ghost flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium disabled:opacity-40"
+                aria-label="Shuffle the tiles (S)"
+                title="Shuffle the tiles (S)"
+              >
+                <Shuffle size={14} className="text-accent-2" /> Shuffle
+              </button>
+            )}
+          </div>
           <ComboBadge combo={state.combo} mult={mult} />
           <PeriodicGrid
             numbers={config.view ?? config.targets}
             renderCell={renderCell}
             minCell={config.targets.length > 40 || config.view ? 34 : 38}
             maxCell={72}
+            zoom={boardZoom}
             showAxes
             className="pb-2 pt-6"
           />
@@ -414,6 +491,49 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
         </div>
       )}
 
+      {/* Pause: the board is hidden so pausing can't be used to study it. */}
+      <AnimatePresence>
+        {paused && (
+          <motion.div
+            className="fixed inset-0 z-40 grid place-items-center bg-bg/95 px-6 backdrop-blur-xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="paused-title"
+            data-pause-screen
+          >
+            <div className="w-full max-w-sm text-center">
+              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full" style={{ background: 'color-mix(in oklab, var(--accent-2) 16%, transparent)' }}>
+                <Pause size={28} className="text-accent-2" />
+              </div>
+              <h2 id="paused-title" className="font-display mt-4 text-4xl font-semibold">
+                Paused
+              </h2>
+              <p className="mt-2 text-ink-2">
+                {config.title} · {state.placed.length}/{config.targets.length} placed
+                {timed && (
+                  <>
+                    {' '}
+                    · <span className="tabular-nums">{formatTime(timeLeft(state, Date.now()))}</span> left
+                  </>
+                )}
+              </p>
+              <p className="mt-1 text-xs text-ink-3">The clock is stopped. Press P to carry on.</p>
+              <div className="mt-7 flex flex-col gap-3">
+                <button autoFocus onClick={togglePause} className="btn-primary flex h-14 items-center justify-center gap-2 rounded-2xl text-base">
+                  <Play size={18} /> Resume
+                </button>
+                <button onClick={() => (state.placed.length ? setConfirmLeave(true) : onExit())} className="btn-ghost h-12 rounded-2xl font-medium">
+                  Leave round
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Countdown */}
       <AnimatePresence>
         {state.phase === 'countdown' && count > 0 && (
@@ -466,6 +586,8 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
           onNext={onNext}
           nextLabel={nextLabel}
           onExit={onExit}
+          headline={result.summary.completed ? finale?.headline : undefined}
+          message={result.summary.completed ? finale?.message : undefined}
         />
       )}
     </div>
@@ -515,3 +637,42 @@ function ComboBadge({ combo, mult }: { combo: number; mult: number }) {
   );
 }
 
+/** Time left on a timed round. Turns red in the last ten seconds. */
+function Countdown({ state }: { state: GameState }) {
+  const running = state.phase === 'playing';
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(id);
+  }, [running]);
+  const ms = timeLeft(state, running ? now : Date.now());
+  const low = ms <= 10_000;
+  return (
+    <span className={`tabular-nums ${low ? 'text-bad' : ''}`} aria-label={`${Math.ceil(ms / 1000)} seconds left`}>
+      {formatTime(Math.ceil(ms / 1000) * 1000)}
+    </span>
+  );
+}
+
+/** Make the board bigger or smaller. Remembered between rounds; never touches the round itself. */
+function ZoomControl() {
+  const zoom = useSettings((s) => s.boardZoom);
+  const set = useSettings((s) => s.set);
+  const i = BOARD_ZOOM_STEPS.indexOf(zoom as (typeof BOARD_ZOOM_STEPS)[number]);
+  const at = i === -1 ? BOARD_ZOOM_STEPS.indexOf(1) : i;
+  const step = (d: number) => set({ boardZoom: BOARD_ZOOM_STEPS[Math.max(0, Math.min(BOARD_ZOOM_STEPS.length - 1, at + d))] });
+  return (
+    <div className="flex items-center gap-1" role="group" aria-label="Board zoom">
+      <button onClick={() => step(-1)} disabled={at === 0} className="btn-ghost grid h-8 w-8 place-items-center rounded-full disabled:opacity-40" aria-label="Zoom out">
+        <ZoomOut size={15} />
+      </button>
+      <button onClick={() => set({ boardZoom: 1 })} className="min-w-[3.25rem] rounded-full px-1.5 py-1 text-xs font-medium tabular-nums text-ink-2 hover:text-ink" aria-label={`Zoom ${Math.round(zoom * 100)} percent. Reset to 100 percent`} title="Reset zoom">
+        {Math.round(zoom * 100)}%
+      </button>
+      <button onClick={() => step(1)} disabled={at === BOARD_ZOOM_STEPS.length - 1} className="btn-ghost grid h-8 w-8 place-items-center rounded-full disabled:opacity-40" aria-label="Zoom in">
+        <ZoomIn size={15} />
+      </button>
+    </div>
+  );
+}

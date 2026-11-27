@@ -36,7 +36,7 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
   const setSettings = useUi((s) => s.setSettings);
   const lvl = levelFromXp(xp);
   const streak = liveStreak(daily, todayKey());
-  const active = route === 'game' ? 'play' : route;
+  const active = route === 'game' || route === 'challenge' ? 'play' : route;
 
   if (immersive) return <div className="relative z-10">{children}</div>;
 

@@ -1,6 +1,10 @@
 // Builds src/data/elements.json from the PubChem periodic table export
 // (scripts/source/pubchem-periodic-table.json) plus the hand-written
-// learning content in src/data/content-1.json and src/data/content-2.json.
+// learning content in src/data/content-1.json and src/data/content-2.json,
+// plus discoverers and stable isotope counts from src/data/discovery.json.
+//
+// Stable isotope counts: Wikipedia, "List of elements by stability of isotopes"
+// (251 stable nuclides in total).
 //
 // Source: PubChem, National Center for Biotechnology Information.
 // https://pubchem.ncbi.nlm.nih.gov/periodic-table/
@@ -20,6 +24,9 @@ for (const file of ['content-1.json', 'content-2.json']) {
   const p = join(root, 'src/data', file);
   if (existsSync(p)) Object.assign(content, JSON.parse(readFileSync(p, 'utf8')));
 }
+
+const discoveryPath = join(root, 'src/data/discovery.json');
+const discovery = existsSync(discoveryPath) ? JSON.parse(readFileSync(discoveryPath, 'utf8')) : {};
 
 const CATEGORY = {
   'Alkali metal': 'alkali-metal',
@@ -93,6 +100,8 @@ const elements = rows.map((r) => {
     summary: c?.summary ?? null,
     uses: c?.uses ?? [],
     fact: c?.fact ?? null,
+    discoveredBy: discovery[String(z)]?.discoveredBy ?? null,
+    stableIsotopes: discovery[String(z)]?.stableIsotopes ?? null,
   };
 });
 

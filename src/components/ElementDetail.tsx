@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { ChevronLeft, ChevronRight, Lightbulb } from 'lucide-react';
 import { useEffect, type CSSProperties } from 'react';
-import { ELEMENTS, byNumber, catVar, categoryLabel, formatNumber, type Element } from '../lib/elements';
+import { ELEMENTS, byNumber, catVar, categoryLabel, formatNumber, metallicCharacter, type Element } from '../lib/elements';
 import { shells } from '../lib/shells';
 import { useProgress } from '../store/progress';
 import { announceAchievements, useUi } from '../store/ui';
@@ -41,11 +41,13 @@ function ElementDetail({ e }: { e: Element }) {
   const c = catVar(e.category);
   const toC = (k: number | null) => (k === null ? null : Math.round(k - 273.15));
 
-  const props: [string, string, string?][] = [
+  /** [label, value, unit, wide] — wide rows hold longer text such as names. */
+  const props: [string, string, string?, boolean?][] = [
     ['Atomic mass', `${formatNumber(e.mass, 6)}`, 'u'],
     ['State at 20 °C', e.state + (e.statePredicted ? ' (predicted)' : '')],
     ['Group · Period', `${e.group ?? '—'} · ${e.period}`],
     ['Block', `${e.block}-block`],
+    ['Metallic character', metallicCharacter(e.category)],
     ['Electronegativity', formatNumber(e.electronegativity), e.electronegativity !== null ? 'Pauling' : undefined],
     ['Density', formatNumber(e.density), e.density !== null ? 'g/cm³' : undefined],
     ['Melting point', e.melt === null ? '—' : `${formatNumber(e.melt, 4)} K`, e.melt === null ? undefined : `${toC(e.melt)} °C`],
@@ -53,7 +55,9 @@ function ElementDetail({ e }: { e: Element }) {
     ['Atomic radius', formatNumber(e.radius), e.radius !== null ? 'pm' : undefined],
     ['Ionization energy', formatNumber(e.ionization), e.ionization !== null ? 'eV' : undefined],
     ['Discovered', e.ancient ? 'Ancient' : (e.year?.toString() ?? '—')],
+    ['Discovered by', e.discoveredBy ?? '—', undefined, true],
     ['Oxidation states', e.oxidation ?? '—'],
+    ['Stable isotopes', e.stableIsotopes === null ? '—' : e.stableIsotopes === 0 ? 'None' : String(e.stableIsotopes), e.stableIsotopes === 0 ? 'all radioactive' : undefined],
   ];
 
   return (
@@ -117,10 +121,10 @@ function ElementDetail({ e }: { e: Element }) {
       </div>
 
       <dl className="grid grid-cols-2 gap-px border-y border-line bg-line sm:grid-cols-3">
-        {props.map(([k, v, unit]) => (
-          <div key={k} className="solid px-5 py-3.5">
+        {props.map(([k, v, unit, wide]) => (
+          <div key={k} className={`solid px-5 py-3.5 ${wide ? 'col-span-2 sm:col-span-1' : ''}`}>
             <dt className="text-[11px] font-medium uppercase tracking-wider text-ink-3">{k}</dt>
-            <dd className="mt-0.5 font-display text-[17px] font-medium tabular-nums">
+            <dd className={`mt-0.5 font-display font-medium tabular-nums ${wide ? 'text-[15px] leading-snug' : 'text-[17px]'}`}>
               {v} {unit && <span className="text-xs font-normal text-ink-3">{unit}</span>}
             </dd>
           </div>
@@ -132,7 +136,7 @@ function ElementDetail({ e }: { e: Element }) {
         <span className="hidden text-xs text-ink-3 sm:block">Use ← → to browse</span>
         <NeighbourButton n={e.number === 118 ? 1 : e.number + 1} dir="next" onClick={openDetail} />
       </nav>
-      <p className="px-6 pb-6 text-[11px] text-ink-3 sm:px-8">Property data: PubChem (NCBI). Values for superheavy elements are predictions or estimates.</p>
+      <p className="px-6 pb-6 text-[11px] text-ink-3 sm:px-8">Property data: PubChem (NCBI). Stable isotope counts: Wikipedia. Values for superheavy elements are predictions or estimates.</p>
     </article>
   );
 }

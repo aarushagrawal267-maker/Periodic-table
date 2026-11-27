@@ -5,6 +5,7 @@ import { Shell } from './components/Shell';
 import { SettingsSheet } from './components/SettingsSheet';
 import { Toasts } from './components/Toasts';
 import { useRoute } from './lib/router';
+import { ChallengeGame, ChallengeHub } from './screens/Challenge';
 import { Daily } from './screens/Daily';
 import { Explore } from './screens/Explore';
 import { Home } from './screens/Home';
@@ -30,8 +31,15 @@ export function App() {
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f5f5fa' : '#07070d');
   }, [theme, systemLight, colorblind, reduceMotion]);
 
-  const immersive = route.name === 'game' || route.name === 'daily' || route.name === 'quiz' || route.name === 'life' || route.name === 'match' || (route.name === 'learn' && !!route.chapter);
-  const key = route.name === 'game' ? `game-${route.region}` : route.name === 'learn' ? `learn-${route.chapter ?? ''}` : route.name;
+  const immersive = route.name === 'game' || route.name === 'daily' || route.name === 'quiz' || route.name === 'life' || route.name === 'match' || (route.name === 'learn' && !!route.chapter) || (route.name === 'challenge' && !!route.level);
+  const key =
+    route.name === 'game'
+      ? `game-${route.region}`
+      : route.name === 'learn'
+        ? `learn-${route.chapter ?? ''}`
+        : route.name === 'challenge'
+          ? `challenge-${route.level ?? ''}`
+          : route.name;
 
   let screen;
   switch (route.name) {
@@ -64,6 +72,9 @@ export function App() {
       break;
     case 'match':
       screen = <Match />;
+      break;
+    case 'challenge':
+      screen = route.level ? <ChallengeGame levelId={route.level} /> : <ChallengeHub />;
       break;
   }
 

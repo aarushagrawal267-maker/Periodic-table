@@ -23,6 +23,8 @@ interface Props {
   className?: string;
   overlay?: ReactNode;
   onLayout?: (cell: number) => void;
+  /** Scales the cells; above 1 the table scrolls sideways. Defaults to 1 (fit). */
+  zoom?: number;
 }
 
 const AXIS = 18;
@@ -43,6 +45,7 @@ export function PeriodicGrid({
   className = '',
   overlay,
   onLayout,
+  zoom = 1,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -60,8 +63,8 @@ export function PeriodicGrid({
 
   const axis = showAxes ? AXIS : 0;
   const layout = useMemo(
-    () => (width ? computeLayout(nums, width - axis, { min: minCell, max: maxCell, gap }) : null),
-    [nums, width, minCell, maxCell, gap, axis],
+    () => (width ? computeLayout(nums, (width - axis) * zoom, { min: minCell * zoom, max: maxCell * zoom, gap }) : null),
+    [nums, width, minCell, maxCell, gap, axis, zoom],
   );
 
   useLayoutEffect(() => {

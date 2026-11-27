@@ -19,11 +19,14 @@ interface Props {
   onNext?: () => void;
   nextLabel?: string;
   onExit: () => void;
+  /** Overrides for the headline and message (e.g. the end of the Timed Challenge). */
+  headline?: string;
+  message?: string;
 }
 
 const HEADLINES = ['Good try!', 'Nicely done', 'Great run', 'Flawless'];
 
-export function Results({ summary: s, outcome: o, title, total, onReplay, onNext, nextLabel, onExit }: Props) {
+export function Results({ summary: s, outcome: o, title, total, onReplay, onNext, nextLabel, onExit, headline: headlineOverride, message }: Props) {
   const xp = useProgress((p) => p.xp);
   const openDetail = useUi((u) => u.openDetail);
   const reduce = useSettings((x) => x.reduceMotion);
@@ -35,7 +38,7 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
   const slipped = Object.entries(s.results)
     .filter(([, ok]) => !ok)
     .map(([n]) => byNumber(Number(n)));
-  const headline = s.completed ? HEADLINES[s.stars] : HEADLINES[0];
+  const headline = headlineOverride ?? (s.timedOut ? "Time's up!" : s.completed ? HEADLINES[s.stars] : HEADLINES[0]);
 
   return (
     <motion.div className="fixed inset-0 z-50 overflow-y-auto bg-bg/85 backdrop-blur-xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -46,7 +49,7 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
           <h2 id="results-title" className="font-display mt-1 text-4xl font-semibold sm:text-5xl">
             {headline}
           </h2>
-          <p className="mt-2 text-ink-2">{encouragement(s)}</p>
+          <p className="mt-2 text-ink-2">{message ?? encouragement(s, total)}</p>
           <div className="mt-5 flex justify-center gap-3" aria-label={`${s.stars} of 3 stars`}>
             {[0, 1, 2].map((i) => (
               <motion.div
@@ -153,7 +156,8 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
   );
 }
 
-function encouragement(s: RoundSummary) {
+function encouragement(s: RoundSummary, total: number) {
+  if (s.timedOut) return `The clock ran out with ${total - s.correct} still to place. You'll be quicker next time.`;
   if (!s.completed) return 'Every mistake is a fact you now know. Try again — it gets easier fast.';
   if (s.stars === 3) return 'You clearly know these. Time to try something harder?';
   if (s.stars === 2) return 'Solid work. A couple more rounds and these will be locked in.';

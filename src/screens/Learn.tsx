@@ -3,7 +3,8 @@ import { ArrowLeft, ArrowRight, Check, Clock, RotateCcw, Sparkles, Star } from '
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { ElementTile } from '../components/ElementTile';
 import { CHAPTERS, chapterById, type Chapter } from '../lib/chapters';
-import { byNumber, catVar, categoryLabel, type Element } from '../lib/elements';
+import { CATEGORIES, byNumber, catVar, categoryLabel, type Element } from '../lib/elements';
+import { MiniTable } from '../components/MiniTable';
 import { sfx } from '../lib/feedback';
 import { go } from '../lib/router';
 import { useProgress } from '../store/progress';
@@ -36,7 +37,43 @@ export function LearnPath() {
           <ChapterNode key={c.id} chapter={c} index={i} stars={chapters[c.id] ?? 0} current={c === current} />
         ))}
       </ol>
+
+      <TableStory />
     </div>
+  );
+}
+
+/** A short history of the periodic table, with the whole table drawn in category colours. */
+function TableStory() {
+  const hl = 'font-semibold text-accent-2';
+  return (
+    <motion.section className="card mt-14 overflow-hidden" aria-labelledby="table-story" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+      <div className="p-6 sm:p-8">
+        <p className="text-xs font-semibold uppercase tracking-wider text-ink-3">Background</p>
+        <h2 id="table-story" className="font-display mt-1 text-2xl font-semibold sm:text-3xl">
+          The periodic table
+        </h2>
+        <p className="mt-3 leading-relaxed text-ink-2">
+          The periodic table arranges the chemical elements by their <span className={hl}>atomic numbers</span>, <span className={hl}>electron configurations</span> and recurring{' '}
+          <span className={hl}>chemical properties</span>. Elements appear in order of increasing atomic number. The standard table has <span className={hl}>18 columns</span> (groups) and{' '}
+          <span className={hl}>7 rows</span> (periods), with a double row of elements, the lanthanides and actinides, set out underneath.
+        </p>
+        <p className="mt-3 leading-relaxed text-ink-2">
+          It took more than <span className={hl}>200 years</span> and many scientists to develop. The modern table is based on <span className={hl}>Dmitri Mendeleev's 1869</span> design, which left gaps for elements nobody had found yet and correctly predicted their properties.
+        </p>
+      </div>
+      <figure className="border-t border-line px-6 pb-6 pt-5 sm:px-8">
+        <MiniTable className="w-full" label="The full periodic table, coloured by element category" />
+        <figcaption className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-ink-2">
+          {CATEGORIES.map((c) => (
+            <span key={c.id} className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-sm" style={{ background: catVar(c.id) }} aria-hidden />
+              {c.label}
+            </span>
+          ))}
+        </figcaption>
+      </figure>
+    </motion.section>
   );
 }
 

@@ -30,7 +30,9 @@
    "Ammonia fertilizer production",
    "Hydrogen fuel cells"
   ],
-  "fact": "About three quarters of the ordinary matter in the universe, measured by mass, is hydrogen, almost all of it formed shortly after the Big Bang."
+  "fact": "About three quarters of the ordinary matter in the universe, measured by mass, is hydrogen, almost all of it formed shortly after the Big Bang.",
+  "discoveredBy": "Henry Cavendish",
+  "stableIsotopes": 2
  },
  {
   "number": 2,
@@ -63,7 +65,9 @@
    "Weather and party balloons",
    "Deep-sea diving gas"
   ],
-  "fact": "Helium was first detected in sunlight during an 1868 solar eclipse, well before chemists managed to collect any of it on Earth."
+  "fact": "Helium was first detected in sunlight during an 1868 solar eclipse, well before chemists managed to collect any of it on Earth.",
+  "discoveredBy": "Pierre Janssen & Norman Lockyer",
+  "stableIsotopes": 2
  },
  {
   "number": 3,
@@ -96,7 +100,9 @@
    "Mood-stabilizing medicines",
    "Heat-resistant glass and ceramics"
   ],
-  "fact": "Along with hydrogen and helium, a tiny amount of lithium was made in the first minutes after the Big Bang, long before any stars existed."
+  "fact": "Along with hydrogen and helium, a tiny amount of lithium was made in the first minutes after the Big Bang, long before any stars existed.",
+  "discoveredBy": "Johan August Arfwedson",
+  "stableIsotopes": 2
  },
  {
   "number": 4,
@@ -129,7 +135,9 @@
    "X-ray tube windows",
    "Non-sparking tools"
   ],
-  "fact": "Emeralds and aquamarines are both varieties of beryl, a mineral containing beryllium, with traces of other elements giving each gemstone its color."
+  "fact": "Emeralds and aquamarines are both varieties of beryl, a mineral containing beryllium, with traces of other elements giving each gemstone its color.",
+  "discoveredBy": "Louis Nicolas Vauquelin",
+  "stableIsotopes": 1
  },
  {
   "number": 5,
@@ -162,7 +170,9 @@
    "Laundry and cleaning products",
    "Nuclear reactor control rods"
   ],
-  "fact": "Boron carbide, a compound of boron and carbon, is one of the hardest materials known and is used in body armor."
+  "fact": "Boron carbide, a compound of boron and carbon, is one of the hardest materials known and is used in body armor.",
+  "discoveredBy": "Joseph Louis Gay-Lussac",
+  "stableIsotopes": 2
  },
  {
   "number": 6,
@@ -195,7 +205,9 @@
    "Carbon fiber composites",
    "Diamond cutting tools"
   ],
-  "fact": "Sparkling diamond and the soft graphite in a pencil are both pure carbon, differing only in the way their atoms are arranged."
+  "fact": "Sparkling diamond and the soft graphite in a pencil are both pure carbon, differing only in the way their atoms are arranged.",
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 2
  },
  {
   "number": 7,
@@ -228,7 +240,9 @@
    "Food packaging gas",
    "Liquid nitrogen freezing"
   ],
-  "fact": "Although nitrogen makes up about 78 percent of the air, most living things cannot use it until bacteria or lightning turn it into other compounds."
+  "fact": "Although nitrogen makes up about 78 percent of the air, most living things cannot use it until bacteria or lightning turn it into other compounds.",
+  "discoveredBy": "Daniel Rutherford",
+  "stableIsotopes": 2
  },
  {
   "number": 8,
@@ -261,7 +275,9 @@
    "Steel making",
    "Rocket fuel oxidizer"
   ],
-  "fact": "Liquid oxygen is pale blue and magnetic enough to be held between the poles of a strong magnet."
+  "fact": "Liquid oxygen is pale blue and magnetic enough to be held between the poles of a strong magnet.",
+  "discoveredBy": "Carl Wilhelm Scheele & Joseph Priestley",
+  "stableIsotopes": 3
  },
  {
   "number": 9,
@@ -294,7 +310,9 @@
    "Nonstick pan coatings",
    "Uranium fuel processing"
   ],
-  "fact": "Fluorine is so dangerous to handle that several chemists were injured or killed trying to isolate it before Henri Moissan succeeded in 1886."
+  "fact": "Fluorine is so dangerous to handle that several chemists were injured or killed trying to isolate it before Henri Moissan succeeded in 1886.",
+  "discoveredBy": "Henri Moissan (first isolated it in 1886)",
+  "stableIsotopes": 1
  },
  {
   "number": 10,
@@ -327,7 +345,9 @@
    "Helium-neon lasers",
    "High-voltage indicators"
   ],
-  "fact": "Pure neon glows only reddish orange, so many so-called neon signs in other colors actually use different gases or coated glass tubes."
+  "fact": "Pure neon glows only reddish orange, so many so-called neon signs in other colors actually use different gases or coated glass tubes.",
+  "discoveredBy": "Morris Travers",
+  "stableIsotopes": 3
  },
  {
   "number": 11,
@@ -360,7 +380,9 @@
    "Yellow street lamps",
    "Baking soda"
   ],
-  "fact": "Sodium metal is soft enough to slice with a butter knife and is stored under oil to keep it away from air and moisture."
+  "fact": "Sodium metal is soft enough to slice with a butter knife and is stored under oil to keep it away from air and moisture.",
+  "discoveredBy": "Humphry Davy",
+  "stableIsotopes": 1
  },
  {
   "number": 12,
@@ -393,7 +415,9 @@
    "Fireworks and flares",
    "Antacid medicines"
   ],
-  "fact": "Every molecule of chlorophyll, the green pigment plants use to capture sunlight, has a single magnesium atom at its center."
+  "fact": "Every molecule of chlorophyll, the green pigment plants use to capture sunlight, has a single magnesium atom at its center.",
+  "discoveredBy": "Joseph Black",
+  "stableIsotopes": 3
  },
  {
   "number": 13,
@@ -426,7 +450,9 @@
    "Aircraft bodies",
    "Kitchen foil"
   ],
-  "fact": "Before cheap electricity, aluminum was so hard to extract that it was treated as a precious metal, even though it is the most abundant metal in Earth's crust."
+  "fact": "Before cheap electricity, aluminum was so hard to extract that it was treated as a precious metal, even though it is the most abundant metal in Earth's crust.",
+  "discoveredBy": "Hans Christian Ørsted (first isolated it in 1825)",
+  "stableIsotopes": 1
  },
  {
   "number": 14,
@@ -459,7 +485,9 @@
    "Solar panels",
    "Glass making"
   ],
-  "fact": "Silicon is the second most abundant element in Earth's crust after oxygen, and together the two make up sand and most common rocks."
+  "fact": "Silicon is the second most abundant element in Earth's crust after oxygen, and together the two make up sand and most common rocks.",
+  "discoveredBy": "Jöns Jacob Berzelius",
+  "stableIsotopes": 3
  },
  {
   "number": 15,
@@ -492,7 +520,9 @@
    "Safety match strikers",
    "Animal feed supplements"
   ],
-  "fact": "Phosphorus was discovered in 1669 by Hennig Brand, an alchemist who boiled down large amounts of urine while searching for a way to make gold."
+  "fact": "Phosphorus was discovered in 1669 by Hennig Brand, an alchemist who boiled down large amounts of urine while searching for a way to make gold.",
+  "discoveredBy": "Hennig Brand",
+  "stableIsotopes": 1
  },
  {
   "number": 16,
@@ -525,7 +555,9 @@
    "Rubber vulcanization",
    "Fertilizers and fungicides"
   ],
-  "fact": "Pure sulfur has no smell, and the rotten-egg stink people blame on it actually comes from hydrogen sulfide, a compound of sulfur and hydrogen."
+  "fact": "Pure sulfur has no smell, and the rotten-egg stink people blame on it actually comes from hydrogen sulfide, a compound of sulfur and hydrogen.",
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 4
  },
  {
   "number": 17,
@@ -558,7 +590,9 @@
    "Household bleach",
    "PVC plastic pipes"
   ],
-  "fact": "Chlorine gas was used as a weapon in the First World War, yet adding chlorine to drinking water has saved enormous numbers of lives."
+  "fact": "Chlorine gas was used as a weapon in the First World War, yet adding chlorine to drinking water has saved enormous numbers of lives.",
+  "discoveredBy": "Carl Wilhelm Scheele",
+  "stableIsotopes": 2
  },
  {
   "number": 18,
@@ -591,7 +625,9 @@
    "Incandescent light bulbs",
    "Double-glazed window filling"
   ],
-  "fact": "Argon is the third most common gas in dry air, making up nearly one percent of every breath you take."
+  "fact": "Argon is the third most common gas in dry air, making up nearly one percent of every breath you take.",
+  "discoveredBy": "Lord Rayleigh & William Ramsay",
+  "stableIsotopes": 3
  },
  {
   "number": 19,
@@ -624,7 +660,9 @@
    "Soap making",
    "Low-sodium salt substitutes"
   ],
-  "fact": "A tiny fraction of all potassium is naturally radioactive, so bananas and even your own body give off a very small, harmless amount of radiation."
+  "fact": "A tiny fraction of all potassium is naturally radioactive, so bananas and even your own body give off a very small, harmless amount of radiation.",
+  "discoveredBy": "Humphry Davy",
+  "stableIsotopes": 2
  },
  {
   "number": 20,
@@ -657,7 +695,9 @@
    "Plaster and drywall",
    "Dietary supplements"
   ],
-  "fact": "Marble, limestone, eggshells, seashells, and pearls are all made mainly of the same compound, calcium carbonate."
+  "fact": "Marble, limestone, eggshells, seashells, and pearls are all made mainly of the same compound, calcium carbonate.",
+  "discoveredBy": "Humphry Davy",
+  "stableIsotopes": 5
  },
  {
   "number": 21,
@@ -690,7 +730,9 @@
    "Stadium floodlights",
    "Lightweight sports equipment"
   ],
-  "fact": "Dmitri Mendeleev predicted this element and its properties, calling it eka-boron, several years before it was discovered in Sweden in 1879."
+  "fact": "Dmitri Mendeleev predicted this element and its properties, calling it eka-boron, several years before it was discovered in Sweden in 1879.",
+  "discoveredBy": "Lars Fredrik Nilson",
+  "stableIsotopes": 1
  },
  {
   "number": 22,
@@ -723,7 +765,9 @@
    "Hip and dental implants",
    "White paint pigment"
   ],
-  "fact": "Most titanium is not used as a metal at all but as titanium dioxide, the brilliant white pigment in paint, sunscreen, and toothpaste."
+  "fact": "Most titanium is not used as a metal at all but as titanium dioxide, the brilliant white pigment in paint, sunscreen, and toothpaste.",
+  "discoveredBy": "William Gregor",
+  "stableIsotopes": 5
  },
  {
   "number": 23,
@@ -756,7 +800,9 @@
    "Sulfuric acid catalyst",
    "Large-scale flow batteries"
   ],
-  "fact": "Vanadium was named after Vanadis, another name for the Norse goddess Freyja, because its compounds come in so many beautiful colors."
+  "fact": "Vanadium was named after Vanadis, another name for the Norse goddess Freyja, because its compounds come in so many beautiful colors.",
+  "discoveredBy": "Andrés Manuel del Río",
+  "stableIsotopes": 1
  },
  {
   "number": 24,
@@ -789,7 +835,9 @@
    "Chrome plating",
    "Paint pigments"
   ],
-  "fact": "Tiny traces of chromium are what give rubies their deep red color and emeralds their rich green color."
+  "fact": "Tiny traces of chromium are what give rubies their deep red color and emeralds their rich green color.",
+  "discoveredBy": "Louis Nicolas Vauquelin",
+  "stableIsotopes": 4
  },
  {
   "number": 25,
@@ -822,7 +870,9 @@
    "Alkaline batteries",
    "Aluminum drink cans"
   ],
-  "fact": "Potato-sized lumps rich in manganese, called nodules, lie scattered across large areas of the deep ocean floor, having grown extremely slowly over millions of years."
+  "fact": "Potato-sized lumps rich in manganese, called nodules, lie scattered across large areas of the deep ocean floor, having grown extremely slowly over millions of years.",
+  "discoveredBy": "Johan Gottlieb Gahn",
+  "stableIsotopes": 1
  },
  {
   "number": 26,
@@ -855,7 +905,9 @@
    "Cast iron cookware",
    "Magnets and electromagnets"
   ],
-  "fact": "Earth's core is made mostly of iron, and the swirling motion of its liquid outer layer generates the planet's magnetic field."
+  "fact": "Earth's core is made mostly of iron, and the swirling motion of its liquid outer layer generates the planet's magnetic field.",
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 4
  },
  {
   "number": 27,
@@ -888,7 +940,9 @@
    "Jet engine superalloys",
    "Blue glass and ceramics"
   ],
-  "fact": "Cobalt's name comes from kobold, a German word for a goblin, because miners long ago blamed mischievous spirits for its troublesome ores."
+  "fact": "Cobalt's name comes from kobold, a German word for a goblin, because miners long ago blamed mischievous spirits for its troublesome ores.",
+  "discoveredBy": "Georg Brandt",
+  "stableIsotopes": 1
  },
  {
   "number": 28,
@@ -921,7 +975,9 @@
    "Coin making",
    "Electric vehicle batteries"
   ],
-  "fact": "The US five-cent coin known as a nickel is actually three quarters copper and only one quarter nickel."
+  "fact": "The US five-cent coin known as a nickel is actually three quarters copper and only one quarter nickel.",
+  "discoveredBy": "Axel Fredrik Cronstedt",
+  "stableIsotopes": 5
  },
  {
   "number": 29,
@@ -954,7 +1010,9 @@
    "Water pipes",
    "Bronze and brass"
   ],
-  "fact": "The Statue of Liberty is covered in copper sheets, which slowly turned from reddish brown to green as the metal reacted with the air."
+  "fact": "The Statue of Liberty is covered in copper sheets, which slowly turned from reddish brown to green as the metal reacted with the air.",
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 2
  },
  {
   "number": 30,
@@ -987,7 +1045,9 @@
    "Brass alloys",
    "Sunscreen and skin creams"
   ],
-  "fact": "US pennies made since 1983 are almost entirely zinc, with just a thin coating of copper on the outside."
+  "fact": "US pennies made since 1983 are almost entirely zinc, with just a thin coating of copper on the outside.",
+  "discoveredBy": "Andreas Marggraf",
+  "stableIsotopes": 5
  },
  {
   "number": 31,
@@ -1020,7 +1080,9 @@
    "Mobile phone chips",
    "High-efficiency solar cells"
   ],
-  "fact": "Gallium melts at about 30 degrees Celsius, so a solid piece will slowly turn to liquid in the palm of your hand."
+  "fact": "Gallium melts at about 30 degrees Celsius, so a solid piece will slowly turn to liquid in the palm of your hand.",
+  "discoveredBy": "Paul-Émile Lecoq de Boisbaudran",
+  "stableIsotopes": 2
  },
  {
   "number": 32,
@@ -1053,7 +1115,9 @@
    "Infrared camera lenses",
    "High-speed electronics"
   ],
-  "fact": "The very first transistor, built at Bell Labs in 1947, used germanium rather than the silicon that dominates electronics today."
+  "fact": "The very first transistor, built at Bell Labs in 1947, used germanium rather than the silicon that dominates electronics today.",
+  "discoveredBy": "Clemens Winkler",
+  "stableIsotopes": 4
  },
  {
   "number": 33,
@@ -1086,7 +1150,9 @@
    "Wood preservatives",
    "Lead battery alloys"
   ],
-  "fact": "In the 1800s a fashionable green pigment containing arsenic was used in wallpaper and clothing, sometimes making people ill."
+  "fact": "In the 1800s a fashionable green pigment containing arsenic was used in wallpaper and clothing, sometimes making people ill.",
+  "discoveredBy": "Albertus Magnus (first isolated it around 1250)",
+  "stableIsotopes": 1
  },
  {
   "number": 34,
@@ -1119,7 +1185,9 @@
    "Dietary supplements",
    "Anti-dandruff shampoos"
   ],
-  "fact": "Selenium was named after Selene, the Greek goddess of the Moon, to pair it with tellurium, which had been named after the Earth."
+  "fact": "Selenium was named after Selene, the Greek goddess of the Moon, to pair it with tellurium, which had been named after the Earth.",
+  "discoveredBy": "Jöns Jacob Berzelius",
+  "stableIsotopes": 5
  },
  {
   "number": 35,
@@ -1152,7 +1220,9 @@
    "Water treatment chemicals",
    "Traditional photographic film"
   ],
-  "fact": "Bromine is one of only two elements that are liquid at room temperature, and its name comes from a Greek word meaning stench."
+  "fact": "Bromine is one of only two elements that are liquid at room temperature, and its name comes from a Greek word meaning stench.",
+  "discoveredBy": "Antoine Jérôme Balard",
+  "stableIsotopes": 2
  },
  {
   "number": 36,
@@ -1185,7 +1255,9 @@
    "Photographic flash lamps",
    "Krypton fluoride lasers"
   ],
-  "fact": "From 1960 to 1983 the meter was officially defined using the wavelength of orange-red light given off by krypton atoms."
+  "fact": "From 1960 to 1983 the meter was officially defined using the wavelength of orange-red light given off by krypton atoms.",
+  "discoveredBy": "William Ramsay & Morris Travers",
+  "stableIsotopes": 5
  },
  {
   "number": 37,
@@ -1218,7 +1290,9 @@
    "Scientific research",
    "Specialty glass"
   ],
-  "fact": "Rubidium's name comes from the Latin for deep red, after the red lines scientists saw when they first examined its light."
+  "fact": "Rubidium's name comes from the Latin for deep red, after the red lines scientists saw when they first examined its light.",
+  "discoveredBy": "Robert Bunsen & Gustav Kirchhoff",
+  "stableIsotopes": 1
  },
  {
   "number": 38,
@@ -1251,7 +1325,9 @@
    "Emergency flares",
    "Glow-in-the-dark paints"
   ],
-  "fact": "Strontium is named after Strontian, a village in Scotland where the mineral containing it was first found."
+  "fact": "Strontium is named after Strontian, a village in Scotland where the mineral containing it was first found.",
+  "discoveredBy": "Adair Crawford",
+  "stableIsotopes": 4
  },
  {
   "number": 39,
@@ -1284,7 +1360,9 @@
    "Solid-state lasers",
    "High-temperature superconductors"
   ],
-  "fact": "Four elements, yttrium, ytterbium, terbium, and erbium, are all named after the same small Swedish village, Ytterby."
+  "fact": "Four elements, yttrium, ytterbium, terbium, and erbium, are all named after the same small Swedish village, Ytterby.",
+  "discoveredBy": "Johan Gadolin",
+  "stableIsotopes": 1
  },
  {
   "number": 40,
@@ -1317,7 +1395,9 @@
    "Ceramic knives",
    "Dental crowns"
   ],
-  "fact": "Cubic zirconia, a sparkling crystal form of zirconium dioxide, is widely used as an inexpensive stand-in for diamond in jewelry."
+  "fact": "Cubic zirconia, a sparkling crystal form of zirconium dioxide, is widely used as an inexpensive stand-in for diamond in jewelry.",
+  "discoveredBy": "Martin Heinrich Klaproth",
+  "stableIsotopes": 4
  },
  {
   "number": 41,
@@ -1350,7 +1430,9 @@
    "Superconducting magnets",
    "Jet engine alloys"
   ],
-  "fact": "Niobium is named after Niobe, daughter of Tantalus in Greek myth, because it is so similar to the element tantalum."
+  "fact": "Niobium is named after Niobe, daughter of Tantalus in Greek myth, because it is so similar to the element tantalum.",
+  "discoveredBy": "Charles Hatchett",
+  "stableIsotopes": 1
  },
  {
   "number": 42,
@@ -1383,7 +1465,9 @@
    "Industrial lubricants",
    "Oil refining catalysts"
   ],
-  "fact": "Many of the bacteria that turn nitrogen from the air into food for plants depend on an enzyme that contains molybdenum."
+  "fact": "Many of the bacteria that turn nitrogen from the air into food for plants depend on an enzyme that contains molybdenum.",
+  "discoveredBy": "Carl Wilhelm Scheele",
+  "stableIsotopes": 6
  },
  {
   "number": 43,
@@ -1416,7 +1500,9 @@
    "Bone and heart scans",
    "Scientific research"
   ],
-  "fact": "Technetium was the first element to be made artificially, and its name comes from a Greek word meaning artificial."
+  "fact": "Technetium was the first element to be made artificially, and its name comes from a Greek word meaning artificial.",
+  "discoveredBy": "Carlo Perrier & Emilio Segrè",
+  "stableIsotopes": 0
  },
  {
   "number": 44,
@@ -1449,7 +1535,9 @@
    "Hard disk drives",
    "Chemical catalysts"
   ],
-  "fact": "Ruthenium is named after Ruthenia, a Latin name for Russia, where the ore it was discovered in had been mined."
+  "fact": "Ruthenium is named after Ruthenia, a Latin name for Russia, where the ore it was discovered in had been mined.",
+  "discoveredBy": "Karl Ernst Claus",
+  "stableIsotopes": 7
  },
  {
   "number": 45,
@@ -1482,7 +1570,9 @@
    "Jewelry plating",
    "Reflective mirror coatings"
   ],
-  "fact": "Rhodium is one of the rarest and most expensive precious metals, and at times it has cost many times more than gold."
+  "fact": "Rhodium is one of the rarest and most expensive precious metals, and at times it has cost many times more than gold.",
+  "discoveredBy": "William Hyde Wollaston",
+  "stableIsotopes": 1
  },
  {
   "number": 46,
@@ -1515,7 +1605,9 @@
    "White gold jewelry",
    "Electronic components"
   ],
-  "fact": "Palladium can soak up hydrogen like a sponge, absorbing hundreds of times its own volume of the gas."
+  "fact": "Palladium can soak up hydrogen like a sponge, absorbing hundreds of times its own volume of the gas.",
+  "discoveredBy": "William Hyde Wollaston",
+  "stableIsotopes": 6
  },
  {
   "number": 47,
@@ -1548,7 +1640,9 @@
    "Solar panels",
    "Mirror coatings"
   ],
-  "fact": "Silver conducts both electricity and heat better than any other metal, beating even copper, though it is too costly for ordinary wiring."
+  "fact": "Silver conducts both electricity and heat better than any other metal, beating even copper, though it is too costly for ordinary wiring.",
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 2
  },
  {
   "number": 48,
@@ -1581,7 +1675,9 @@
    "Yellow and red pigments",
    "Thin-film solar panels"
   ],
-  "fact": "Cadmium compounds give artists some of their brightest yellow, orange, and red paints, which have been popular since the 1800s."
+  "fact": "Cadmium compounds give artists some of their brightest yellow, orange, and red paints, which have been popular since the 1800s.",
+  "discoveredBy": "Friedrich Stromeyer",
+  "stableIsotopes": 6
  },
  {
   "number": 49,
@@ -1614,7 +1710,9 @@
    "Flat-panel displays",
    "Low-melting solders"
   ],
-  "fact": "Indium is named after the bright indigo-blue line seen in its light spectrum, not after the country of India."
+  "fact": "Indium is named after the bright indigo-blue line seen in its light spectrum, not after the country of India.",
+  "discoveredBy": "Ferdinand Reich & Hieronymus Theodor Richter",
+  "stableIsotopes": 1
  },
  {
   "number": 50,
@@ -1647,7 +1745,9 @@
    "Electronics solder",
    "Bronze and pewter"
   ],
-  "fact": "In very cold conditions tin can slowly crumble into a gray powder, a change nicknamed tin pest."
+  "fact": "In very cold conditions tin can slowly crumble into a gray powder, a change nicknamed tin pest.",
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 10
  },
  {
   "number": 51,
@@ -1680,7 +1780,9 @@
    "Lead-acid battery plates",
    "Semiconductor devices"
   ],
-  "fact": "Antimony's symbol Sb comes from stibium, its Latin name, and its dark mineral stibnite was ground into eye makeup in parts of the ancient world."
+  "fact": "Antimony's symbol Sb comes from stibium, its Latin name, and its dark mineral stibnite was ground into eye makeup in parts of the ancient world.",
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 2
  },
  {
   "number": 52,
@@ -1713,7 +1815,9 @@
    "Steel and copper alloys",
    "Thermoelectric cooling devices"
   ],
-  "fact": "People who absorb even tiny amounts of tellurium develop breath that smells strongly of garlic, an effect that can linger for weeks."
+  "fact": "People who absorb even tiny amounts of tellurium develop breath that smells strongly of garlic, an effect that can linger for weeks.",
+  "discoveredBy": "Franz-Joseph Müller von Reichenstein",
+  "stableIsotopes": 6
  },
  {
   "number": 53,
@@ -1746,7 +1850,9 @@
    "Antiseptic wound cleaners",
    "X-ray contrast dyes"
   ],
-  "fact": "Iodine was discovered in 1811 by Bernard Courtois, who noticed purple vapor rising from seaweed ash he was treating with acid."
+  "fact": "Iodine was discovered in 1811 by Bernard Courtois, who noticed purple vapor rising from seaweed ash he was treating with acid.",
+  "discoveredBy": "Bernard Courtois",
+  "stableIsotopes": 1
  },
  {
   "number": 54,
@@ -1779,7 +1885,9 @@
    "Cinema projector lamps",
    "Spacecraft ion engines"
   ],
-  "fact": "Xenon was thought to be completely unreactive until 1962, when Neil Bartlett used it to make the first noble gas compound."
+  "fact": "Xenon was thought to be completely unreactive until 1962, when Neil Bartlett used it to make the first noble gas compound.",
+  "discoveredBy": "William Ramsay & Morris Travers",
+  "stableIsotopes": 7
  },
  {
   "number": 55,
@@ -1812,7 +1920,9 @@
    "Oil drilling fluids",
    "Photoelectric cells"
   ],
-  "fact": "Since 1967 the second has been officially defined by counting a particular vibration of cesium atoms that repeats more than nine billion times."
+  "fact": "Since 1967 the second has been officially defined by counting a particular vibration of cesium atoms that repeats more than nine billion times.",
+  "discoveredBy": "Robert Bunsen & Gustav Kirchhoff",
+  "stableIsotopes": 1
  },
  {
   "number": 56,
@@ -1845,7 +1955,9 @@
    "Green fireworks",
    "Oil well drilling mud"
   ],
-  "fact": "Barium compounds that dissolve in water are poisonous, yet barium sulfate is safe to swallow for X-rays because it does not dissolve in the body."
+  "fact": "Barium compounds that dissolve in water are poisonous, yet barium sulfate is safe to swallow for X-rays because it does not dissolve in the body.",
+  "discoveredBy": "Humphry Davy",
+  "stableIsotopes": 6
  },
  {
   "number": 57,
@@ -1878,7 +1990,9 @@
    "Hybrid car batteries",
    "Oil refining catalysts"
   ],
-  "fact": "Lanthanum's name comes from a Greek word meaning to lie hidden, because it was found concealed inside a mineral of cerium."
+  "fact": "Lanthanum's name comes from a Greek word meaning to lie hidden, because it was found concealed inside a mineral of cerium.",
+  "discoveredBy": "Carl Gustaf Mosander",
+  "stableIsotopes": 1
  },
  {
   "number": 58,
@@ -1911,7 +2025,9 @@
    "Catalytic converters",
    "Lighter flints"
   ],
-  "fact": "The sparks from a cigarette lighter's flint come from an alloy rich in cerium, which sheds burning shavings when it is scratched."
+  "fact": "The sparks from a cigarette lighter's flint come from an alloy rich in cerium, which sheds burning shavings when it is scratched.",
+  "discoveredBy": "Martin Heinrich Klaproth, Jöns Jacob Berzelius & Wilhelm Hisinger",
+  "stableIsotopes": 4
  },
  {
   "number": 59,
@@ -1944,7 +2060,9 @@
    "Welding goggle glass",
    "Yellow ceramic glazes"
   ],
-  "fact": "Its name means green twin in Greek, because it was separated in 1885 from a material once believed to be a single element."
+  "fact": "Its name means green twin in Greek, because it was separated in 1885 from a material once believed to be a single element.",
+  "discoveredBy": "Carl Auer von Welsbach",
+  "stableIsotopes": 1
  },
  {
   "number": 60,
@@ -1977,7 +2095,9 @@
    "Electric vehicle motors",
    "Industrial and medical lasers"
   ],
-  "fact": "Glass colored with neodymium appears lilac in daylight but can look pale blue under fluorescent lamps, because it absorbs a narrow band of yellow light."
+  "fact": "Glass colored with neodymium appears lilac in daylight but can look pale blue under fluorescent lamps, because it absorbs a narrow band of yellow light.",
+  "discoveredBy": "Carl Auer von Welsbach",
+  "stableIsotopes": 5
  },
  {
   "number": 61,
@@ -2010,7 +2130,9 @@
    "Thickness measuring gauges",
    "Atomic batteries"
   ],
-  "fact": "Promethium is named after Prometheus, the figure in Greek myth who stole fire from the gods and gave it to humans."
+  "fact": "Promethium is named after Prometheus, the figure in Greek myth who stole fire from the gods and gave it to humans.",
+  "discoveredBy": "Jacob A. Marinsky, Lawrence E. Glendenin & Charles D. Coryell",
+  "stableIsotopes": 0
  },
  {
   "number": 62,
@@ -2043,7 +2165,9 @@
    "Nuclear reactor control rods",
    "Cancer pain treatment"
   ],
-  "fact": "Samarium takes its name from the mineral samarskite, which honors Vasili Samarsky-Bykhovets, a Russian mining official who gave scientists access to the mineral samples."
+  "fact": "Samarium takes its name from the mineral samarskite, which honors Vasili Samarsky-Bykhovets, a Russian mining official who gave scientists access to the mineral samples.",
+  "discoveredBy": "Paul-Émile Lecoq de Boisbaudran",
+  "stableIsotopes": 5
  },
  {
   "number": 63,
@@ -2076,7 +2200,9 @@
    "Fluorescent lamps",
    "Anti-counterfeiting inks"
   ],
-  "fact": "Europium is named after the continent of Europe, and its compounds that glow under ultraviolet light are used in security inks that help expose forged documents."
+  "fact": "Europium is named after the continent of Europe, and its compounds that glow under ultraviolet light are used in security inks that help expose forged documents.",
+  "discoveredBy": "Eugène-Anatole Demarçay",
+  "stableIsotopes": 1
  },
  {
   "number": 64,
@@ -2109,7 +2235,9 @@
    "Neutron absorbers in reactors",
    "X-ray imaging screens"
   ],
-  "fact": "Gadolinium is strongly magnetic like iron on a cool day, but it loses that strong magnetism when it is warmed to roughly room temperature."
+  "fact": "Gadolinium is strongly magnetic like iron on a cool day, but it loses that strong magnetism when it is warmed to roughly room temperature.",
+  "discoveredBy": "Jean Charles Galissard de Marignac",
+  "stableIsotopes": 6
  },
  {
   "number": 65,
@@ -2142,7 +2270,9 @@
    "Fluorescent lamps",
    "Sonar transducers"
   ],
-  "fact": "Four elements, terbium, yttrium, erbium, and ytterbium, are all named after the same small Swedish village, Ytterby, where their minerals were first found."
+  "fact": "Four elements, terbium, yttrium, erbium, and ytterbium, are all named after the same small Swedish village, Ytterby, where their minerals were first found.",
+  "discoveredBy": "Carl Gustaf Mosander",
+  "stableIsotopes": 1
  },
  {
   "number": 66,
@@ -2175,7 +2305,9 @@
    "Wind turbine generators",
    "Nuclear reactor control rods"
   ],
-  "fact": "Dysprosium's name comes from a Greek word meaning hard to get at, because its discoverer needed many repeated steps to separate it."
+  "fact": "Dysprosium's name comes from a Greek word meaning hard to get at, because its discoverer needed many repeated steps to separate it.",
+  "discoveredBy": "Paul-Émile Lecoq de Boisbaudran",
+  "stableIsotopes": 7
  },
  {
   "number": 67,
@@ -2208,7 +2340,9 @@
    "Magnet pole pieces",
    "Colored glass"
   ],
-  "fact": "Holmium gets its name from Holmia, the Latin name for Stockholm, the Swedish capital that lies close to where many rare earth minerals were found."
+  "fact": "Holmium gets its name from Holmia, the Latin name for Stockholm, the Swedish capital that lies close to where many rare earth minerals were found.",
+  "discoveredBy": "Marc Delafontaine & Jacques-Louis Soret",
+  "stableIsotopes": 1
  },
  {
   "number": 68,
@@ -2241,7 +2375,9 @@
    "Pink glass coloring",
    "Dental and skin lasers"
   ],
-  "fact": "Early chemists confused erbium with terbium so badly that the two names ended up swapped compared with how their discoverer first assigned them."
+  "fact": "Early chemists confused erbium with terbium so badly that the two names ended up swapped compared with how their discoverer first assigned them.",
+  "discoveredBy": "Carl Gustaf Mosander",
+  "stableIsotopes": 6
  },
  {
   "number": 69,
@@ -2274,7 +2410,9 @@
    "Surgical lasers",
    "Fiber-optic signal amplifiers"
   ],
-  "fact": "Thulium is named after Thule, an ancient name for a mysterious land in the far north that is often linked with Scandinavia."
+  "fact": "Thulium is named after Thule, an ancient name for a mysterious land in the far north that is often linked with Scandinavia.",
+  "discoveredBy": "Per Teodor Cleve",
+  "stableIsotopes": 1
  },
  {
   "number": 70,
@@ -2307,7 +2445,9 @@
    "Industrial fiber lasers",
    "Chemical reaction catalysts"
   ],
-  "fact": "Ytterbium's electrical resistance changes when it is squeezed very hard, so it has been used in gauges that measure the shock from explosions and earthquakes."
+  "fact": "Ytterbium's electrical resistance changes when it is squeezed very hard, so it has been used in gauges that measure the shock from explosions and earthquakes.",
+  "discoveredBy": "Jean Charles Galissard de Marignac",
+  "stableIsotopes": 7
  },
  {
   "number": 71,
@@ -2340,7 +2480,9 @@
    "Targeted cancer therapy",
    "Oil refining catalysts"
   ],
-  "fact": "Lutetium is named after Lutetia, the Roman name for the settlement that grew into the city of Paris."
+  "fact": "Lutetium is named after Lutetia, the Roman name for the settlement that grew into the city of Paris.",
+  "discoveredBy": "Georges Urbain & Carl Auer von Welsbach",
+  "stableIsotopes": 1
  },
  {
   "number": 72,
@@ -2373,7 +2515,9 @@
    "Computer chip insulators",
    "High-temperature alloys"
   ],
-  "fact": "Hafnium is named after Hafnia, the Latin name for Copenhagen, where it was finally found hiding in minerals of zirconium, which it closely resembles."
+  "fact": "Hafnium is named after Hafnia, the Latin name for Copenhagen, where it was finally found hiding in minerals of zirconium, which it closely resembles.",
+  "discoveredBy": "Dirk Coster & George de Hevesy",
+  "stableIsotopes": 5
  },
  {
   "number": 73,
@@ -2406,7 +2550,9 @@
    "Surgical implants",
    "Chemical processing equipment"
   ],
-  "fact": "Tantalum is named after Tantalus from Greek myth, who stood in water he could never drink, because the metal's oxide would not take up acid."
+  "fact": "Tantalum is named after Tantalus from Greek myth, who stood in water he could never drink, because the metal's oxide would not take up acid.",
+  "discoveredBy": "Anders Gustaf Ekeberg",
+  "stableIsotopes": 2
  },
  {
   "number": 74,
@@ -2439,7 +2585,9 @@
    "Carbide cutting tools",
    "Welding electrodes"
   ],
-  "fact": "Tungsten means heavy stone in Swedish, yet its symbol W comes from its other name, wolfram, which is still used in several languages."
+  "fact": "Tungsten means heavy stone in Swedish, yet its symbol W comes from its other name, wolfram, which is still used in several languages.",
+  "discoveredBy": "Fausto & Juan José de Elhuyar",
+  "stableIsotopes": 4
  },
  {
   "number": 75,
@@ -2472,7 +2620,9 @@
    "Petroleum refining catalysts",
    "High-temperature thermocouples"
   ],
-  "fact": "Rhenium is named after the Rhine river in Germany, and it was the last element with a stable form to be discovered."
+  "fact": "Rhenium is named after the Rhine river in Germany, and it was the last element with a stable form to be discovered.",
+  "discoveredBy": "Masataka Ogawa",
+  "stableIsotopes": 1
  },
  {
   "number": 76,
@@ -2505,7 +2655,9 @@
    "Electrical contacts",
    "Microscope sample staining"
   ],
-  "fact": "Osmium's name comes from the Greek word for smell, because its powder slowly forms a toxic compound in air that has a sharp odor."
+  "fact": "Osmium's name comes from the Greek word for smell, because its powder slowly forms a toxic compound in air that has a sharp odor.",
+  "discoveredBy": "Smithson Tennant",
+  "stableIsotopes": 5
  },
  {
   "number": 77,
@@ -2538,7 +2690,9 @@
    "High-temperature crucibles",
    "OLED screen materials"
   ],
-  "fact": "A thin layer of iridium-rich clay found around the world is key evidence that an asteroid struck Earth when the dinosaurs died out."
+  "fact": "A thin layer of iridium-rich clay found around the world is key evidence that an asteroid struck Earth when the dinosaurs died out.",
+  "discoveredBy": "Smithson Tennant",
+  "stableIsotopes": 2
  },
  {
   "number": 78,
@@ -2571,7 +2725,9 @@
    "Fine jewelry",
    "Cancer chemotherapy drugs"
   ],
-  "fact": "Spanish explorers in South America called platinum platina, meaning little silver, and at first considered it a nuisance mixed in with their gold."
+  "fact": "Spanish explorers in South America called platinum platina, meaning little silver, and at first considered it a nuisance mixed in with their gold.",
+  "discoveredBy": "Antonio de Ulloa",
+  "stableIsotopes": 5
  },
  {
   "number": 79,
@@ -2604,7 +2760,9 @@
    "Electronic connectors",
    "Dental crowns"
   ],
-  "fact": "Gold can be hammered into sheets so thin that they become see-through, and its symbol Au comes from aurum, the Latin word for gold."
+  "fact": "Gold can be hammered into sheets so thin that they become see-through, and its symbol Au comes from aurum, the Latin word for gold.",
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 1
  },
  {
   "number": 80,
@@ -2637,7 +2795,9 @@
    "Older thermometers and barometers",
    "Dental amalgam fillings"
   ],
-  "fact": "Mercury is so dense that pieces of solid lead and even iron cannonballs will float on its surface instead of sinking."
+  "fact": "Mercury is so dense that pieces of solid lead and even iron cannonballs will float on its surface instead of sinking.",
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 7
  },
  {
   "number": 81,
@@ -2670,7 +2830,9 @@
    "Infrared lens materials",
    "Special low-melting glass"
   ],
-  "fact": "Thallium was discovered by the bright green line it gives off in a flame, and its name comes from a Greek word for a green shoot."
+  "fact": "Thallium was discovered by the bright green line it gives off in a flame, and its name comes from a Greek word for a green shoot.",
+  "discoveredBy": "William Crookes",
+  "stableIsotopes": 2
  },
  {
   "number": 82,
@@ -2703,7 +2865,9 @@
    "Radiation shielding",
    "Weights and ballast"
   ],
-  "fact": "The word plumbing and lead's symbol Pb both come from plumbum, the Latin name for lead, because Roman water pipes were made from it."
+  "fact": "The word plumbing and lead's symbol Pb both come from plumbum, the Latin name for lead, because Roman water pipes were made from it.",
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 4
  },
  {
   "number": 83,
@@ -2736,7 +2900,9 @@
    "Lead-free solders",
    "Cosmetic pigments"
   ],
-  "fact": "Bismuth crystals grown in a laboratory form staircase-like spirals coated in a thin oxide layer that shimmers with rainbow colors."
+  "fact": "Bismuth crystals grown in a laboratory form staircase-like spirals coated in a thin oxide layer that shimmers with rainbow colors.",
+  "discoveredBy": "Claude François Geoffroy",
+  "stableIsotopes": 0
  },
  {
   "number": 84,
@@ -2769,7 +2935,9 @@
    "Spacecraft heat sources",
    "Neutron sources"
   ],
-  "fact": "Marie Curie named polonium after Poland, her homeland, which at the time did not exist as an independent country."
+  "fact": "Marie Curie named polonium after Poland, her homeland, which at the time did not exist as an independent country.",
+  "discoveredBy": "Pierre & Marie Curie",
+  "stableIsotopes": 0
  },
  {
   "number": 85,
@@ -2802,7 +2970,9 @@
    "Scientific research",
    "Nuclear medicine studies"
   ],
-  "fact": "Astatine's name comes from the Greek word for unstable, which suits an element whose longest-lived form has a half-life of only about eight hours."
+  "fact": "Astatine's name comes from the Greek word for unstable, which suits an element whose longest-lived form has a half-life of only about eight hours.",
+  "discoveredBy": "Dale R. Corson, Kenneth Ross MacKenzie & Emilio Segrè",
+  "stableIsotopes": 0
  },
  {
   "number": 86,
@@ -2835,7 +3005,9 @@
    "Tracing groundwater flow",
    "Studying air movement"
   ],
-  "fact": "Radon is the heaviest of the noble gases found in nature, and it is roughly eight times denser than the air around us."
+  "fact": "Radon is the heaviest of the noble gases found in nature, and it is roughly eight times denser than the air around us.",
+  "discoveredBy": "Friedrich Ernst Dorn",
+  "stableIsotopes": 0
  },
  {
   "number": 87,
@@ -2868,7 +3040,9 @@
    "Scientific research",
    "Studying atomic structure"
   ],
-  "fact": "Francium was discovered by Marguerite Perey, a former assistant of Marie Curie, who named the new element after her home country, France."
+  "fact": "Francium was discovered by Marguerite Perey, a former assistant of Marie Curie, who named the new element after her home country, France.",
+  "discoveredBy": "Marguerite Perey",
+  "stableIsotopes": 0
  },
  {
   "number": 88,
@@ -2901,7 +3075,9 @@
    "Cancer radiotherapy",
    "Early neutron sources"
   ],
-  "fact": "Factory workers known as the Radium Girls became seriously ill after licking their brushes to a point while painting glowing radium onto watch dials."
+  "fact": "Factory workers known as the Radium Girls became seriously ill after licking their brushes to a point while painting glowing radium onto watch dials.",
+  "discoveredBy": "Pierre & Marie Curie",
+  "stableIsotopes": 0
  },
  {
   "number": 89,
@@ -2934,7 +3110,9 @@
    "Neutron sources",
    "Scientific research"
   ],
-  "fact": "Actinium gives its name to the actinides, the row of fifteen radioactive elements that starts with it and ends with lawrencium."
+  "fact": "Actinium gives its name to the actinides, the row of fifteen radioactive elements that starts with it and ends with lawrencium.",
+  "discoveredBy": "André-Louis Debierne",
+  "stableIsotopes": 0
  },
  {
   "number": 90,
@@ -2967,7 +3145,9 @@
    "Nuclear fuel research",
    "Heat-resistant magnesium alloys"
   ],
-  "fact": "Thorium was named after Thor, the Norse god of thunder, by the Swedish chemist Berzelius, who first identified the element."
+  "fact": "Thorium was named after Thor, the Norse god of thunder, by the Swedish chemist Berzelius, who first identified the element.",
+  "discoveredBy": "Jöns Jacob Berzelius",
+  "stableIsotopes": 0
  },
  {
   "number": 91,
@@ -3000,7 +3180,9 @@
    "Scientific research",
    "Nuclear chemistry studies"
   ],
-  "fact": "Protactinium's name means parent of actinium, because it slowly decays into actinium as it gives off radiation."
+  "fact": "Protactinium's name means parent of actinium, because it slowly decays into actinium as it gives off radiation.",
+  "discoveredBy": "Kasimir Fajans & Oswald Helmuth Göhring",
+  "stableIsotopes": 0
  },
  {
   "number": 92,
@@ -3033,7 +3215,9 @@
    "Submarine reactor fuel",
    "Dating ancient rocks"
   ],
-  "fact": "Uranium was named after the planet Uranus, which had been discovered only eight years before the element was identified in 1789."
+  "fact": "Uranium was named after the planet Uranus, which had been discovered only eight years before the element was identified in 1789.",
+  "discoveredBy": "Martin Heinrich Klaproth",
+  "stableIsotopes": 0
  },
  {
   "number": 93,
@@ -3066,7 +3250,9 @@
    "Making plutonium-238",
    "Scientific research"
   ],
-  "fact": "Neptunium is named after the planet Neptune because it follows uranium in the table, just as Neptune follows Uranus in the solar system."
+  "fact": "Neptunium is named after the planet Neptune because it follows uranium in the table, just as Neptune follows Uranus in the solar system.",
+  "discoveredBy": "Edwin McMillan & Philip H. Abelson",
+  "stableIsotopes": 0
  },
  {
   "number": 94,
@@ -3099,7 +3285,9 @@
    "Nuclear reactor fuel",
    "Nuclear weapons"
   ],
-  "fact": "Plutonium was named after Pluto, continuing the planet pattern set by uranium and neptunium, back when Pluto was still counted as a planet."
+  "fact": "Plutonium was named after Pluto, continuing the planet pattern set by uranium and neptunium, back when Pluto was still counted as a planet.",
+  "discoveredBy": "Glenn T. Seaborg, Arthur C. Wahl, Joseph W. Kennedy & Edwin McMillan",
+  "stableIsotopes": 0
  },
  {
   "number": 95,
@@ -3132,7 +3320,9 @@
    "Industrial thickness gauges",
    "Oil well logging"
   ],
-  "fact": "Americium was discovered during the Manhattan Project, and Glenn Seaborg first revealed it to the public while answering a question on a children's radio quiz show."
+  "fact": "Americium was discovered during the Manhattan Project, and Glenn Seaborg first revealed it to the public while answering a question on a children's radio quiz show.",
+  "discoveredBy": "Glenn T. Seaborg, Ralph A. James, Leon O. Morgan & Albert Ghiorso",
+  "stableIsotopes": 0
  },
  {
   "number": 96,
@@ -3165,7 +3355,9 @@
    "Making heavier elements",
    "Scientific research"
   ],
-  "fact": "Curium is named after Marie and Pierre Curie, the married scientists who pioneered the study of radioactivity."
+  "fact": "Curium is named after Marie and Pierre Curie, the married scientists who pioneered the study of radioactivity.",
+  "discoveredBy": "Glenn T. Seaborg, Ralph A. James & Albert Ghiorso",
+  "stableIsotopes": 0
  },
  {
   "number": 97,
@@ -3198,7 +3390,9 @@
    "Scientific research",
    "Nuclear chemistry studies"
   ],
-  "fact": "Berkelium is named after Berkeley, California, and a berkelium target was used to create the first atoms of tennessine."
+  "fact": "Berkelium is named after Berkeley, California, and a berkelium target was used to create the first atoms of tennessine.",
+  "discoveredBy": "Stanley G. Thompson, Albert Ghiorso & Glenn T. Seaborg",
+  "stableIsotopes": 0
  },
  {
   "number": 98,
@@ -3231,7 +3425,9 @@
    "Oil well logging",
    "Detecting metal ores"
   ],
-  "fact": "Californium is named after the state and university of California, and its price has been quoted at millions of dollars per gram."
+  "fact": "Californium is named after the state and university of California, and its price has been quoted at millions of dollars per gram.",
+  "discoveredBy": "Stanley G. Thompson, Kenneth Street Jr., Albert Ghiorso & Glenn T. Seaborg",
+  "stableIsotopes": 0
  },
  {
   "number": 99,
@@ -3264,7 +3460,9 @@
    "Making heavier elements",
    "Studying heavy atoms"
   ],
-  "fact": "Einsteinium was first found in the debris of the first hydrogen bomb test in 1952, and its discovery was kept secret for several years."
+  "fact": "Einsteinium was first found in the debris of the first hydrogen bomb test in 1952, and its discovery was kept secret for several years.",
+  "discoveredBy": "Albert Ghiorso & team",
+  "stableIsotopes": 0
  },
  {
   "number": 100,
@@ -3297,7 +3495,9 @@
    "Nuclear physics experiments",
    "Studying atomic nuclei"
   ],
-  "fact": "Fermium is named after Enrico Fermi, who led the team that built the first nuclear reactor, and it was first found in hydrogen bomb debris."
+  "fact": "Fermium is named after Enrico Fermi, who led the team that built the first nuclear reactor, and it was first found in hydrogen bomb debris.",
+  "discoveredBy": "Albert Ghiorso & team",
+  "stableIsotopes": 0
  },
  {
   "number": 101,
@@ -3330,7 +3530,9 @@
    "Heavy element chemistry studies",
    "Nuclear physics experiments"
   ],
-  "fact": "Mendelevium is named after Dmitri Mendeleev, the Russian chemist who created an early periodic table and left gaps for elements not yet discovered."
+  "fact": "Mendelevium is named after Dmitri Mendeleev, the Russian chemist who created an early periodic table and left gaps for elements not yet discovered.",
+  "discoveredBy": "Albert Ghiorso, Bernard G. Harvey, Gregory R. Choppin, Stanley G. Thompson & Glenn T. Seaborg",
+  "stableIsotopes": 0
  },
  {
   "number": 102,
@@ -3363,7 +3565,9 @@
    "Studying heavy atoms",
    "Particle accelerator experiments"
   ],
-  "fact": "Nobelium is named after Alfred Nobel, the Swedish inventor of dynamite whose fortune was used to found the Nobel Prizes."
+  "fact": "Nobelium is named after Alfred Nobel, the Swedish inventor of dynamite whose fortune was used to found the Nobel Prizes.",
+  "discoveredBy": "Albert Ghiorso & team",
+  "stableIsotopes": 0
  },
  {
   "number": 103,
@@ -3396,7 +3600,9 @@
    "Testing periodic table theory",
    "Nuclear physics experiments"
   ],
-  "fact": "Lawrencium is named after Ernest Lawrence, who invented the cyclotron, a machine that speeds up particles and helped scientists create many new elements."
+  "fact": "Lawrencium is named after Ernest Lawrence, who invented the cyclotron, a machine that speeds up particles and helped scientists create many new elements.",
+  "discoveredBy": "Albert Ghiorso, Torbjørn Sikkeland, Almon E. Larsh & Robert M. Latimer",
+  "stableIsotopes": 0
  },
  {
   "number": 104,
@@ -3429,7 +3635,9 @@
    "Single-atom chemistry experiments",
    "Studying superheavy atoms"
   ],
-  "fact": "Rutherfordium is named after Ernest Rutherford, the New Zealand-born physicist who discovered that atoms have a tiny, dense nucleus."
+  "fact": "Rutherfordium is named after Ernest Rutherford, the New Zealand-born physicist who discovered that atoms have a tiny, dense nucleus.",
+  "discoveredBy": "Joint Institute for Nuclear Research & Lawrence Berkeley National Laboratory",
+  "stableIsotopes": 0
  },
  {
   "number": 105,
@@ -3462,7 +3670,9 @@
    "Single-atom chemistry experiments",
    "Nuclear physics experiments"
   ],
-  "fact": "Dubnium is named after Dubna, the Russian town that is home to a famous laboratory where many superheavy elements were first made."
+  "fact": "Dubnium is named after Dubna, the Russian town that is home to a famous laboratory where many superheavy elements were first made.",
+  "discoveredBy": "Joint Institute for Nuclear Research & Lawrence Berkeley National Laboratory",
+  "stableIsotopes": 0
  },
  {
   "number": 106,
@@ -3495,7 +3705,9 @@
    "Studying superheavy atoms",
    "Testing periodic table trends"
   ],
-  "fact": "Seaborgium is named after the American chemist Glenn Seaborg, who was still alive when the name was officially approved, a very rare honor."
+  "fact": "Seaborgium is named after the American chemist Glenn Seaborg, who was still alive when the name was officially approved, a very rare honor.",
+  "discoveredBy": "Lawrence Berkeley National Laboratory & Joint Institute for Nuclear Research",
+  "stableIsotopes": 0
  },
  {
   "number": 107,
@@ -3528,7 +3740,9 @@
    "Nuclear physics experiments",
    "Studying superheavy atoms"
   ],
-  "fact": "Bohrium is named after Niels Bohr, the Danish physicist whose model of the atom placed electrons in fixed energy levels around the nucleus."
+  "fact": "Bohrium is named after Niels Bohr, the Danish physicist whose model of the atom placed electrons in fixed energy levels around the nucleus.",
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
  },
  {
   "number": 108,
@@ -3561,7 +3775,9 @@
    "Single-atom chemistry experiments",
    "Studying nuclear stability"
   ],
-  "fact": "Hassium is named after Hassia, the Latin name for the German state of Hesse, where it was first made at a laboratory in Darmstadt."
+  "fact": "Hassium is named after Hassia, the Latin name for the German state of Hesse, where it was first made at a laboratory in Darmstadt.",
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
  },
  {
   "number": 109,
@@ -3594,7 +3810,9 @@
    "Nuclear physics experiments",
    "Studying superheavy atoms"
   ],
-  "fact": "Meitnerium is named after Lise Meitner, the Austrian-born physicist who helped explain nuclear fission but was overlooked for the Nobel Prize."
+  "fact": "Meitnerium is named after Lise Meitner, the Austrian-born physicist who helped explain nuclear fission but was overlooked for the Nobel Prize.",
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
  },
  {
   "number": 110,
@@ -3627,7 +3845,9 @@
    "Studying nuclear stability",
    "Particle accelerator experiments"
   ],
-  "fact": "Darmstadtium is named after Darmstadt, the German city whose research center first created it by firing nickel atoms at a lead target."
+  "fact": "Darmstadtium is named after Darmstadt, the German city whose research center first created it by firing nickel atoms at a lead target.",
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
  },
  {
   "number": 111,
@@ -3660,7 +3880,9 @@
    "Nuclear physics experiments",
    "Studying superheavy atoms"
   ],
-  "fact": "Roentgenium is named after Wilhelm Roentgen, the German physicist who discovered X-rays and won the very first Nobel Prize in Physics."
+  "fact": "Roentgenium is named after Wilhelm Roentgen, the German physicist who discovered X-rays and won the very first Nobel Prize in Physics.",
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
  },
  {
   "number": 112,
@@ -3693,7 +3915,9 @@
    "Single-atom chemistry experiments",
    "Testing atomic theories"
   ],
-  "fact": "Copernicium is named after Nicolaus Copernicus, the astronomer who argued that Earth orbits the Sun rather than the other way around."
+  "fact": "Copernicium is named after Nicolaus Copernicus, the astronomer who argued that Earth orbits the Sun rather than the other way around.",
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
  },
  {
   "number": 113,
@@ -3726,7 +3950,9 @@
    "Studying superheavy atoms",
    "Particle accelerator experiments"
   ],
-  "fact": "Nihonium takes its name from Nihon, a Japanese word for Japan that is often translated as land of the rising sun."
+  "fact": "Nihonium takes its name from Nihon, a Japanese word for Japan that is often translated as land of the rising sun.",
+  "discoveredBy": "RIKEN",
+  "stableIsotopes": 0
  },
  {
   "number": 114,
@@ -3759,7 +3985,9 @@
    "Studying nuclear stability",
    "Single-atom chemistry experiments"
   ],
-  "fact": "Flerovium is named after the Flerov Laboratory of Nuclear Reactions in Dubna, Russia, which itself honors the physicist Georgy Flerov."
+  "fact": "Flerovium is named after the Flerov Laboratory of Nuclear Reactions in Dubna, Russia, which itself honors the physicist Georgy Flerov.",
+  "discoveredBy": "Joint Institute for Nuclear Research",
+  "stableIsotopes": 0
  },
  {
   "number": 115,
@@ -3792,7 +4020,9 @@
    "Nuclear physics experiments",
    "Studying superheavy atoms"
   ],
-  "fact": "Moscovium is named after the Moscow region of Russia, which includes the town of Dubna, where the laboratory that helped discover it is located."
+  "fact": "Moscovium is named after the Moscow region of Russia, which includes the town of Dubna, where the laboratory that helped discover it is located.",
+  "discoveredBy": "Joint Institute for Nuclear Research & Lawrence Livermore National Laboratory",
+  "stableIsotopes": 0
  },
  {
   "number": 116,
@@ -3825,7 +4055,9 @@
    "Studying nuclear stability",
    "Particle accelerator experiments"
   ],
-  "fact": "Livermorium is named after the Lawrence Livermore National Laboratory in California, whose scientists worked with Russian researchers to discover it."
+  "fact": "Livermorium is named after the Lawrence Livermore National Laboratory in California, whose scientists worked with Russian researchers to discover it.",
+  "discoveredBy": "Joint Institute for Nuclear Research & Lawrence Livermore National Laboratory",
+  "stableIsotopes": 0
  },
  {
   "number": 117,
@@ -3858,7 +4090,9 @@
    "Studying superheavy atoms",
    "Testing atomic theories"
   ],
-  "fact": "Tennessine is named after the American state of Tennessee, home to Oak Ridge National Laboratory, which supplied material needed to make it."
+  "fact": "Tennessine is named after the American state of Tennessee, home to Oak Ridge National Laboratory, which supplied material needed to make it.",
+  "discoveredBy": "Joint Institute for Nuclear Research, Oak Ridge National Laboratory & Vanderbilt University",
+  "stableIsotopes": 0
  },
  {
   "number": 118,
@@ -3891,6 +4125,8 @@
    "Nuclear physics experiments",
    "Testing atomic theories"
   ],
-  "fact": "Oganesson is named after Yuri Oganessian, a Russian physicist of Armenian descent, who was still living when the element officially received his name."
+  "fact": "Oganesson is named after Yuri Oganessian, a Russian physicist of Armenian descent, who was still living when the element officially received his name.",
+  "discoveredBy": "Joint Institute for Nuclear Research & Lawrence Livermore National Laboratory",
+  "stableIsotopes": 0
  }
 ]
