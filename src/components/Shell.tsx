@@ -64,7 +64,7 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
   const setSettings = useUi((s) => s.setSettings);
   const lvl = levelFromXp(xp);
   const streak = liveStreak(daily, todayKey());
-  const active = route === 'game' ? 'play' : route;
+  const active = route === 'game' || route === 'challenge' ? 'play' : route;
   const account = useHeaderAccount();
 
   // Immersive screens (games, lessons) bring their own <main>, so the skip-link target here is a plain wrapper.

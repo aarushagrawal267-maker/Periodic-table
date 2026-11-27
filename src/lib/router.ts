@@ -12,7 +12,8 @@ export type Route =
   | { name: 'learn'; chapter?: string }
   | { name: 'life' }
   | { name: 'match' }
-  | { name: 'account' };
+  | { name: 'account' }
+  | { name: 'challenge'; level?: string };
 
 export function parse(hash: string): Route {
   const [, a, b] = hash.replace(/^#/, '').split('/');
@@ -35,6 +36,8 @@ export function parse(hash: string): Route {
       return { name: 'match' };
     case 'account':
       return { name: 'account' };
+    case 'challenge':
+      return { name: 'challenge', level: b };
     default:
       return { name: 'home' };
   }

@@ -13,6 +13,12 @@ export interface SettingsState {
   /** Quick Quiz question timer on Standard and Expert. Learner never has one. */
   quizTimer: boolean;
   set: (patch: Partial<SettingsData>) => void;
+  /**
+   * Size of the puzzle board, 1 = fit to the screen. A per-device view preference:
+   * it is saved on this device but deliberately not one of SETTING_KEYS, so it never syncs.
+   */
+  boardZoom: number;
+  setBoardZoom: (zoom: number) => void;
   /** Back to the defaults. Used when a signed-in device signs out (docs/ACCOUNTS.md 5.6.4). */
   reset: () => void;
 }
@@ -37,7 +43,9 @@ export const useSettings = create<SettingsState>()(
   persist(
     (set) => ({
       ...defaultSettings(),
+      boardZoom: 1,
       set: (patch) => set(patch),
+      setBoardZoom: (boardZoom) => set({ boardZoom }),
       reset: () => set(defaultSettings()),
     }),
     {
@@ -53,6 +61,8 @@ export const useSettings = create<SettingsState>()(
     },
   ),
 );
+
+export const BOARD_ZOOM_STEPS = [0.6, 0.75, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2] as const;
 
 export const DIFFICULTIES: { id: Difficulty; name: string; desc: string }[] = [
   { id: 'learner', name: 'Learner', desc: 'Atomic numbers on tiles and colour hints on the table' },

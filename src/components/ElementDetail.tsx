@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
-import { ELEMENTS, byNumber, catVar, categoryLabel, formatNumber, type Element } from '../lib/elements';
+import { ELEMENTS, byNumber, catVar, categoryLabel, formatNumber, metallicCharacter, type Element } from '../lib/elements';
 import { shells } from '../lib/shells';
 import { useProgress } from '../store/progress';
 import { announceAchievements, useUi } from '../store/ui';
@@ -79,11 +79,13 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
   const c = catVar(e.category);
   const toC = (k: number) => `${Math.round(k - 273.15).toLocaleString('en-US')} °C`;
 
-  const props: [string, string, string?][] = [
+  /** [label, value, unit, wide]. Wide rows hold names, in the text face, spanning both columns on phones. */
+  const props: [string, string, string?, boolean?][] = [
     ['Atomic mass', `${formatNumber(e.mass, 6)}`, 'u'],
     ['State at 20 °C', e.state + (e.statePredicted ? ' (predicted)' : '')],
     ['Group · Period', `${e.group ?? '—'} · ${e.period}`],
     ['Block', `${e.block}-block`],
+    ['Metallic character', metallicCharacter(e.category)],
     ['Electronegativity', formatNumber(e.electronegativity), e.electronegativity !== null ? 'Pauling' : undefined],
     ['Density', formatNumber(e.density), e.density !== null ? 'g/cm³' : undefined],
     ['Melting point', e.melt === null ? '—' : `${formatNumber(e.melt, 4)} K`, e.melt === null ? undefined : toC(e.melt)],
@@ -91,7 +93,9 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
     ['Atomic radius', formatNumber(e.radius), e.radius !== null ? 'pm' : undefined],
     ['Ionization energy', formatNumber(e.ionization), e.ionization !== null ? 'eV' : undefined],
     ['Discovered', e.ancient ? 'Ancient' : (e.year?.toString() ?? '—')],
+    ['Discovered by', e.discoveredBy ?? '—', undefined, true],
     ['Oxidation states', e.oxidation ?? '—'],
+    ['Stable isotopes', e.stableIsotopes === null ? '—' : e.stableIsotopes === 0 ? 'None' : String(e.stableIsotopes), e.stableIsotopes === 0 ? 'all radioactive' : undefined],
   ];
 
   return (
@@ -150,10 +154,10 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
       </div>
 
       <dl className="grid grid-cols-2 gap-px border-y border-line bg-line sm:grid-cols-3">
-        {props.map(([k, v, unit]) => (
-          <div key={k} className="bg-surface px-4 py-3 sm:px-8">
+        {props.map(([k, v, unit, wide]) => (
+          <div key={k} className={`bg-surface px-4 py-3 sm:px-8 ${wide ? 'col-span-2 sm:col-span-1' : ''}`}>
             <dt className="text-[13px] text-ink-2">{k}</dt>
-            <dd className="num mt-1 text-[17px] font-medium">
+            <dd className={wide ? 'mt-1 text-[15px] font-medium leading-snug' : 'num mt-1 text-[17px] font-medium'}>
               {v} {unit && <span className="mono whitespace-nowrap text-xs font-normal text-ink-3">{unit}</span>}
             </dd>
           </div>
@@ -169,7 +173,7 @@ function ElementDetail({ e, browse }: { e: Element; browse: (n: number, focus: '
         </span>
         <NeighbourButton n={e.number === 118 ? 1 : e.number + 1} dir="next" onClick={(n) => browse(n, 'next')} />
       </nav>
-      <p className="px-4 pb-6 text-xs text-ink-3 sm:px-8">Property data: PubChem (NCBI). Values for superheavy elements are predictions or estimates.</p>
+      <p className="px-4 pb-6 text-xs text-ink-3 sm:px-8">Property data: PubChem (NCBI). Stable isotope counts: Wikipedia. Values for superheavy elements are predictions or estimates.</p>
     </article>
   );
 }

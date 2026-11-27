@@ -1,22 +1,22 @@
 import { AnimatePresence, motion, useIsPresent } from 'motion/react';
-import { ArrowLeft, Lightbulb, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Lightbulb, Pause, Play, Shuffle, Timer, Volume2, VolumeX, ZoomIn, ZoomOut } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore, type KeyboardEvent, type PointerEvent, type RefObject } from 'react';
 import { ElementTile, tileRadius } from '../components/ElementTile';
 import { DUR, EASE, tween } from '../components/motion';
 import { PeriodicGrid, type CellRect } from '../components/PeriodicGrid';
 import { AnimatedNumber, Elapsed } from '../components/Stats';
 import { Sheet } from '../components/Sheet';
-import { Results } from '../components/Results';
+import { Results, makeBackgroundInert } from '../components/Results';
 import { ELEMENTS, byNumber, catVar, type Element } from '../lib/elements';
-import { createGame, gameReducer, hand, summarize, EXPERT_LIVES, HAND_SIZE } from '../lib/game';
+import { createGame, gameReducer, hand, summarize, timeLeft, EXPERT_LIVES, HAND_SIZE, type GameState } from '../lib/game';
 import { haptic, sfx } from '../lib/feedback';
-import { multiplier } from '../lib/scoring';
+import { formatTime, multiplier } from '../lib/scoring';
 import { useProgress, type RoundOutcome, type RoundSummary } from '../store/progress';
-import { useSettings, type Difficulty } from '../store/settings';
+import { BOARD_ZOOM_STEPS, useSettings, type Difficulty } from '../store/settings';
 import { announceAchievements, useUi } from '../store/ui';
 
 export interface GameConfig {
-  kind: 'place' | 'daily' | 'lesson';
+  kind: 'place' | 'daily' | 'lesson' | 'challenge';
   title: string;
   subtitle: string;
   targets: number[];
@@ -26,6 +26,8 @@ export interface GameConfig {
   regionId?: string;
   dailyKey?: string;
   order?: number[];
+  /** Optional time limit for the round, in ms. When it runs out the round ends: "Time's up!" */
+  timeLimitMs?: number;
 }
 
 interface Props {
@@ -38,10 +40,12 @@ interface Props {
   exitLabel?: string;
   /** Called once, on the first placement attempt or hint. The daily only counts as attempted from then on. */
   onFirstMove?: () => void;
+  /** Replaces the results headline and message when the round is completed (Timed Challenge levels). */
+  finale?: { headline: string; message: string };
 }
 
-export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, onFirstMove }: Props) {
-  const [state, dispatch] = useReducer(gameReducer, config, (c) => createGame(c.targets, c.difficulty, c.order));
+export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, onFirstMove, finale }: Props) {
+  const [state, dispatch] = useReducer(gameReducer, config, (c) => createGame(c.targets, c.difficulty, { order: c.order, timeLimitMs: c.timeLimitMs }));
   const [result, setResult] = useState<{ summary: RoundSummary; outcome: RoundOutcome } | null>(null);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [announce, setAnnounce] = useState('');
@@ -79,6 +83,36 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
     if (moved) firstMoveRef.current?.();
   }, [moved]);
   const isDaily = config.kind === 'daily';
+  const timed = state.timeLimitMs > 0;
+  const paused = state.phase === 'paused';
+  // The daily deals the same tiles in the same order to everyone, so it keeps that order.
+  const canShuffle = !isDaily;
+  const boardZoom = useSettings((s) => s.boardZoom) ?? 1;
+
+  const togglePause = useCallback(() => {
+    if (state.phase === 'playing') {
+      setTip(null);
+      dispatch({ type: 'pause', now: Date.now() });
+      sfx.pick();
+    } else if (state.phase === 'paused') {
+      dispatch({ type: 'resume', now: Date.now() });
+      sfx.pick();
+    }
+  }, [state.phase]);
+  const shuffleTray = useCallback(() => {
+    if (state.phase !== 'playing' || state.queue.length < 2) return;
+    dispatch({ type: 'shuffle' });
+    sfx.pick();
+    say('Tiles shuffled.');
+  }, [state.phase, state.queue.length, say]);
+
+  // Time limit: end the round when the clock runs out. Re-armed after every resume.
+  useEffect(() => {
+    if (!timed || state.phase !== 'playing') return;
+    const t = setTimeout(() => dispatch({ type: 'timeout', now: Date.now() }), timeLeft(state, Date.now()));
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- startedAt moves on resume, which re-arms the timer
+  }, [timed, state.phase, state.startedAt]);
 
   // Countdown, then start.
   const [count, setCount] = useState(reduceMotion ? 0 : 3);
@@ -240,10 +274,12 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
         dispatch({ type: 'select', number: tiles[i] });
         sfx.pick();
       } else if (e.key === 'h' || e.key === 'H') dispatch({ type: 'hint' });
+      else if (e.key === 'p' || e.key === 'P') togglePause();
+      else if ((e.key === 's' || e.key === 'S') && canShuffle) shuffleTray();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [state.phase, state.selected, tiles]);
+  }, [state.phase, state.selected, tiles, togglePause, shuffleTray, canShuffle]);
 
   const onSlotKey = (e: KeyboardEvent<HTMLButtonElement>) => {
     const dirs: Record<string, [number, number]> = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
@@ -367,7 +403,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
       {/* HUD: quiet figures with labels. */}
       <header className="sticky top-0 z-30 border-b border-line bg-bg">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:gap-4 sm:px-6">
-          <button onClick={() => (state.phase === 'playing' && moved ? setConfirmLeave(true) : onExit())} className="icon-btn -ml-3 md:-ml-2" aria-label="Leave round">
+          <button onClick={() => ((state.phase === 'playing' || paused) && moved ? setConfirmLeave(true) : onExit())} className="icon-btn -ml-3 md:-ml-2" aria-label="Leave round">
             <ArrowLeft size={18} strokeWidth={1.5} />
           </button>
           <div className="min-w-0 flex-1">
@@ -394,18 +430,38 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
                 </div>
               </div>
             )}
-            <div className={`hidden text-right ${learner ? '' : 'sm:block'}`}>
-              <div className="text-xs leading-4 text-ink-3">Time</div>
-              <div className="num text-base font-medium leading-6">
-                <Elapsed start={state.startedAt} end={state.endedAt} running={state.phase === 'playing'} />
+            {timed ? (
+              <div className="text-right" data-testid="time-left">
+                <div className="flex items-center justify-end gap-1 text-xs leading-4 text-ink-3">
+                  <Timer size={12} strokeWidth={1.5} aria-hidden /> Left
+                </div>
+                <div className="num text-base font-medium leading-6">
+                  <Countdown state={state} />
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className={`hidden text-right ${learner ? '' : 'sm:block'}`}>
+                <div className="text-xs leading-4 text-ink-3">Time</div>
+                <div className="num text-base font-medium leading-6">
+                  <Elapsed start={state.startedAt} end={paused ? state.pausedAt : state.endedAt} running={state.phase === 'playing'} />
+                </div>
+              </div>
+            )}
             <div className="min-w-12 text-right">
               <div className="text-xs leading-4 text-ink-3">Score</div>
               <div className="num text-base font-medium leading-6">
                 <AnimatedNumber value={state.score} />
               </div>
             </div>
+            <button
+              onClick={togglePause}
+              disabled={state.phase !== 'playing' && !paused}
+              className="icon-btn -mr-2 disabled:text-ink-3 sm:mr-0"
+              aria-label={paused ? 'Resume (P)' : 'Pause (P)'}
+              title={paused ? 'Resume (P)' : 'Pause (P)'}
+            >
+              {paused ? <Play size={18} strokeWidth={1.5} /> : <Pause size={18} strokeWidth={1.5} />}
+            </button>
             <button onClick={() => setSettings({ sound: !sound })} className="icon-btn -mr-2 hidden sm:inline-grid" aria-label={sound ? 'Mute sounds' : 'Unmute sounds'}>
               {sound ? <Volume2 size={18} strokeWidth={1.5} /> : <VolumeX size={18} strokeWidth={1.5} />}
             </button>
@@ -419,12 +475,14 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
             On phones it keeps the 16px page gutter like every other screen; a table too wide for it scrolls inside it. */}
         <div aria-hidden className="flex-1" />
         <div className="relative mx-auto w-full max-w-7xl">
+          <ZoomControl />
           <ComboBadge combo={state.combo} mult={mult} />
           <PeriodicGrid
             numbers={config.view ?? config.targets}
             renderCell={renderCell}
             minCell={bigBoard || !wide ? 34 : 38}
             maxCell={72}
+            zoom={boardZoom}
             showAxes
             className="pb-2 pt-6 sm:pt-8"
           />
@@ -492,15 +550,28 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
             </AnimatePresence>
           </div>
           <div className="flex shrink-0 flex-row-reverse items-center justify-between gap-1 sm:flex-col sm:justify-center">
-            <button
-              onClick={() => dispatch({ type: 'hint' })}
-              disabled={state.phase !== 'playing'}
-              className="btn btn-secondary w-11 px-0 text-ink-2 disabled:text-ink-3 sm:h-12 sm:w-12"
-              aria-label="Hint: show where the selected element goes (H)"
-              title="Hint (H)"
-            >
-              <Lightbulb size={18} strokeWidth={1.5} />
-            </button>
+            <div className="flex items-center gap-2">
+              {canShuffle && (
+                <button
+                  onClick={shuffleTray}
+                  disabled={state.phase !== 'playing' || state.queue.length < 2}
+                  className="btn btn-secondary w-11 px-0 text-ink-2 disabled:text-ink-3 sm:h-12 sm:w-12"
+                  aria-label="Shuffle the tiles (S)"
+                  title="Shuffle (S)"
+                >
+                  <Shuffle size={18} strokeWidth={1.5} />
+                </button>
+              )}
+              <button
+                onClick={() => dispatch({ type: 'hint' })}
+                disabled={state.phase !== 'playing'}
+                className="btn btn-secondary w-11 px-0 text-ink-2 disabled:text-ink-3 sm:h-12 sm:w-12"
+                aria-label="Hint: show where the selected element goes (H)"
+                title="Hint (H)"
+              >
+                <Lightbulb size={18} strokeWidth={1.5} />
+              </button>
+            </div>
             <span className="meta">{state.queue.length} left</span>
           </div>
         </div>
@@ -513,6 +584,18 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
           <TrayTile e={byNumber(dragging)} difficulty={config.difficulty} selected />
         </div>
       )}
+
+      {/* Pause: the board is covered, so a pause cannot be used to study it. */}
+      <AnimatePresence>
+        {paused && (
+          <PauseScreen
+            title={config.title}
+            detail={`${state.placed.length}/${config.targets.length} placed${timed ? ` · ${formatTime(timeLeft(state, Date.now()))} left` : ''}`}
+            onResume={togglePause}
+            onLeave={() => (moved ? setConfirmLeave(true) : onExit())}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Countdown */}
       <AnimatePresence>
@@ -571,6 +654,8 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
           nextLabel={nextLabel}
           onExit={onExit}
           exitLabel={exitLabel}
+          headline={result.summary.completed ? finale?.headline : undefined}
+          message={result.summary.completed ? finale?.message : undefined}
         />
       )}
     </div>
@@ -777,3 +862,106 @@ function ComboBadge({ combo, mult }: { combo: number; mult: number }) {
     </div>
   );
 }
+
+/** Time left on a timed round. Turns red in the last ten seconds. */
+function Countdown({ state }: { state: GameState }) {
+  const running = state.phase === 'playing';
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(id);
+  }, [running]);
+  const secs = Math.ceil(timeLeft(state, running ? now : Date.now()) / 1000);
+  return (
+    <span className={secs <= 10 ? 'text-bad' : undefined} aria-label={`${secs} seconds left`}>
+      {formatTime(secs * 1000)}
+    </span>
+  );
+}
+
+/** Make the board bigger or smaller. Remembered on this device between rounds; it never touches the round itself. */
+function ZoomControl() {
+  const zoom = useSettings((s) => s.boardZoom) ?? 1;
+  const setZoom = useSettings((s) => s.setBoardZoom);
+  const i = BOARD_ZOOM_STEPS.indexOf(zoom as (typeof BOARD_ZOOM_STEPS)[number]);
+  const at = i === -1 ? BOARD_ZOOM_STEPS.indexOf(1) : i;
+  const step = (d: number) => setZoom(BOARD_ZOOM_STEPS[Math.max(0, Math.min(BOARD_ZOOM_STEPS.length - 1, at + d))]);
+  const pct = Math.round(zoom * 100);
+  return (
+    <div className="flex items-center justify-center gap-1" role="group" aria-label="Board zoom">
+      <button onClick={() => step(-1)} disabled={at === 0} className="icon-btn h-9 w-9 disabled:text-ink-3" aria-label="Zoom out" title="Zoom out">
+        <ZoomOut size={16} strokeWidth={1.5} />
+      </button>
+      <button onClick={() => setZoom(1)} className="meta min-w-12 rounded-control px-1 py-2 hover:text-ink" aria-label={`Zoom ${pct} percent. Reset to 100 percent`} title="Reset zoom">
+        {pct}%
+      </button>
+      <button onClick={() => step(1)} disabled={at === BOARD_ZOOM_STEPS.length - 1} className="icon-btn h-9 w-9 disabled:text-ink-3" aria-label="Zoom in" title="Zoom in">
+        <ZoomIn size={16} strokeWidth={1.5} />
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Full-screen pause. A modal (WCAG 2.4.3): focus moves to Resume, the page behind is inert,
+ * and Escape or P resumes. "Leave round" asks first when the round has moves in it.
+ */
+function PauseScreen({ title, detail, onResume, onLeave }: { title: string; detail: string; onResume: () => void; onLeave: () => void }) {
+  const root = useRef<HTMLDivElement>(null);
+  const resume = useRef<HTMLButtonElement>(null);
+  const resumeRef = useRef(onResume);
+  resumeRef.current = onResume;
+  useEffect(() => {
+    const restore = makeBackgroundInert(root.current);
+    resume.current?.focus({ preventScroll: true });
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      // Another dialog on top (the "Leave this round?" sheet) handles its own keys.
+      const active = document.activeElement;
+      const other = active instanceof HTMLElement ? active.closest('[aria-modal="true"]') : null;
+      if (other && other !== root.current) return;
+      if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        resumeRef.current();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      restore();
+    };
+  }, []);
+  return (
+    <motion.div
+      ref={root}
+      className="fixed inset-0 z-40 grid place-items-center bg-bg px-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="paused-title"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={tween(DUR.menu)}
+    >
+      <div className="w-full max-w-sm text-center">
+        <Pause size={28} strokeWidth={1.5} className="mx-auto text-ink-2" aria-hidden />
+        <h2 id="paused-title" className="t-display mt-4">
+          Paused
+        </h2>
+        <p className="mt-2 text-ink-2">{title}</p>
+        <p className="meta mt-1">{detail}</p>
+        <p className="mt-3 text-[13px] leading-5 text-ink-3">The clock is stopped. Press P or Esc to carry on.</p>
+        <div className="mt-8 flex flex-col gap-3">
+          <button ref={resume} onClick={onResume} className="btn btn-primary w-full">
+            <Play size={18} strokeWidth={1.5} aria-hidden /> Resume
+          </button>
+          <button onClick={onLeave} className="btn btn-secondary w-full">
+            Leave round
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+

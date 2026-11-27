@@ -1,9 +1,10 @@
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight, Star, Timer } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { DifficultyPicker } from '../components/DifficultyPicker';
 import { ElementChip, tileRadius } from '../components/ElementTile';
 import { SectionHeader } from '../components/SectionHeader';
 import { MiniTable } from '../components/MiniTable';
+import { CHALLENGE_LEVELS, challengeCleared } from '../lib/challenge';
 import { bySymbol } from '../lib/elements';
 import { REGIONS, regionById, type Region } from '../lib/regions';
 import { go } from '../lib/router';
@@ -37,6 +38,7 @@ export function PlayHub() {
         ))}
       </div>
       {full && <FullTableCard region={full} />}
+      <ChallengeCard />
 
       <section className="mt-12 md:mt-16" aria-labelledby="more-ways">
         <SectionHeader id="more-ways" title="More ways to play" sub="Quick rounds for when you have five minutes" />
@@ -129,6 +131,33 @@ function FullTableCard({ region: r }: { region: Region }) {
           Place all {r.numbers.length} <ArrowRight size={16} strokeWidth={1.5} aria-hidden />
         </span>
       </div>
+    </a>
+  );
+}
+
+/** The Timed Challenge: the classic six-level ladder against the clock. */
+function ChallengeCard() {
+  const best = useProgress((s) => s.best);
+  const cleared = CHALLENGE_LEVELS.filter((l) => challengeCleared(best, l.id)).length;
+  return (
+    <a href="#/challenge" className="card card-link mt-3 flex items-center gap-3 p-4 sm:gap-6 sm:p-6 md:mt-4">
+      <div className="grid w-24 shrink-0 grid-cols-6 items-end gap-1 self-stretch sm:w-28" aria-hidden>
+        {CHALLENGE_LEVELS.map((l, i) => (
+          <span
+            key={l.id}
+            className="rounded-[3px]"
+            style={{ height: `${30 + (i / (CHALLENGE_LEVELS.length - 1)) * 70}%`, background: i < cleared ? 'var(--accent)' : 'var(--surface-2)' }}
+          />
+        ))}
+      </div>
+      <div className="min-w-0 flex-1">
+        <h2 className="flex items-center gap-2 text-base font-medium leading-6">
+          <Timer size={16} strokeWidth={1.5} aria-hidden /> Timed challenge
+        </h2>
+        <p className="mt-1 text-sm leading-5 text-ink-2">Six levels against the clock, from 10 elements up to all 118. Pause whenever you need to</p>
+        <p className="meta mt-3">{cleared}/6 levels cleared</p>
+      </div>
+      <ArrowRight size={16} strokeWidth={1.5} aria-hidden className="hidden shrink-0 text-ink-2 sm:block" />
     </a>
   );
 }

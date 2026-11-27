@@ -40,6 +40,10 @@ export interface Element {
   summary: string | null;
   uses: string[];
   fact: string | null;
+  /** Person, team or lab credited with the discovery (or isolation). */
+  discoveredBy: string | null;
+  /** Number of stable isotopes; 0 means every isotope is radioactive. */
+  stableIsotopes: number | null;
 }
 
 export const ELEMENTS = raw as Element[];
@@ -60,6 +64,13 @@ export const CATEGORIES: { id: Category; label: string; short: string }[] = [
 ];
 export const categoryLabel = (c: Category) => CATEGORIES.find((x) => x.id === c)!.label;
 export const catVar = (c: Category) => `var(--cat-${c})`;
+
+/** Broad metallic character, derived from the category. */
+export function metallicCharacter(c: Category): 'Metal' | 'Metalloid' | 'Nonmetal' {
+  if (c === 'metalloid') return 'Metalloid';
+  if (c === 'nonmetal' || c === 'halogen' || c === 'noble-gas') return 'Nonmetal';
+  return 'Metal';
+}
 
 /** Placeholder cells in group 3 that point to the detached f-block rows. */
 export const F_BLOCK_MARKERS = [

@@ -22,7 +22,8 @@ More screenshots are in [`screenshots/`](screenshots/).
 | Section | What the student does |
 |---|---|
 | **Learn** | A path of 13 short chapters (from "The lightest ten" to "Made in the lab") with flashcards, memory tricks and a placement round at the end of each chapter. |
-| **Play (puzzles)** | Drag elements from a tray onto an empty table, region by region (the first twenty, reactive metals, the right-hand side, transition metals, lanthanides and actinides, the full table), on three difficulty levels. Combos, speed bonus, stars and hints. Works with touch, mouse and keyboard. |
+| **Play (puzzles)** | Drag elements from a tray onto an empty table, region by region (the first twenty, reactive metals, the right-hand side, transition metals, lanthanides and actinides, the full table), on three difficulty levels. Combos, speed bonus, stars and hints. Pause (P), shuffle the tray (S) and zoom the board. Works with touch, mouse and keyboard. |
+| **Timed challenge** | Six levels against the clock (10, 25, 50, 75, 100, then all 118 elements, 30 down to 8 seconds per element). Clearing a level opens the next; time running out ends the round. |
 | **Daily challenge** | Twelve elements to place, the same for everyone each day (seeded by date), one attempt, a streak and a shareable result. |
 | **Quick quiz** | Ten questions on symbols, names, atomic numbers, element groups and facts, with an optional timer. |
 | **Match pairs** | A memory game pairing element symbols with their names. |
@@ -129,6 +130,7 @@ firestore.rules, firebase.json   Firebase security rules and emulator config
 
 - Element properties: PubChem (NCBI), `scripts/source/pubchem-periodic-table.json`.
 - Learning content (summary, uses, fact for each element): `src/data/content-1.json`, `src/data/content-2.json`.
+- Discoverers and stable isotope counts: `src/data/discovery.json`. Isotope counts follow Wikipedia's "List of elements by stability of isotopes" (251 stable nuclides).
 - Progress is stored in the browser's local storage. Accounts are optional: a student who signs in with Google or an email has their progress saved to their account in Cloud Firestore (Google Firebase) and synced across devices. A build without the `VITE_FIREBASE_*` variables has no accounts and sends nothing to a server. See `docs/ACCOUNTS.md`.
 
 ## Limitations

@@ -1,0 +1,474 @@
+{
+ "1": {
+  "discoveredBy": "Henry Cavendish",
+  "stableIsotopes": 2
+ },
+ "2": {
+  "discoveredBy": "Pierre Janssen & Norman Lockyer",
+  "stableIsotopes": 2
+ },
+ "3": {
+  "discoveredBy": "Johan August Arfwedson",
+  "stableIsotopes": 2
+ },
+ "4": {
+  "discoveredBy": "Louis Nicolas Vauquelin",
+  "stableIsotopes": 1
+ },
+ "5": {
+  "discoveredBy": "Joseph Louis Gay-Lussac",
+  "stableIsotopes": 2
+ },
+ "6": {
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 2
+ },
+ "7": {
+  "discoveredBy": "Daniel Rutherford",
+  "stableIsotopes": 2
+ },
+ "8": {
+  "discoveredBy": "Carl Wilhelm Scheele & Joseph Priestley",
+  "stableIsotopes": 3
+ },
+ "9": {
+  "discoveredBy": "Henri Moissan (first isolated it in 1886)",
+  "stableIsotopes": 1
+ },
+ "10": {
+  "discoveredBy": "Morris Travers",
+  "stableIsotopes": 3
+ },
+ "11": {
+  "discoveredBy": "Humphry Davy",
+  "stableIsotopes": 1
+ },
+ "12": {
+  "discoveredBy": "Joseph Black",
+  "stableIsotopes": 3
+ },
+ "13": {
+  "discoveredBy": "Hans Christian Ørsted (first isolated it in 1825)",
+  "stableIsotopes": 1
+ },
+ "14": {
+  "discoveredBy": "Jöns Jacob Berzelius",
+  "stableIsotopes": 3
+ },
+ "15": {
+  "discoveredBy": "Hennig Brand",
+  "stableIsotopes": 1
+ },
+ "16": {
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 4
+ },
+ "17": {
+  "discoveredBy": "Carl Wilhelm Scheele",
+  "stableIsotopes": 2
+ },
+ "18": {
+  "discoveredBy": "Lord Rayleigh & William Ramsay",
+  "stableIsotopes": 3
+ },
+ "19": {
+  "discoveredBy": "Humphry Davy",
+  "stableIsotopes": 2
+ },
+ "20": {
+  "discoveredBy": "Humphry Davy",
+  "stableIsotopes": 5
+ },
+ "21": {
+  "discoveredBy": "Lars Fredrik Nilson",
+  "stableIsotopes": 1
+ },
+ "22": {
+  "discoveredBy": "William Gregor",
+  "stableIsotopes": 5
+ },
+ "23": {
+  "discoveredBy": "Andrés Manuel del Río",
+  "stableIsotopes": 1
+ },
+ "24": {
+  "discoveredBy": "Louis Nicolas Vauquelin",
+  "stableIsotopes": 4
+ },
+ "25": {
+  "discoveredBy": "Johan Gottlieb Gahn",
+  "stableIsotopes": 1
+ },
+ "26": {
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 4
+ },
+ "27": {
+  "discoveredBy": "Georg Brandt",
+  "stableIsotopes": 1
+ },
+ "28": {
+  "discoveredBy": "Axel Fredrik Cronstedt",
+  "stableIsotopes": 5
+ },
+ "29": {
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 2
+ },
+ "30": {
+  "discoveredBy": "Andreas Marggraf",
+  "stableIsotopes": 5
+ },
+ "31": {
+  "discoveredBy": "Paul-Émile Lecoq de Boisbaudran",
+  "stableIsotopes": 2
+ },
+ "32": {
+  "discoveredBy": "Clemens Winkler",
+  "stableIsotopes": 4
+ },
+ "33": {
+  "discoveredBy": "Albertus Magnus (first isolated it around 1250)",
+  "stableIsotopes": 1
+ },
+ "34": {
+  "discoveredBy": "Jöns Jacob Berzelius",
+  "stableIsotopes": 5
+ },
+ "35": {
+  "discoveredBy": "Antoine Jérôme Balard",
+  "stableIsotopes": 2
+ },
+ "36": {
+  "discoveredBy": "William Ramsay & Morris Travers",
+  "stableIsotopes": 5
+ },
+ "37": {
+  "discoveredBy": "Robert Bunsen & Gustav Kirchhoff",
+  "stableIsotopes": 1
+ },
+ "38": {
+  "discoveredBy": "Adair Crawford",
+  "stableIsotopes": 4
+ },
+ "39": {
+  "discoveredBy": "Johan Gadolin",
+  "stableIsotopes": 1
+ },
+ "40": {
+  "discoveredBy": "Martin Heinrich Klaproth",
+  "stableIsotopes": 4
+ },
+ "41": {
+  "discoveredBy": "Charles Hatchett",
+  "stableIsotopes": 1
+ },
+ "42": {
+  "discoveredBy": "Carl Wilhelm Scheele",
+  "stableIsotopes": 6
+ },
+ "43": {
+  "discoveredBy": "Carlo Perrier & Emilio Segrè",
+  "stableIsotopes": 0
+ },
+ "44": {
+  "discoveredBy": "Karl Ernst Claus",
+  "stableIsotopes": 7
+ },
+ "45": {
+  "discoveredBy": "William Hyde Wollaston",
+  "stableIsotopes": 1
+ },
+ "46": {
+  "discoveredBy": "William Hyde Wollaston",
+  "stableIsotopes": 6
+ },
+ "47": {
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 2
+ },
+ "48": {
+  "discoveredBy": "Friedrich Stromeyer",
+  "stableIsotopes": 6
+ },
+ "49": {
+  "discoveredBy": "Ferdinand Reich & Hieronymus Theodor Richter",
+  "stableIsotopes": 1
+ },
+ "50": {
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 10
+ },
+ "51": {
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 2
+ },
+ "52": {
+  "discoveredBy": "Franz-Joseph Müller von Reichenstein",
+  "stableIsotopes": 6
+ },
+ "53": {
+  "discoveredBy": "Bernard Courtois",
+  "stableIsotopes": 1
+ },
+ "54": {
+  "discoveredBy": "William Ramsay & Morris Travers",
+  "stableIsotopes": 7
+ },
+ "55": {
+  "discoveredBy": "Robert Bunsen & Gustav Kirchhoff",
+  "stableIsotopes": 1
+ },
+ "56": {
+  "discoveredBy": "Humphry Davy",
+  "stableIsotopes": 6
+ },
+ "57": {
+  "discoveredBy": "Carl Gustaf Mosander",
+  "stableIsotopes": 1
+ },
+ "58": {
+  "discoveredBy": "Martin Heinrich Klaproth, Jöns Jacob Berzelius & Wilhelm Hisinger",
+  "stableIsotopes": 4
+ },
+ "59": {
+  "discoveredBy": "Carl Auer von Welsbach",
+  "stableIsotopes": 1
+ },
+ "60": {
+  "discoveredBy": "Carl Auer von Welsbach",
+  "stableIsotopes": 5
+ },
+ "61": {
+  "discoveredBy": "Jacob A. Marinsky, Lawrence E. Glendenin & Charles D. Coryell",
+  "stableIsotopes": 0
+ },
+ "62": {
+  "discoveredBy": "Paul-Émile Lecoq de Boisbaudran",
+  "stableIsotopes": 5
+ },
+ "63": {
+  "discoveredBy": "Eugène-Anatole Demarçay",
+  "stableIsotopes": 1
+ },
+ "64": {
+  "discoveredBy": "Jean Charles Galissard de Marignac",
+  "stableIsotopes": 6
+ },
+ "65": {
+  "discoveredBy": "Carl Gustaf Mosander",
+  "stableIsotopes": 1
+ },
+ "66": {
+  "discoveredBy": "Paul-Émile Lecoq de Boisbaudran",
+  "stableIsotopes": 7
+ },
+ "67": {
+  "discoveredBy": "Marc Delafontaine & Jacques-Louis Soret",
+  "stableIsotopes": 1
+ },
+ "68": {
+  "discoveredBy": "Carl Gustaf Mosander",
+  "stableIsotopes": 6
+ },
+ "69": {
+  "discoveredBy": "Per Teodor Cleve",
+  "stableIsotopes": 1
+ },
+ "70": {
+  "discoveredBy": "Jean Charles Galissard de Marignac",
+  "stableIsotopes": 7
+ },
+ "71": {
+  "discoveredBy": "Georges Urbain & Carl Auer von Welsbach",
+  "stableIsotopes": 1
+ },
+ "72": {
+  "discoveredBy": "Dirk Coster & George de Hevesy",
+  "stableIsotopes": 5
+ },
+ "73": {
+  "discoveredBy": "Anders Gustaf Ekeberg",
+  "stableIsotopes": 2
+ },
+ "74": {
+  "discoveredBy": "Fausto & Juan José de Elhuyar",
+  "stableIsotopes": 4
+ },
+ "75": {
+  "discoveredBy": "Masataka Ogawa",
+  "stableIsotopes": 1
+ },
+ "76": {
+  "discoveredBy": "Smithson Tennant",
+  "stableIsotopes": 5
+ },
+ "77": {
+  "discoveredBy": "Smithson Tennant",
+  "stableIsotopes": 2
+ },
+ "78": {
+  "discoveredBy": "Antonio de Ulloa",
+  "stableIsotopes": 5
+ },
+ "79": {
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 1
+ },
+ "80": {
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 7
+ },
+ "81": {
+  "discoveredBy": "William Crookes",
+  "stableIsotopes": 2
+ },
+ "82": {
+  "discoveredBy": "Known since ancient times",
+  "stableIsotopes": 4
+ },
+ "83": {
+  "discoveredBy": "Claude François Geoffroy",
+  "stableIsotopes": 0
+ },
+ "84": {
+  "discoveredBy": "Pierre & Marie Curie",
+  "stableIsotopes": 0
+ },
+ "85": {
+  "discoveredBy": "Dale R. Corson, Kenneth Ross MacKenzie & Emilio Segrè",
+  "stableIsotopes": 0
+ },
+ "86": {
+  "discoveredBy": "Friedrich Ernst Dorn",
+  "stableIsotopes": 0
+ },
+ "87": {
+  "discoveredBy": "Marguerite Perey",
+  "stableIsotopes": 0
+ },
+ "88": {
+  "discoveredBy": "Pierre & Marie Curie",
+  "stableIsotopes": 0
+ },
+ "89": {
+  "discoveredBy": "André-Louis Debierne",
+  "stableIsotopes": 0
+ },
+ "90": {
+  "discoveredBy": "Jöns Jacob Berzelius",
+  "stableIsotopes": 0
+ },
+ "91": {
+  "discoveredBy": "Kasimir Fajans & Oswald Helmuth Göhring",
+  "stableIsotopes": 0
+ },
+ "92": {
+  "discoveredBy": "Martin Heinrich Klaproth",
+  "stableIsotopes": 0
+ },
+ "93": {
+  "discoveredBy": "Edwin McMillan & Philip H. Abelson",
+  "stableIsotopes": 0
+ },
+ "94": {
+  "discoveredBy": "Glenn T. Seaborg, Arthur C. Wahl, Joseph W. Kennedy & Edwin McMillan",
+  "stableIsotopes": 0
+ },
+ "95": {
+  "discoveredBy": "Glenn T. Seaborg, Ralph A. James, Leon O. Morgan & Albert Ghiorso",
+  "stableIsotopes": 0
+ },
+ "96": {
+  "discoveredBy": "Glenn T. Seaborg, Ralph A. James & Albert Ghiorso",
+  "stableIsotopes": 0
+ },
+ "97": {
+  "discoveredBy": "Stanley G. Thompson, Albert Ghiorso & Glenn T. Seaborg",
+  "stableIsotopes": 0
+ },
+ "98": {
+  "discoveredBy": "Stanley G. Thompson, Kenneth Street Jr., Albert Ghiorso & Glenn T. Seaborg",
+  "stableIsotopes": 0
+ },
+ "99": {
+  "discoveredBy": "Albert Ghiorso & team",
+  "stableIsotopes": 0
+ },
+ "100": {
+  "discoveredBy": "Albert Ghiorso & team",
+  "stableIsotopes": 0
+ },
+ "101": {
+  "discoveredBy": "Albert Ghiorso, Bernard G. Harvey, Gregory R. Choppin, Stanley G. Thompson & Glenn T. Seaborg",
+  "stableIsotopes": 0
+ },
+ "102": {
+  "discoveredBy": "Albert Ghiorso & team",
+  "stableIsotopes": 0
+ },
+ "103": {
+  "discoveredBy": "Albert Ghiorso, Torbjørn Sikkeland, Almon E. Larsh & Robert M. Latimer",
+  "stableIsotopes": 0
+ },
+ "104": {
+  "discoveredBy": "Joint Institute for Nuclear Research & Lawrence Berkeley National Laboratory",
+  "stableIsotopes": 0
+ },
+ "105": {
+  "discoveredBy": "Joint Institute for Nuclear Research & Lawrence Berkeley National Laboratory",
+  "stableIsotopes": 0
+ },
+ "106": {
+  "discoveredBy": "Lawrence Berkeley National Laboratory & Joint Institute for Nuclear Research",
+  "stableIsotopes": 0
+ },
+ "107": {
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
+ },
+ "108": {
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
+ },
+ "109": {
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
+ },
+ "110": {
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
+ },
+ "111": {
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
+ },
+ "112": {
+  "discoveredBy": "Gesellschaft für Schwerionenforschung",
+  "stableIsotopes": 0
+ },
+ "113": {
+  "discoveredBy": "RIKEN",
+  "stableIsotopes": 0
+ },
+ "114": {
+  "discoveredBy": "Joint Institute for Nuclear Research",
+  "stableIsotopes": 0
+ },
+ "115": {
+  "discoveredBy": "Joint Institute for Nuclear Research & Lawrence Livermore National Laboratory",
+  "stableIsotopes": 0
+ },
+ "116": {
+  "discoveredBy": "Joint Institute for Nuclear Research & Lawrence Livermore National Laboratory",
+  "stableIsotopes": 0
+ },
+ "117": {
+  "discoveredBy": "Joint Institute for Nuclear Research, Oak Ridge National Laboratory & Vanderbilt University",
+  "stableIsotopes": 0
+ },
+ "118": {
+  "discoveredBy": "Joint Institute for Nuclear Research & Lawrence Livermore National Laboratory",
+  "stableIsotopes": 0
+ }
+}

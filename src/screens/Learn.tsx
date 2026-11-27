@@ -6,7 +6,7 @@ import { MiniTable } from '../components/MiniTable';
 import { SectionHeader } from '../components/SectionHeader';
 import { DUR, rise, tween } from '../components/motion';
 import { CHAPTERS, chapterById, type Chapter } from '../lib/chapters';
-import { byNumber, catVar, categoryLabel, type Element } from '../lib/elements';
+import { CATEGORIES, byNumber, catVar, categoryLabel, type Element } from '../lib/elements';
 import { sfx } from '../lib/feedback';
 import { dueForReview } from '../lib/review';
 import { go } from '../lib/router';
@@ -55,8 +55,42 @@ export function LearnPath() {
             ))}
           </ol>
         </section>
+        <TableStory />
       </div>
     </div>
+  );
+}
+
+/** A short history of the periodic table, with the whole table drawn in category colours. */
+function TableStory() {
+  const hl = 'font-medium text-ink';
+  return (
+    <section className="mt-12 md:mt-16" aria-labelledby="table-story">
+      <SectionHeader id="table-story" title="The periodic table" sub="Where the table you are learning comes from" />
+      <div className="card overflow-hidden">
+        <div className="space-y-3 p-4 leading-relaxed text-ink-2 sm:p-6">
+          <p>
+            The periodic table arranges the chemical elements by their <span className={hl}>atomic numbers</span>, <span className={hl}>electron configurations</span> and recurring{' '}
+            <span className={hl}>chemical properties</span>. Elements appear in order of increasing atomic number. The standard table has <span className={hl}>18 columns</span> (groups) and{' '}
+            <span className={hl}>7 rows</span> (periods), with a double row of elements, the lanthanides and actinides, set out underneath.
+          </p>
+          <p>
+            It took more than <span className={hl}>200 years</span> and many scientists to develop. The modern table is based on <span className={hl}>Dmitri Mendeleev's 1869</span> design, which left gaps for elements nobody had found yet and correctly predicted their properties.
+          </p>
+        </div>
+        <figure className="border-t border-line p-4 sm:p-6">
+          <MiniTable className="w-full" label="The full periodic table, coloured by element category" />
+          <figcaption className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[13px] leading-5 text-ink-2">
+            {CATEGORIES.map((c) => (
+              <span key={c.id} className="inline-flex items-center gap-2">
+                <span className="dot" style={{ background: catVar(c.id) }} aria-hidden />
+                {c.label}
+              </span>
+            ))}
+          </figcaption>
+        </figure>
+      </div>
+    </section>
   );
 }
 

@@ -6,9 +6,11 @@ import { Shell } from './components/Shell';
 import { SettingsSheet } from './components/SettingsSheet';
 import { Toasts } from './components/Toasts';
 import { CHAPTERS, chapterById } from './lib/chapters';
+import { challengeLevelById, challengeUnlocked } from './lib/challenge';
 import { regionById } from './lib/regions';
 import { useRoute, type Route } from './lib/router';
 import { DUR, EASE } from './components/motion';
+import { ChallengeGame, ChallengeHub } from './screens/Challenge';
 import { Daily } from './screens/Daily';
 import { Explore } from './screens/Explore';
 import { Home } from './screens/Home';
@@ -18,6 +20,7 @@ import { Match } from './screens/Match';
 import { PlayHub, RegionGame } from './screens/Play';
 import { ProgressScreen } from './screens/Progress';
 import { Quiz } from './screens/Quiz';
+import { useProgress } from './store/progress';
 import { useSettings } from './store/settings';
 import { useUi } from './store/ui';
 
@@ -40,6 +43,10 @@ export function App() {
     root.classList.toggle('reduce-motion', reduceMotion);
   }, [colorblind, reduceMotion]);
 
+  const best = useProgress((s) => s.best);
+  const challengeLevel = route.name === 'challenge' && route.level ? challengeLevelById(route.level) : undefined;
+  const challengePlayable = !!challengeLevel && challengeUnlocked(best, challengeLevel);
+
   // A puzzle or lesson link with an unknown id (mistyped, or saved before a rename) shows Home or the Learn path instead.
   // Those are ordinary pages, so they keep the header, the navigation and the <main> landmark.
   const immersive =
@@ -48,8 +55,17 @@ export function App() {
     route.name === 'quiz' ||
     route.name === 'life' ||
     route.name === 'match' ||
-    (route.name === 'learn' && !!route.chapter && (route.chapter === 'review' || !!chapterById(route.chapter)));
-  const key = route.name === 'game' ? `game-${route.region}` : route.name === 'learn' ? `learn-${route.chapter ?? ''}` : route.name;
+    (route.name === 'learn' && !!route.chapter && (route.chapter === 'review' || !!chapterById(route.chapter))) ||
+    // A locked or unknown challenge level shows the Timed Challenge page instead, which keeps the header.
+    (route.name === 'challenge' && challengePlayable);
+  const key =
+    route.name === 'game'
+      ? `game-${route.region}`
+      : route.name === 'learn'
+        ? `learn-${route.chapter ?? ''}`
+        : route.name === 'challenge'
+          ? `challenge-${challengePlayable ? route.level : ''}`
+          : route.name;
 
   // The element card and Settings are app-wide dialogs. Leaving the screen (browser or Android back, a link) closes
   // them, so a dialog never sits over a screen it was not opened on. A layout effect runs before the new screen's own
@@ -71,7 +87,7 @@ export function App() {
   }, [key]);
 
   // Each screen has its own title, so screen-reader users and browser tabs know where they are (WCAG 2.4.2).
-  const title = titleFor(route);
+  const title = titleFor(route, challengePlayable);
   useEffect(() => {
     document.title = title;
   }, [title]);
@@ -111,6 +127,9 @@ export function App() {
     case 'account':
       // Lazy: rendered inside the <Suspense fallback={null}> below, together with RouteFocus.
       screen = <Account />;
+      break;
+    case 'challenge':
+      screen = challengePlayable ? <ChallengeGame levelId={route.level!} /> : <ChallengeHub />;
       break;
   }
 
@@ -156,7 +175,7 @@ function skipToMain(e: MouseEvent) {
 
 const SITE = 'Periodica';
 
-function titleFor(route: Route): string {
+function titleFor(route: Route, challengePlayable = false): string {
   const t = (name: string) => `${name} · ${SITE}`;
   switch (route.name) {
     case 'home':
@@ -189,6 +208,10 @@ function titleFor(route: Route): string {
       return t('Match pairs');
     case 'account':
       return t('Your account');
+    case 'challenge': {
+      const level = challengePlayable && route.level ? challengeLevelById(route.level) : undefined;
+      return level ? t(`Timed challenge, level ${level.level}`) : t('Timed challenge');
+    }
   }
 }
 

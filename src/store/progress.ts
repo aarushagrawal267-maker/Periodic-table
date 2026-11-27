@@ -17,7 +17,7 @@ export interface Mastery {
 }
 
 export interface RoundSummary {
-  kind: 'place' | 'quiz' | 'daily' | 'lesson' | 'life' | 'match';
+  kind: 'place' | 'quiz' | 'daily' | 'lesson' | 'life' | 'match' | 'challenge';
   regionId?: string;
   dailyKey?: string;
   difficulty: Difficulty;
@@ -33,6 +33,8 @@ export interface RoundSummary {
   results: Record<number, boolean>;
   /** Emoji-ready sequence of outcomes, in play order. */
   trail: ('hit' | 'miss' | 'hint')[];
+  /** Set when a timed round ran out of time. */
+  timedOut?: boolean;
 }
 
 export interface DailyResult {
@@ -122,10 +124,16 @@ export const useProgress = create<ProgressState>()(
           mastery[n] = { s, c: m.c + (ok ? 1 : 0), w: m.w + (ok ? 0 : 1), t: now };
         }
 
-        const key = r.kind === 'place' ? `${r.regionId}:${r.difficulty}` : `${r.kind}:${r.regionId ?? r.dailyKey ?? r.difficulty}`;
+        const key =
+          r.kind === 'place'
+            ? `${r.regionId}:${r.difficulty}`
+            : r.kind === 'challenge'
+              ? challengeBestKey(r.regionId ?? '', r.difficulty)
+              : `${r.kind}:${r.regionId ?? r.dailyKey ?? r.difficulty}`;
         const prev = p.best[key];
         const newBest = r.completed && (!prev || r.score > prev.score);
-        const best = newBest && r.kind === 'place' ? { ...p.best, [key]: { score: r.score, stars: r.stars, timeMs: r.timeMs } } : p.best;
+        const keepsBest = r.kind === 'place' || r.kind === 'challenge';
+        const best = newBest && keepsBest ? { ...p.best, [key]: { score: r.score, stars: r.stars, timeMs: r.timeMs } } : p.best;
 
         // Only real chapters of the path earn chapter stars; a spaced-review round ('review') does not.
         const isChapter = r.kind === 'lesson' && r.completed && !!r.regionId && CHAPTERS.some((c) => c.id === r.regionId);
@@ -191,6 +199,14 @@ export const useProgress = create<ProgressState>()(
     },
   ),
 );
+
+/**
+ * Best-score key for a Timed Challenge level, e.g. "challenge_level-1_standard".
+ * It has no ':' so it is never mistaken for a region key ("region:difficulty") by
+ * achievements, Home or Progress, and only plain characters so it is a safe
+ * Firestore map key when progress syncs to an account.
+ */
+export const challengeBestKey = (levelId: string, difficulty: Difficulty) => `challenge_${levelId}_${difficulty}`;
 
 export const xpToday = (t: ProgressData['today'], key = todayKey()) => (t.key === key ? t.xp : 0);
 

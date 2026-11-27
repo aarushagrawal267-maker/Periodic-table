@@ -25,11 +25,14 @@ interface Props {
   onExit: () => void;
   /** Visible text and accessible name of the exit button. Say where it goes, e.g. "Home" or "Back to path". */
   exitLabel?: string;
+  /** Overrides for the headline and the line under it (the end of a Timed Challenge level). */
+  headline?: string;
+  message?: string;
 }
 
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export function Results({ summary: s, outcome: o, title, total, onReplay, onNext, nextLabel, onExit, exitLabel = 'Done' }: Props) {
+export function Results({ summary: s, outcome: o, title, total, onReplay, onNext, nextLabel, onExit, exitLabel = 'Done', headline: headlineOverride, message }: Props) {
   const xp = useProgress((p) => p.xp);
   const openDetail = useUi((u) => u.openDetail);
   const reduce = useSettings((x) => x.reduceMotion);
@@ -41,7 +44,7 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
   const slipped = Object.entries(s.results)
     .filter(([, ok]) => !ok)
     .map(([n]) => byNumber(Number(n)));
-  const headline = headlineFor(s, acc, attempts);
+  const headline = headlineOverride ?? headlineFor(s, acc, attempts);
   const played = new Set(Object.keys(s.results).map(Number));
   const slippedSet = new Set(slipped.map((e) => e.number));
   const primary: 'share' | 'next' | 'replay' | null = s.kind === 'daily' ? 'share' : onNext && s.completed ? 'next' : onReplay ? 'replay' : null;
@@ -101,7 +104,7 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
           <h2 ref={heading} id="results-title" tabIndex={-1} className="t-display mt-2" style={{ outline: 'none' }}>
             {headline}
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-ink-2">{encouragement(s, acc, attempts, slipped.length > 0)}</p>
+          <p className="mx-auto mt-3 max-w-md text-ink-2">{message ?? encouragement(s, acc, attempts, slipped.length > 0, total)}</p>
           <Stars stars={s.stars} reduce={reduce} />
           {s.kind === 'daily' && <TrailSquares trail={s.trail} className="mt-4" />}
         </motion.div>
@@ -291,6 +294,7 @@ function Stars({ stars, reduce }: { stars: number; reduce: boolean }) {
 
 /** Picks the headline from accuracy as well as stars, so a 3/10 never reads "Nicely done". */
 function headlineFor(s: RoundSummary, acc: number, attempts: number) {
+  if (s.timedOut) return "Time's up";
   if (!s.completed) return 'Good try';
   if (attempts > 0 && acc < 50) return 'Keep going';
   if (s.stars >= 3) return acc === 100 ? 'Flawless' : 'Brilliant';
@@ -298,7 +302,8 @@ function headlineFor(s: RoundSummary, acc: number, attempts: number) {
   return 'Nicely done';
 }
 
-function encouragement(s: RoundSummary, acc: number, attempts: number, hasList: boolean) {
+function encouragement(s: RoundSummary, acc: number, attempts: number, hasList: boolean, total: number) {
+  if (s.timedOut) return `The clock ran out with ${total - s.correct} still to place. Pause whenever you need a breather, and try again.`;
   if (!s.completed) return 'Every mistake is a fact you now know. Try again, it gets easier fast.';
   if (attempts > 0 && acc < 50)
     return hasList ? 'Every miss is something you now know. The ones to look at are below.' : 'Every miss is something you now know. Another round will help these stick.';
@@ -311,7 +316,7 @@ function encouragement(s: RoundSummary, acc: number, attempts: number, hasList: 
  * Sets `inert` on everything outside `root` (sibling branches at each level up to <body>).
  * Live regions and other open dialogs are left alone. Returns a function that undoes exactly what it changed.
  */
-function makeBackgroundInert(root: HTMLElement | null) {
+export function makeBackgroundInert(root: HTMLElement | null) {
   const touched: HTMLElement[] = [];
   let node: HTMLElement | null = root;
   while (node && node !== document.body) {
