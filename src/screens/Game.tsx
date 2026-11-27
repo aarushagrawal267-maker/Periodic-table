@@ -101,10 +101,43 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
   }, [state.phase]);
   const shuffleTray = useCallback(() => {
     if (state.phase !== 'playing' || state.queue.length < 2) return;
+    // A focused tray tile may leave the hand; focus then moves to the first tile of the new hand (WCAG 2.4.3).
+    const a = document.activeElement;
+    const focusInTray = a instanceof HTMLElement && !!tilesRef.current?.contains(a);
     dispatch({ type: 'shuffle' });
     sfx.pick();
     say('Tiles shuffled.');
+    if (focusInTray) requestAnimationFrame(() => tilesRef.current?.querySelector<HTMLElement>('[data-tile]:not([inert])')?.focus({ preventScroll: true }));
   }, [state.phase, state.queue.length, say]);
+
+  // Spoken warnings before the clock runs out, so screen-reader users are not surprised by "Time's up" (WCAG 2.2.1).
+  const warned = useRef(new Set<number>());
+  useEffect(() => {
+    if (!timed || state.phase !== 'playing') return;
+    const check = () => {
+      const secs = Math.ceil(timeLeft(state, Date.now()) / 1000);
+      for (const mark of [60, 30, 10]) {
+        if (secs <= mark && secs > mark - 3 && !warned.current.has(mark)) {
+          warned.current.add(mark);
+          say(`${mark} seconds left.`);
+        }
+      }
+    };
+    check();
+    const id = setInterval(check, 500);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- startedAt moves on resume
+  }, [timed, state.phase, state.startedAt, say]);
+
+  // When a round ends (time up, last life) with a dialog open over it, close that dialog first,
+  // so the results screen is the only modal and its focus trap and Escape work.
+  useEffect(() => {
+    if (state.phase !== 'done') return;
+    setConfirmLeave(false);
+    const ui = useUi.getState();
+    if (ui.detail !== null) ui.openDetail(null);
+    if (ui.settingsOpen) ui.setSettings(false);
+  }, [state.phase]);
 
   // Time limit: end the round when the clock runs out. Re-armed after every resume.
   useEffect(() => {
@@ -252,6 +285,15 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
     setDragging(null);
     setOver(null);
   };
+
+  // A tile that leaves the hand mid-drag (shuffle), or a round that stops (pause, time up), ends the drag,
+  // so the ghost never stays stuck on screen.
+  useEffect(() => {
+    const d = drag.current;
+    if (!d) return;
+    if (state.phase !== 'playing' || !hand(state).includes(d.n)) onTileCancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.phase, state.queue]);
 
   // ---- Keyboard ----
   useEffect(() => {
@@ -455,6 +497,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
             </div>
             <button
               onClick={togglePause}
+              data-pause-button
               disabled={state.phase !== 'playing' && !paused}
               className="icon-btn -mr-2 disabled:text-ink-3 sm:mr-0"
               aria-label={paused ? 'Resume (P)' : 'Pause (P)'}
@@ -475,7 +518,10 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
             On phones it keeps the 16px page gutter like every other screen; a table too wide for it scrolls inside it. */}
         <div aria-hidden className="flex-1" />
         <div className="relative mx-auto w-full max-w-7xl">
-          <ZoomControl />
+          {/* From sm the zoom keys sit above the board, left, clear of the centred combo badge. Phones keep them in the tray row. */}
+          <div className="hidden sm:flex">
+            <ZoomControl />
+          </div>
           <ComboBadge combo={state.combo} mult={mult} />
           <PeriodicGrid
             numbers={config.view ?? config.targets}
@@ -572,7 +618,12 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
                 <Lightbulb size={18} strokeWidth={1.5} />
               </button>
             </div>
-            <span className="meta">{state.queue.length} left</span>
+            <div className="flex items-center gap-1">
+              <span className="meta">{state.queue.length} left</span>
+              <div className="sm:hidden">
+                <ZoomControl compact />
+              </div>
+            </div>
           </div>
         </div>
         <p className="mx-auto mt-5 hidden max-w-3xl px-4 text-center text-[13px] leading-5 text-ink-3 sm:block">{guide}</p>
@@ -866,13 +917,14 @@ function ComboBadge({ combo, mult }: { combo: number; mult: number }) {
 /** Time left on a timed round. Turns red in the last ten seconds. */
 function Countdown({ state }: { state: GameState }) {
   const running = state.phase === 'playing';
-  const [now, setNow] = useState(Date.now());
+  // The interval only triggers re-renders; the time is read on each render, so the first frame after Resume is right too.
+  const [, setTick] = useState(0);
   useEffect(() => {
     if (!running) return;
-    const id = setInterval(() => setNow(Date.now()), 250);
+    const id = setInterval(() => setTick((t) => t + 1), 250);
     return () => clearInterval(id);
   }, [running]);
-  const secs = Math.ceil(timeLeft(state, running ? now : Date.now()) / 1000);
+  const secs = Math.ceil(timeLeft(state, Date.now()) / 1000);
   return (
     <span className={secs <= 10 ? 'text-bad' : undefined} aria-label={`${secs} seconds left`}>
       {formatTime(secs * 1000)}
@@ -881,7 +933,7 @@ function Countdown({ state }: { state: GameState }) {
 }
 
 /** Make the board bigger or smaller. Remembered on this device between rounds; it never touches the round itself. */
-function ZoomControl() {
+function ZoomControl({ compact = false }: { compact?: boolean }) {
   const zoom = useSettings((s) => s.boardZoom) ?? 1;
   const setZoom = useSettings((s) => s.setBoardZoom);
   const i = BOARD_ZOOM_STEPS.indexOf(zoom as (typeof BOARD_ZOOM_STEPS)[number]);
@@ -889,14 +941,16 @@ function ZoomControl() {
   const step = (d: number) => setZoom(BOARD_ZOOM_STEPS[Math.max(0, Math.min(BOARD_ZOOM_STEPS.length - 1, at + d))]);
   const pct = Math.round(zoom * 100);
   return (
-    <div className="flex items-center justify-center gap-1" role="group" aria-label="Board zoom">
-      <button onClick={() => step(-1)} disabled={at === 0} className="icon-btn h-9 w-9 disabled:text-ink-3" aria-label="Zoom out" title="Zoom out">
+    <div className="flex items-center gap-1" role="group" aria-label={compact ? `Board zoom, ${pct} percent` : 'Board zoom'}>
+      <button onClick={() => step(-1)} disabled={at === 0} className="icon-btn disabled:text-ink-3" aria-label="Zoom out" title="Zoom out">
         <ZoomOut size={16} strokeWidth={1.5} />
       </button>
-      <button onClick={() => setZoom(1)} className="meta min-w-12 rounded-control px-1 py-2 hover:text-ink" aria-label={`Zoom ${pct} percent. Reset to 100 percent`} title="Reset zoom">
-        {pct}%
-      </button>
-      <button onClick={() => step(1)} disabled={at === BOARD_ZOOM_STEPS.length - 1} className="icon-btn h-9 w-9 disabled:text-ink-3" aria-label="Zoom in" title="Zoom in">
+      {!compact && (
+        <button onClick={() => setZoom(1)} className="meta min-h-11 min-w-12 rounded-control px-1 hover:text-ink md:min-h-9" aria-label={`Zoom ${pct} percent. Reset to 100 percent`} title="Reset zoom">
+          {pct}%
+        </button>
+      )}
+      <button onClick={() => step(1)} disabled={at === BOARD_ZOOM_STEPS.length - 1} className="icon-btn disabled:text-ink-3" aria-label="Zoom in" title="Zoom in">
         <ZoomIn size={16} strokeWidth={1.5} />
       </button>
     </div>
@@ -912,8 +966,25 @@ function PauseScreen({ title, detail, onResume, onLeave }: { title: string; deta
   const resume = useRef<HTMLButtonElement>(null);
   const resumeRef = useRef(onResume);
   resumeRef.current = onResume;
+  const isPresent = useIsPresent();
+  const release = useRef<(() => void) | null>(null);
+  // Resume starts the exit animation; the page and focus come back right away, not after it ends.
   useEffect(() => {
+    if (!isPresent) release.current?.();
+  }, [isPresent]);
+  useEffect(() => {
+    const previous = document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : null;
     const restore = makeBackgroundInert(root.current);
+    let released = false;
+    release.current = () => {
+      if (released) return;
+      released = true;
+      document.removeEventListener('keydown', onKey);
+      restore();
+      // Back where the student was (WCAG 2.4.3); if that is gone, the Pause button.
+      const target = previous?.isConnected && !previous.closest('[inert]') ? previous : document.querySelector<HTMLElement>('[data-pause-button]');
+      target?.focus({ preventScroll: true });
+    };
     resume.current?.focus({ preventScroll: true });
     const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -927,10 +998,7 @@ function PauseScreen({ title, detail, onResume, onLeave }: { title: string; deta
       }
     };
     document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      restore();
-    };
+    return () => release.current?.();
   }, []);
   return (
     <motion.div

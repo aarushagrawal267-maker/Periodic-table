@@ -27,13 +27,15 @@ export function AnimatedNumber({ value, duration = 500, className }: { value: nu
 
 /** Ticking clock that re-renders itself only. */
 export function Elapsed({ start, end, running }: { start: number; end: number; running: boolean }) {
-  const [now, setNow] = useState(Date.now());
+  // The interval only triggers re-renders; the time is read on each render, so a moved `start` (resume after a pause)
+  // never shows against a stale clock.
+  const [, setTick] = useState(0);
   useEffect(() => {
     if (!running) return;
-    const id = setInterval(() => setNow(Date.now()), 250);
+    const id = setInterval(() => setTick((t) => t + 1), 250);
     return () => clearInterval(id);
   }, [running]);
-  const ms = start ? (running ? now : end) - start : 0;
+  const ms = start ? (running ? Date.now() : end) - start : 0;
   return <span className="tabular-nums">{formatTime(Math.max(0, ms))}</span>;
 }
 

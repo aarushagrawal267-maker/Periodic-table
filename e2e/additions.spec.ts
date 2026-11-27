@@ -93,6 +93,8 @@ test('puzzle: shuffle deals a new tray, P pauses, zoom keeps placed elements', a
   await expect(pause).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(pause).toHaveCount(0);
+  // Focus comes back to the page, not to <body>.
+  await expect.poll(() => page.evaluate(() => document.activeElement !== document.body && !!document.activeElement)).toBe(true);
 
   // Leaving from the pause screen asks first, because the round has a move in it.
   await page.getByRole('button', { name: 'Pause (P)' }).click();
@@ -129,4 +131,22 @@ test('learning path tells the story of the periodic table', async ({ page }) => 
   await story.scrollIntoViewIfNeeded();
   await expect(story.getByText(/Dmitri Mendeleev's 1869/)).toBeVisible();
   await expect(story.getByRole('img', { name: /full periodic table/ })).toBeVisible();
+});
+
+test('phones: zoom keys sit in the tray row and add no height above the board @phone', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'phone', 'phone layout only');
+  await page.goto('./#/play/full');
+  const board = new Board(page);
+  await board.waitForStart();
+  const tray = page.locator('footer');
+  const zoomIn = tray.getByRole('button', { name: 'Zoom in' });
+  await expect(zoomIn).toBeVisible();
+  const box = (await zoomIn.boundingBox())!;
+  expect(box.width).toBeGreaterThanOrEqual(44);
+  expect(box.height).toBeGreaterThanOrEqual(44);
+  // The phone tray still fits five tiles side by side with nothing pushed off-screen.
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  expect(overflow).toBe(false);
+  await zoomIn.click();
+  await expect(tray.getByRole('group', { name: /Board zoom, 115 percent/ })).toBeVisible();
 });

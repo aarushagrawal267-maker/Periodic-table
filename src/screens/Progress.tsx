@@ -190,7 +190,7 @@ export function ProgressScreen() {
               ))}
             </ul>
           </div>
-          {!Object.keys(p.best).length && <p className="mt-2 text-sm text-ink-3">No stars yet. Pick any region to play its first round.</p>}
+          {!Object.keys(p.best).some((k) => REGIONS.some((r) => k.startsWith(`${r.id}:`))) && <p className="mt-2 text-sm text-ink-3">No stars yet. Pick any region to play its first round.</p>}
         </div>
 
         <div className="min-w-0">
