@@ -52,7 +52,7 @@ export function Sheet({ open, onClose, label, children, wide }: Props) {
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
           <motion.div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -64,20 +64,20 @@ export function Sheet({ open, onClose, label, children, wide }: Props) {
             aria-modal="true"
             aria-label={label}
             tabIndex={-1}
-            className={`solid relative max-h-[92dvh] w-full overflow-y-auto rounded-t-[28px] outline-none thin-scroll sm:rounded-[28px] ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
+            className={`solid relative max-h-[92dvh] w-full overflow-y-auto rounded-t-2xl outline-none thin-scroll sm:rounded-2xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
             style={{ boxShadow: 'var(--shadow-lg)' }}
-            initial={{ y: 60, opacity: 0, scale: 0.98 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 40, opacity: 0, scale: 0.98 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            initial={{ y: 24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 16, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-line-strong sm:hidden" />
             <button
               onClick={onClose}
-              className="btn-ghost absolute right-4 top-4 z-10 grid h-9 w-9 place-items-center rounded-full"
+              className="btn-ghost absolute right-4 top-4 z-10 grid h-9 w-9 place-items-center rounded-[10px]"
               aria-label="Close"
             >
-              <X size={18} />
+              <X size={18} strokeWidth={1.75} />
             </button>
             {children}
           </motion.div>
