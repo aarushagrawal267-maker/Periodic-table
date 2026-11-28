@@ -1,0 +1,391 @@
+/*
+ * Game feel: the snap of a correct drop, the mark of a wrong one, the combo badge, confetti and the chart sheet
+ * under the board. Plain CSS on the theme variables, so light, dark and the colour-blind palette all work.
+ *
+ * Rules (docs/DESIGN.md, "Motion"): one curve (var(--ease-out)), transform and opacity only, every animation runs
+ * once. Colour in an effect is always the element's category colour (--c); the chrome stays on the accent.
+ * Components skip these effects entirely when motion is reduced (useCalm), so nothing here relies on the
+ * global .reduce-motion rule alone.
+ */
+
+/* ------------------------------------------------------------ the chart sheet */
+
+/* The board sits on the printed wall chart: one paper sheet with a hairline, group and period numbers on its edges. */
+.chart-sheet {
+  position: relative;
+  margin-inline: auto;
+  max-width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+}
+@media (min-width: 640px) {
+  .chart-sheet {
+    border-radius: var(--radius-panel);
+  }
+}
+[data-theme='light'] .chart-sheet {
+  box-shadow: var(--shadow-sm);
+}
+/* Empty places are printed boxes on the paper: a touch of the warm raised tone, never a number or symbol. */
+.chart-sheet .slot {
+  background: color-mix(in oklab, var(--surface-2) 55%, var(--surface));
+}
+.chart-sheet .slot-armed:hover {
+  background: var(--accent-soft);
+}
+/* A focused place always sits above a snap flying past it, so the focus ring is never covered. */
+.board-slot:focus-visible {
+  z-index: 25;
+}
+
+/* ----------------------------------------------------------------- the snap */
+
+/* The tile lands: a short pop, 1 to 1.08 and back. */
+@keyframes snap-pop {
+  0% {
+    transform: scale(0.86);
+    opacity: 0;
+  }
+  45% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.snap-pop {
+  animation: snap-pop 420ms var(--ease-out) both;
+}
+
+.snap-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+/* One ring in the category colour opens from the cell edge, holds its colour, then fades. */
+@keyframes snap-ring {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+.snap-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--c);
+  border-radius: var(--r);
+  animation: snap-ring 720ms var(--ease-out) both;
+}
+/*
+ * Tiny element squares leave the rim and fly half a cell out. Transform runs over the whole flight;
+ * opacity comes in fast, holds, then fades over the last part, so the colour reads while they move.
+ */
+@keyframes snap-bit {
+  0% {
+    transform: translate(var(--x0), var(--y0)) scale(0.5);
+    opacity: 0;
+  }
+  10%,
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x1), var(--y1)) rotate(var(--rot)) scale(0.8);
+    opacity: 0;
+  }
+}
+.snap-bit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--s);
+  height: var(--s);
+  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  border-radius: 2px;
+  background: var(--c);
+  animation: snap-bit 800ms var(--ease-out) both;
+}
+/* Every other square is an outlined little tile, printed in the same category colour. */
+.snap-bit-tint {
+  background: var(--surface);
+  border: 2px solid var(--c);
+}
+
+/* --------------------------------------------------------------- the miss */
+
+/* The wrong place fills soft red with a red edge, holds, then fades back. */
+@keyframes miss-flash {
+  0%,
+  40% {
+    background-color: color-mix(in oklab, var(--bad) 20%, var(--surface));
+    border-color: var(--bad);
+    box-shadow: inset 0 0 0 1px var(--bad);
+  }
+}
+.miss-flash {
+  animation: miss-flash 1s var(--ease-out);
+}
+/* Reduced motion: the same red edge and fill, standing still for a moment. */
+.miss-static {
+  background-color: color-mix(in oklab, var(--bad) 20%, var(--surface)) !important;
+  border-color: var(--bad) !important;
+  border-style: solid !important;
+  box-shadow: inset 0 0 0 1px var(--bad);
+}
+
+/* A small cross in the wrong place. */
+@keyframes miss-mark {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  20%,
+  65% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+.miss-mark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--bad);
+  pointer-events: none;
+  animation: miss-mark 1s var(--ease-out) both;
+}
+.miss-mark-still {
+  animation: none;
+}
+
+/* The tile that missed: a short, kind shake (a few px, settling) and a red ring that fades back to the selection. */
+@keyframes miss-shake {
+  0% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-6px);
+  }
+  35% {
+    transform: translateX(5px);
+  }
+  55% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+@keyframes miss-ring {
+  0%,
+  45% {
+    box-shadow:
+      0 0 0 2px var(--bg),
+      0 0 0 4px var(--bad);
+  }
+}
+.tray-miss {
+  animation:
+    miss-shake 440ms var(--ease-out),
+    miss-ring 1s var(--ease-out);
+}
+.tray-miss-static {
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 4px var(--bad);
+}
+
+/* ---------------------------------------------------------- the combo badge */
+
+.combo-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-tag);
+  font-size: 0.875rem;
+  line-height: 22px;
+  white-space: nowrap;
+}
+.combo-label {
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+.combo-count {
+  font-weight: 500;
+  color: var(--ink);
+}
+.combo-mult {
+  font-weight: 500;
+  color: var(--accent);
+}
+/* 5 in a row: the badge takes the accent. */
+.combo-hot {
+  background: var(--accent-soft);
+  border-color: color-mix(in oklab, var(--accent) 45%, transparent);
+}
+.combo-hot .combo-label,
+.combo-high .combo-label {
+  color: var(--ink-2);
+}
+/* x2: a firm accent edge and the multiplier printed on the accent. */
+.combo-high {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.combo-high .combo-mult {
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--on-accent);
+  line-height: 18px;
+}
+/* x3: the whole badge on the accent. */
+.combo-max {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.combo-max .combo-label,
+.combo-max .combo-count,
+.combo-max .combo-mult {
+  color: var(--on-accent);
+}
+
+/* One pulse each time the combo goes up; a bigger one with a ring when the multiplier steps up. */
+@keyframes combo-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+  }
+}
+@keyframes combo-pulse-step {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.22);
+  }
+}
+.combo-pulse {
+  animation: combo-pulse 360ms var(--ease-out);
+}
+.combo-pulse-step {
+  animation: combo-pulse-step 480ms var(--ease-out);
+}
+@keyframes combo-ring {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.25, 1.7);
+    opacity: 0;
+  }
+}
+.combo-ring {
+  position: absolute;
+  inset: -1px;
+  border: 1.5px solid var(--accent);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: combo-ring 640ms var(--ease-out) both;
+}
+
+/* -------------------------------------------------------------- confetti */
+
+/* Covers the first screen of the results dialog, behind its content, and clips so nothing ever scrolls. */
+.confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+/* Outer span: sideways travel on the shared curve. Inner span: thrown up, then falling, turning. */
+@keyframes confetti-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--dx));
+  }
+}
+@keyframes confetti-y {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(0.4);
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  6% {
+    opacity: 1;
+  }
+  30% {
+    transform: translateY(var(--up)) rotate(calc(var(--rot) * 0.3)) scale(1);
+    animation-timing-function: linear;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(var(--fall)) rotate(var(--rot)) scale(1);
+    opacity: 0;
+  }
+}
+.confetti-piece {
+  position: absolute;
+  width: var(--s);
+  height: var(--s);
+  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  animation-name: confetti-x;
+  animation-timing-function: var(--ease-out);
+  animation-fill-mode: both;
+}
+.confetti-piece > span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  animation-name: confetti-y;
+  animation-fill-mode: both;
+}
+/* A plain square, printed in the category colour. */
+.confetti-bit {
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--c) 85%, var(--surface));
+  border: 1px solid var(--c);
+}
+/* A little element tile: tint, category edge, the symbol in category ink. */
+.confetti-tile {
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--c) 24%, var(--surface));
+  border: 1px solid var(--c);
+  color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+}

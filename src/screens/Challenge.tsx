@@ -125,8 +125,8 @@ export function ChallengeGame({ levelId }: { levelId: string }) {
       nextLabel={next ? `Next: level ${next.level}` : undefined}
       finale={
         next
-          ? { headline: `Level ${level.level} complete`, message: `Level ${next.level} is open: ${next.numbers.length} elements, ${next.secondsPerElement} seconds each.` }
-          : { headline: 'Master of the periodic table', message: "You've placed all 118 elements against the clock. You are a chemistry wizard." }
+          ? { kind: 'level', headline: `Level ${level.level} complete`, message: `Level ${next.level} is open: ${next.numbers.length} elements, ${next.secondsPerElement} seconds each.` }
+          : { kind: 'master', headline: 'Master of the periodic table', message: "You've placed all 118 elements against the clock. You are a chemistry wizard." }
       }
     />
   );
