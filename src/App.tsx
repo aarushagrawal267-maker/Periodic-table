@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef, type MouseEvent } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useSyncExternalStore, type MouseEvent } from 'react';
 import { ElementDetailSheet } from './components/ElementDetail';
 import { focusHeadingWhenSheetCloses } from './components/focusAfterSheet';
 import { Shell } from './components/Shell';
@@ -21,7 +21,7 @@ import { PlayHub, RegionGame } from './screens/Play';
 import { ProgressScreen } from './screens/Progress';
 import { Quiz } from './screens/Quiz';
 import { useProgress } from './store/progress';
-import { useSettings } from './store/settings';
+import { THEME_COLOR, useSettings } from './store/settings';
 import { useUi } from './store/ui';
 
 // The account screen and its forms load on first visit, so the guest bundle stays as it was (docs/ACCOUNTS.md 9).
@@ -35,13 +35,21 @@ const Account = lazy(() =>
 
 export function App() {
   const route = useRoute();
-  const { colorblind, reduceMotion } = useSettings();
+  const { colorblind, reduceMotion, theme } = useSettings();
+  const systemLight = useSystemLight();
+  const light = theme === 'light' || (theme === 'system' && systemLight);
 
   useEffect(() => {
     const root = document.documentElement;
     root.dataset.colorblind = String(colorblind);
     root.classList.toggle('reduce-motion', reduceMotion);
   }, [colorblind, reduceMotion]);
+
+  // The theme is also set before the first paint by the script in index.html, so a light page never flashes dark.
+  useLayoutEffect(() => {
+    document.documentElement.dataset.theme = light ? 'light' : 'dark';
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? THEME_COLOR.light : THEME_COLOR.dark);
+  }, [light]);
 
   const best = useProgress((s) => s.best);
   // Mistyped or out-of-date links fall back to an ordinary page; say so rather than pretend nothing happened.
@@ -183,6 +191,17 @@ export function App() {
       </div>
     </MotionConfig>
   );
+}
+
+const LIGHT_QUERY = '(prefers-color-scheme: light)';
+const subscribeLight = (on: () => void) => {
+  const m = matchMedia(LIGHT_QUERY);
+  m.addEventListener('change', on);
+  return () => m.removeEventListener('change', on);
+};
+/** Whether the device asks for a light theme; follows the device as it changes (an evening switch, a projector). */
+function useSystemLight() {
+  return useSyncExternalStore(subscribeLight, () => matchMedia(LIGHT_QUERY).matches, () => false);
 }
 
 function skipToMain(e: MouseEvent) {

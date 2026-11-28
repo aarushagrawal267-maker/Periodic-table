@@ -3,6 +3,8 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { guardedStorage } from '../lib/syncMeta';
 
 export type Difficulty = 'learner' | 'standard' | 'expert';
+/** Colour theme. 'system' follows the device. */
+export type Theme = 'system' | 'light' | 'dark';
 
 export interface SettingsState {
   sound: boolean;
@@ -19,6 +21,12 @@ export interface SettingsState {
    */
   boardZoom: number;
   setBoardZoom: (zoom: number) => void;
+  /**
+   * Light, dark or the device's choice. Like boardZoom it is a per-device view preference (a classroom projector
+   * wants light, the same student's phone at night wants dark): saved on this device, never one of SETTING_KEYS.
+   */
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
   /** Back to the defaults. Used when a signed-in device signs out (docs/ACCOUNTS.md 5.6.4). */
   reset: () => void;
 }
@@ -44,18 +52,22 @@ export const useSettings = create<SettingsState>()(
     (set) => ({
       ...defaultSettings(),
       boardZoom: 1,
+      theme: 'system',
       set: (patch) => set(patch),
       setBoardZoom: (boardZoom) => set({ boardZoom }),
+      setTheme: (theme) => set({ theme }),
       reset: () => set(defaultSettings()),
     }),
     {
       name: 'periodica-settings',
-      version: 3,
+      version: 4,
       // localStorage, except that a tab left over from before a sign out or sign in elsewhere cannot write (docs/ACCOUNTS.md 5.6.8).
       storage: createJSONStorage(() => guardedStorage),
-      // v3: Periodica has one theme, dark, so the old theme choice is dropped.
-      migrate: (persisted) => {
-        const { theme: _theme, ...rest } = (persisted ?? {}) as Record<string, unknown>;
+      // v3 dropped the old (v1, v2) theme choice when Periodica was dark only. v4 brings a theme back as a new,
+      // device-only choice that starts at 'system', so a choice saved before v3 is still dropped rather than revived.
+      migrate: (persisted, version) => {
+        const rest = { ...((persisted ?? {}) as Record<string, unknown>) };
+        if (version < 3) delete rest.theme;
         return rest as unknown as SettingsState;
       },
     },
@@ -69,3 +81,12 @@ export const DIFFICULTIES: { id: Difficulty; name: string; desc: string }[] = [
   { id: 'standard', name: 'Standard', desc: 'Symbol and name only' },
   { id: 'expert', name: 'Expert', desc: 'Symbols only, and three lives: each wrong drop costs one' },
 ];
+
+export const THEMES: { id: Theme; label: string }[] = [
+  { id: 'system', label: 'System' },
+  { id: 'light', label: 'Light' },
+  { id: 'dark', label: 'Dark' },
+];
+
+/** Page colour per theme, for <meta name="theme-color"> (the browser and phone chrome). Keep in step with --bg. */
+export const THEME_COLOR = { light: '#f7f4ee', dark: '#161513' } as const;

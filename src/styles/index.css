@@ -4,8 +4,9 @@
  * Periodica foundation. The contract for these values is docs/DESIGN.md.
  * Built with the unslop process by Damir Sokolovsky (@heydamir), CC BY 4.0.
  *
- * Chrome is graphite and quiet. Colour lives in two moments: the element tiles
- * (category colours, like a printed wall chart) and the round result (gold stars).
+ * Chrome is warm and quiet. Colour lives in the moments: the element tiles
+ * (category colours, like a printed wall chart), the snap of a placed tile and the round result.
+ * Two themes from one ramp: the chart's paper by day (light, made for classroom projectors) and at night (dark).
  */
 
 @theme {
@@ -49,12 +50,14 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* `light:` utilities apply only in the light theme (the theme lives on <html data-theme>). */
+@custom-variant light (&:where([data-theme='light'], [data-theme='light'] *));
 
 /* ---------------------------------------------------------------- tokens */
 
 :root {
   color-scheme: dark;
-  /* The one theme: a warm dark ramp (unslop tokens, Warm), never a colour of its own. */
+  /* Dark: the wall chart's paper at night, a warm ramp (unslop tokens, Warm), never a colour of its own. */
   --bg-deep: #12110f;
   --bg: #161513;
   --surface: #1c1a18;
@@ -68,13 +71,13 @@
   /* Muted: meta and captions only. 4.5:1 or better on bg, surface and surface-2. */
   --ink-3: #969085;
 
-  /* The one accent: cobalt (element 27). Selection, progress, the key figure. */
-  --accent: #6ea3ff;
+  /* The one accent: cobalt (element 27). The primary action, selection, progress, the key figure. */
+  --accent: #5b94ff;
   --on-accent: #12110f;
-  --accent-soft: rgb(110 163 255 / 0.12);
-  /* Primary action: off-white from the ramp with dark text. */
-  --primary: #efe9de;
-  --on-primary: #161513;
+  --accent-soft: rgb(91 148 255 / 0.14);
+  /* Primary action: filled with the accent, dark text at 6.4:1. */
+  --primary: var(--accent);
+  --on-primary: var(--on-accent);
 
   --good: #4cc38a;
   --bad: #ec5d61;
@@ -84,7 +87,7 @@
   --star-line: #c98f1e;
 
   /* Focus ring: 3:1 or better against every surface. */
-  --focus: #6ea3ff;
+  --focus: #5b94ff;
 
   --cell-empty: rgb(239 233 222 / 0.035);
   /* Empty-slot outline: 3:1 or better against the slot and the page (WCAG 1.4.11). */
@@ -126,6 +129,63 @@
   --cat-actinide: #d6b48a;
 }
 
+/*
+ * Light: the paper the wall chart is printed on. Made for classroom projectors, which wash out dark pages:
+ * dark ink on warm white, deeper category colours so tiles keep their hue in a bright room.
+ */
+[data-theme='light'] {
+  color-scheme: light;
+  --bg-deep: #efeae1;
+  --bg: #f7f4ee;
+  --surface: #fdfbf7;
+  --surface-2: #efe9df;
+  --line: rgb(31 27 22 / 0.1);
+  --line-strong: rgb(31 27 22 / 0.18);
+  /* 3:1 or better against bg, surface and surface-2. */
+  --line-control: #7f766a;
+  --ink: #1f1b16;
+  --ink-2: #5e554a;
+  /* 4.5:1 or better on bg, surface and surface-2. */
+  --ink-3: #6b6357;
+
+  --accent: #1f5bd6;
+  --on-accent: #ffffff;
+  --accent-soft: rgb(31 91 214 / 0.09);
+
+  --good: #13773a;
+  --bad: #c92a2a;
+  --gold: #8f5f00;
+  --star: #e8a400;
+  --star-line: #8f5f00;
+
+  --focus: #1f5bd6;
+
+  --cell-empty: rgb(31 27 22 / 0.04);
+  --slot-line: rgb(31 27 22 / 0.5);
+  --cell-ink-mix: 56%;
+  --heat-ink-mix: 46%;
+  --tile-tint: 14%;
+  --tile-edge: 50%;
+  --mini-tint: 40%;
+  --mini-empty: rgb(31 27 22 / 0.08);
+
+  --shadow-sm: 0 1px 2px rgb(31 27 22 / 0.06);
+  --shadow-md: 0 8px 24px rgb(31 27 22 / 0.08);
+  --shadow-lg: 0 16px 48px rgb(31 27 22 / 0.14), 0 0 0 1px var(--line);
+  --highlight: none;
+
+  --cat-alkali-metal: #e5334f;
+  --cat-alkaline-earth-metal: #e57a10;
+  --cat-transition-metal: #c99a00;
+  --cat-post-transition-metal: #5c9a0c;
+  --cat-metalloid: #0e9f8e;
+  --cat-nonmetal: #2f7de1;
+  --cat-halogen: #7655e8;
+  --cat-noble-gas: #c23dd6;
+  --cat-lanthanide: #db4c94;
+  --cat-actinide: #9a7340;
+}
+
 /* Okabe–Ito based palette, distinguishable with the common colour-vision deficiencies. */
 [data-colorblind='true'] {
   --cat-alkali-metal: #e69f00;
@@ -142,6 +202,13 @@
 /* Several Okabe–Ito colours are very light or very dark, so text leans further towards --ink. */
 [data-colorblind='true'] {
   --cell-ink-mix: 58%;
+}
+/* Light: the same Okabe–Ito hues, the pale ones (yellow, grey, mint) deepened so a tile edge still reads on paper. */
+[data-theme='light'][data-colorblind='true'] {
+  --cat-alkaline-earth-metal: #c9b800;
+  --cat-noble-gas: #8a8a8a;
+  --cat-lanthanide: #5fae6b;
+  --cell-ink-mix: 46%;
 }
 
 @layer base {
@@ -273,6 +340,9 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-card);
   }
+  [data-theme='light'] .card {
+    box-shadow: var(--shadow-sm);
+  }
   .panel {
     background: var(--surface);
     border: 1px solid var(--line);
@@ -338,8 +408,9 @@
       color var(--dur-press) var(--ease-out),
       transform var(--dur-press) var(--ease-out);
   }
+  /* Hover leans towards ink: lighter on dark, deeper on light, so the text keeps its contrast in both. */
   .btn-primary:hover:not(:disabled) {
-    background: color-mix(in oklab, var(--primary) 88%, var(--bg));
+    background: color-mix(in oklab, var(--primary) 86%, var(--ink));
   }
   .btn-primary:active:not(:disabled) {
     transform: scale(0.98);
@@ -580,6 +651,9 @@
   /* Element name on a tile: plain --ink-2 dips just under 4.5:1 on the brightest dark tiles. */
   .tile-name {
     color: color-mix(in oklab, var(--ink-2) 60%, var(--ink));
+  }
+  [data-theme='light'] .tile-name {
+    color: var(--ink-2);
   }
   /* The corner number. */
   .tile-number {

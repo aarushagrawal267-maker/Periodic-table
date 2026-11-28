@@ -8,6 +8,17 @@
     <meta name="description" content="Learn and memorize the periodic table by playing: place elements on the table, take quick quizzes and match pairs in three-minute lessons. Free, no sign-up." />
     <link rel="canonical" href="https://aarushagrawal267-maker.github.io/Periodic-table/" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <script>
+      // Theme before the first paint (System, Light or Dark in Settings; saved on this device only), so a light page never flashes dark.
+      try {
+        var t = (JSON.parse(localStorage.getItem('periodica-settings') || '{}').state || {}).theme;
+        var light = t === 'light' || (t !== 'dark' && matchMedia('(prefers-color-scheme: light)').matches);
+        if (light) {
+          document.documentElement.dataset.theme = 'light';
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f4ee');
+        }
+      } catch (e) {}
+    </script>
     <meta name="application-name" content="Periodica" />
 
     <!-- Sharing: Open Graph (Facebook, LinkedIn, WhatsApp, iMessage, Discord, Slack) and X. Absolute URLs only. -->

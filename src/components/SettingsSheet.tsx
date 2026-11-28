@@ -1,5 +1,6 @@
+import { Monitor, Moon, Sun } from 'lucide-react';
 import { useRef, useState, type KeyboardEvent } from 'react';
-import { DIFFICULTIES, useSettings } from '../store/settings';
+import { DIFFICULTIES, THEMES, useSettings, type Theme } from '../store/settings';
 import { useProgress } from '../store/progress';
 import { useUi } from '../store/ui';
 import { AccountDataSummary, useSignedIn } from './account/AccountData';
@@ -43,6 +44,30 @@ export function SettingsSheet() {
       {/* The heading sits on the close button's centre line: 30px on phones, 38px at sm, 34px from md. */}
       <div className="px-4 pb-8 pt-4 sm:px-8 sm:pt-6 md:pt-5">
         <h2 className="t-heading">Settings</h2>
+
+        <section className="mt-8">
+          <h3 id="theme-label" className="label mb-2">
+            Theme
+          </h3>
+          <div
+            className="seg grid w-full grid-cols-3"
+            role="radiogroup"
+            aria-labelledby="theme-label"
+            onKeyDown={(e) => roveRadios(e, THEMES.map((t) => t.id), s.theme, s.setTheme)}
+          >
+            {THEMES.map((t) => {
+              const I = THEME_ICON[t.id];
+              const on = s.theme === t.id;
+              return (
+                <button key={t.id} role="radio" aria-checked={on} tabIndex={on ? 0 : -1} onClick={() => s.setTheme(t.id)} className="seg-item flex items-center justify-center gap-2">
+                  <I size={16} strokeWidth={1.5} aria-hidden />
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[13px] leading-5 text-ink-2">Light is easiest to read on a classroom projector. Saved on this device only</p>
+        </section>
 
         <section className="mt-8">
           <h3 className="label mb-2">Default difficulty</h3>
@@ -108,6 +133,8 @@ export function SettingsSheet() {
     </Sheet>
   );
 }
+
+const THEME_ICON: Record<Theme, typeof Sun> = { system: Monitor, light: Sun, dark: Moon };
 
 /**
  * Arrow keys move the selection inside a radio group, as native radios do (roving tabindex):
