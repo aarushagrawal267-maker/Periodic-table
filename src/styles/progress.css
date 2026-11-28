@@ -1,0 +1,154 @@
+/*
+ * Progress: the mastery map as a wall chart being coloured in (docs/DESIGN.md, moment 1).
+ * Each tile prints its strength as a fill that rises from the bottom: an empty printed slot,
+ * three learning steps (a quarter, half, three quarters), then the full printed tile with a star.
+ * Plain CSS on the theme variables, so light, dark and the colour-blind palette all follow.
+ */
+
+/* ------------------------------------------------------------------ cells */
+
+.pm-cell {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Learning: plain paper above the fill, so the coloured part stands out; the family-colour edge says the tile is begun. */
+.pm-cell[data-step='1'],
+.pm-cell[data-step='2'],
+.pm-cell[data-step='3'] {
+  background: var(--surface);
+}
+.pm-cell[data-step='1'] .tile,
+.pm-cell[data-step='2'] .tile,
+.pm-cell[data-step='3'] .tile {
+  background: transparent;
+  border-color: color-mix(in oklab, var(--c) calc(var(--tile-edge) * 0.75), transparent);
+}
+.pm-cell[data-step='4'] .tile {
+  background: transparent;
+}
+
+/*
+ * Not started: a quiet printed slot, outlined faintly in its family colour like a colouring-in chart,
+ * so even an empty map shows the families. The symbol stays at muted-text contrast so the chart can still be read.
+ */
+.pm-cell[data-step='0'] .tile {
+  background: var(--cell-empty);
+  border-style: dashed;
+  border-color: color-mix(in oklab, var(--c) 22%, var(--line-strong));
+  color: var(--ink-3);
+}
+/* The next lesson's elements, not started yet: the slot is outlined in its family colour, ready to be coloured in. */
+.pm-cell[data-step='0'][data-next] .tile {
+  border-color: color-mix(in oklab, var(--c) 60%, transparent);
+  color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+}
+
+/* The fill: a full printed layer slid up from the bottom by its step. Clipped to the tile's own corners. */
+.pm-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.pm-fill {
+  position: absolute;
+  inset: 0;
+  /* No level line: on a small tile it would cross the symbol and read as struck through. The tint step alone marks the level. */
+  background: color-mix(in oklab, var(--c) var(--tile-tint), var(--surface));
+  transform: translateY(calc((1 - var(--fill, 0)) * 100%));
+}
+
+/* The opening sweep: every coloured tile fills up once, left to right, delayed per column and row (--d). */
+@keyframes pm-fill-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+.pm-sweep {
+  animation: pm-fill-in var(--dur-enter) var(--ease-out) var(--d, 0ms) both;
+}
+
+/* Mastered: a small gold star in the top-right corner, opposite the corner number. */
+.pm-star {
+  position: absolute;
+  top: 9%;
+  right: 9%;
+  fill: var(--star);
+  color: var(--star-line);
+  pointer-events: none;
+}
+
+/* Moved up since the last visit: a family-colour ring that shows once after the sweep and fades. */
+@keyframes pm-up {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.pm-up {
+  position: absolute;
+  inset: -2px;
+  border: 2px solid color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+  border-radius: calc(var(--r) + 2px);
+  opacity: 0;
+  pointer-events: none;
+  animation: pm-up 1200ms var(--ease-out) 700ms both;
+}
+
+/* ----------------------------------------------------------------- legend */
+
+.pm-swatch {
+  position: relative;
+  display: block;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  --c: var(--ink-2);
+  background: var(--surface);
+  border: 1px solid color-mix(in oklab, var(--c) calc(var(--tile-edge) * 0.75), transparent);
+}
+.pm-swatch[data-step='4'] {
+  border-color: color-mix(in oklab, var(--c) var(--tile-edge), transparent);
+}
+.pm-swatch[data-step='0'] {
+  background: var(--cell-empty);
+  border-style: dashed;
+  border-color: var(--line-control);
+}
+.pm-swatch .pm-star {
+  top: -4px;
+  right: -4px;
+}
+
+/* --------------------------------------------------------------- families */
+
+.pm-bar {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--line-strong);
+}
+.pm-bar > span {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  transform-origin: left center;
+}
+/* Learning shows lighter behind mastered, so the bar reads like the tiles: begun, then printed. */
+.pm-bar-learning {
+  background: color-mix(in oklab, var(--c) 40%, transparent);
+}
+.pm-bar-mastered {
+  background: var(--c);
+}
