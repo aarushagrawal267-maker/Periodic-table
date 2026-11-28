@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'Periodica — Master the Periodic Table',
         short_name: 'Periodica',
         description: 'Learn all 118 elements through fast, satisfying puzzle rounds.',
-        theme_color: '#07070d',
-        background_color: '#07070d',
+        theme_color: '#121417',
+        background_color: '#121417',
         display: 'standalone',
         start_url: './',
         icons: [

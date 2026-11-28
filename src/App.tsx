@@ -27,7 +27,7 @@ export function App() {
     root.dataset.theme = light ? 'light' : 'dark';
     root.dataset.colorblind = String(colorblind);
     root.classList.toggle('reduce-motion', reduceMotion);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f5f5fa' : '#07070d');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f6f7f8' : '#121417');
   }, [theme, systemLight, colorblind, reduceMotion]);
 
   const immersive = route.name === 'game' || route.name === 'daily' || route.name === 'quiz' || route.name === 'life' || route.name === 'match' || (route.name === 'learn' && !!route.chapter);
@@ -69,9 +69,8 @@ export function App() {
 
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'never'}>
-      <div className="grain relative min-h-dvh">
-        <div className="aurora" aria-hidden />
-        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-surface-2 focus:px-4 focus:py-2">
+      <div className="relative min-h-dvh">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-[10px] focus:bg-surface-2 focus:px-4 focus:py-2">
           Skip to content
         </a>
         <Shell immersive={immersive} route={route.name}>
@@ -82,7 +81,7 @@ export function App() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             >
               {screen}
             </motion.div>
