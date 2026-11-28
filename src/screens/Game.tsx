@@ -261,7 +261,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
         onKeyDown={onSlotKey}
         onClick={() => state.selected && placeAt(state.selected, e.row, e.col)}
         aria-label={`Period ${e.period}, ${e.group ? `group ${e.group}` : 'f-block'}, empty${state.selected ? `. Place ${byNumber(state.selected).name} here` : ''}`}
-        className={`slot relative h-full w-full transition-[transform,background,border-color] duration-150 ${state.selected ? 'slot-armed' : ''} ${missed ? 'flash-bad' : ''} ${isHint ? '' : ''}`}
+        className={`slot relative h-full w-full transition-[transform,background,border-color] duration-150 ${state.selected ? 'slot-armed' : ''} ${missed ? 'flash-bad' : ''}`}
         style={{
           borderRadius: Math.max(5, rect.size * 0.14),
           background: isOver ? 'color-mix(in oklab, var(--accent) 22%, transparent)' : isHint ? 'color-mix(in oklab, var(--accent) 14%, transparent)' : tint,
