@@ -217,9 +217,9 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
         >
           <motion.div
             className="h-full w-full"
-            initial={fresh ? { scale: 1.5, opacity: 0, rotate: -6 } : false}
-            animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            transition={{ type: 'spring', damping: 14, stiffness: 260 }}
+            initial={fresh ? { scale: 1.12, opacity: 0 } : false}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             <ElementTile element={e} size={rect.size} showNumber={rect.size >= 44} />
           </motion.div>
@@ -227,15 +227,14 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
             <>
               <span
                 className="pointer-events-none absolute inset-0 rounded-lg"
-                style={{ border: `2px solid ${catVar(e.category)}`, animation: 'ripple 0.7s var(--ease-out-expo) forwards' }}
+                style={{ border: `2px solid ${catVar(e.category)}`, animation: 'ripple 0.7s var(--ease) forwards' }}
               />
               <motion.span
                 key={state.event!.id}
-                className="font-display pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2 whitespace-nowrap text-sm font-bold text-good"
+                className="font-display pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2 whitespace-nowrap text-sm font-medium text-good"
                 initial={{ y: 0, opacity: 1 }}
-                animate={{ y: -34, opacity: 0 }}
-                transition={{ duration: 0.9, ease: 'easeOut' }}
-                style={{ textShadow: '0 2px 10px rgb(0 0 0 / 0.6)' }}
+                animate={{ y: -24, opacity: 0 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               >
                 +{state.event!.points}
               </motion.span>
@@ -262,11 +261,11 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
         onKeyDown={onSlotKey}
         onClick={() => state.selected && placeAt(state.selected, e.row, e.col)}
         aria-label={`Period ${e.period}, ${e.group ? `group ${e.group}` : 'f-block'}, empty${state.selected ? `. Place ${byNumber(state.selected).name} here` : ''}`}
-        className={`slot relative h-full w-full transition-[transform,background,border-color] duration-150 ${state.selected ? 'slot-armed' : ''} ${missed ? 'flash-bad' : ''} ${isHint ? 'pulse-ring' : ''}`}
+        className={`slot relative h-full w-full transition-[transform,background,border-color] duration-150 ${state.selected ? 'slot-armed' : ''} ${missed ? 'flash-bad' : ''} ${isHint ? '' : ''}`}
         style={{
           borderRadius: Math.max(5, rect.size * 0.14),
-          background: isOver ? 'color-mix(in oklab, var(--accent-2) 22%, transparent)' : isHint ? 'color-mix(in oklab, var(--accent-2) 14%, transparent)' : tint,
-          borderColor: isOver || isHint ? 'var(--accent-2)' : learner ? `color-mix(in oklab, ${catVar(e.category)} 40%, transparent)` : undefined,
+          background: isOver ? 'color-mix(in oklab, var(--accent) 22%, transparent)' : isHint ? 'color-mix(in oklab, var(--accent) 14%, transparent)' : tint,
+          borderColor: isOver || isHint ? 'var(--accent)' : learner ? `color-mix(in oklab, ${catVar(e.category)} 40%, transparent)` : undefined,
           borderStyle: isOver || isHint ? 'solid' : undefined,
           transform: isOver ? 'scale(1.08)' : undefined,
           cursor: state.selected ? 'pointer' : 'default',
@@ -281,19 +280,19 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
   return (
     <div className="relative flex min-h-dvh flex-col">
       {/* HUD */}
-      <header className="glass sticky top-0 z-30 border-x-0 border-t-0">
+      <header className="solid border border-line sticky top-0 z-30 border-x-0 border-t-0">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-3 py-2.5 sm:px-6">
-          <button onClick={() => (state.phase === 'playing' && state.placed.length ? setConfirmLeave(true) : onExit())} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave round">
-            <ArrowLeft size={18} />
+          <button onClick={() => (state.phase === 'playing' && state.placed.length ? setConfirmLeave(true) : onExit())} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-[10px]" aria-label="Leave round">
+            <ArrowLeft size={18} strokeWidth={1.75} />
           </button>
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline gap-2">
-              <h1 className="font-display truncate text-base font-semibold sm:text-lg">{config.title}</h1>
+              <h1 className="font-display truncate text-base font-medium sm:text-lg">{config.title}</h1>
               <span className="hidden truncate text-xs text-ink-3 sm:inline">{config.subtitle}</span>
             </div>
             <div className="mt-1.5 flex items-center gap-2">
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow={state.placed.length} aria-valuemin={0} aria-valuemax={config.targets.length} aria-label="Elements placed">
-                <motion.div className="h-full rounded-full" style={{ background: 'var(--grad)' }} animate={{ width: `${progress * 100}%` }} transition={{ type: 'spring', damping: 30, stiffness: 200 }} />
+                <motion.div className="h-full rounded-full bg-accent" animate={{ width: `${progress * 100}%` }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} />
               </div>
               <span className="text-xs tabular-nums text-ink-2">
                 {state.placed.length}/{config.targets.length}
@@ -304,24 +303,24 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
             {expert && (
               <div className="flex gap-0.5" aria-label={`${state.lives} lives left`}>
                 {Array.from({ length: EXPERT_LIVES }, (_, i) => (
-                  <Heart key={i} size={16} className={i < state.lives ? 'fill-bad text-bad' : 'text-ink-3'} />
+                  <Heart key={i} size={16} strokeWidth={1.75} className={i < state.lives ? 'fill-bad text-bad' : 'text-ink-3'} />
                 ))}
               </div>
             )}
             <div className={`hidden text-right ${learner ? '' : 'sm:block'}`}>
-              <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Time</div>
-              <div className="font-display text-sm font-semibold">
+              <div className="text-xs text-ink-3">Time</div>
+              <div className="font-display text-sm font-medium tabular-nums">
                 <Elapsed start={state.startedAt} end={state.endedAt} running={state.phase === 'playing'} />
               </div>
             </div>
             <div className="text-right">
-              <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Score</div>
-              <div className="font-display text-sm font-semibold sm:text-base">
+              <div className="text-xs text-ink-3">Score</div>
+              <div className="font-display text-sm font-medium sm:text-base">
                 <AnimatedNumber value={state.score} />
               </div>
             </div>
-            <button onClick={() => setSettings({ sound: !sound })} className="btn-ghost hidden h-10 w-10 place-items-center rounded-full sm:grid" aria-label={sound ? 'Mute sounds' : 'Unmute sounds'}>
-              {sound ? <Volume2 size={17} /> : <VolumeX size={17} />}
+            <button onClick={() => setSettings({ sound: !sound })} className="btn-ghost hidden h-10 w-10 place-items-center rounded-[10px] sm:grid" aria-label={sound ? 'Mute sounds' : 'Unmute sounds'}>
+              {sound ? <Volume2 size={16} strokeWidth={1.75} /> : <VolumeX size={16} strokeWidth={1.75} />}
             </button>
           </div>
         </div>
@@ -343,7 +342,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
       </main>
 
       {/* Tray */}
-      <footer className="glass safe-bottom sticky bottom-0 z-30 border-x-0 border-b-0">
+      <footer className="solid border border-line safe-bottom sticky bottom-0 z-30 border-x-0 border-b-0">
         <div className="mx-auto flex max-w-3xl items-center gap-2 px-2 pt-3 sm:gap-3 sm:px-6">
           <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 sm:gap-3" role="listbox" aria-label="Elements to place">
             <AnimatePresence mode="popLayout" initial={false}>
@@ -358,10 +357,10 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
                     role="option"
                     aria-selected={sel}
                     aria-label={`${e.name}${learner ? `, atomic number ${e.number}` : ''}${sel ? ', selected' : ''}`}
-                    initial={{ y: 40, opacity: 0, scale: 0.8 }}
-                    animate={{ y: sel ? -10 : 0, opacity: dragging === n ? 0.35 : 1, scale: sel ? 1.06 : 1 }}
-                    exit={{ y: -60, opacity: 0, scale: 0.6 }}
-                    transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                    initial={{ y: 12, opacity: 0 }}
+                    animate={{ y: sel ? -6 : 0, opacity: dragging === n ? 0.35 : 1 }}
+                    exit={{ y: -12, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                     onPointerDown={(ev) => onTileDown(ev, n)}
                     onPointerMove={onTileMove}
                     onPointerUp={onTileUp}
@@ -373,11 +372,10 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
                         sfx.pick();
                       }
                     }}
-                    className={`relative h-[66px] w-[57px] shrink-0 cursor-grab touch-none rounded-2xl transition-[filter] sm:h-[84px] sm:w-[74px] ${miss ? 'animate-shake' : ''}`}
-                    style={{ filter: sel ? `drop-shadow(0 10px 22px color-mix(in oklab, ${learner ? catVar(e.category) : 'var(--accent-2)'} 55%, transparent))` : undefined }}
+                    className={`relative h-[66px] w-[57px] shrink-0 cursor-grab touch-none rounded-xl sm:h-[84px] sm:w-[74px] ${miss ? 'animate-shake' : ''}`}
                   >
                     <TrayTile e={e} difficulty={config.difficulty} selected={sel} />
-                    <kbd className="solid absolute -bottom-2 left-1/2 hidden -translate-x-1/2 rounded-md border border-line px-1.5 text-[10px] font-semibold leading-4 text-ink-3 sm:block">{i + 1}</kbd>
+                    <kbd className="solid absolute -bottom-2 left-1/2 hidden -translate-x-1/2 rounded-md border border-line px-1.5 text-[11px] font-medium leading-4 text-ink-3 sm:block">{i + 1}</kbd>
                   </motion.button>
                 );
               })}
@@ -387,19 +385,19 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
             <button
               onClick={() => dispatch({ type: 'hint' })}
               disabled={state.phase !== 'playing'}
-              className="btn-ghost grid h-11 w-11 place-items-center rounded-2xl disabled:opacity-40 sm:h-12 sm:w-12"
+              className="btn-ghost grid h-11 w-11 place-items-center rounded-[10px] disabled:opacity-40 sm:h-12 sm:w-12"
               aria-label="Hint: show where the selected element goes (H)"
               title="Hint (H)"
             >
-              <Lightbulb size={20} className="text-gold" />
+              <Lightbulb size={18} strokeWidth={1.75} className="text-ink-2" />
             </button>
-            <span className="text-[10px] tabular-nums text-ink-3">{state.queue.length} left</span>
+            <span className="text-[11px] tabular-nums text-ink-3">{state.queue.length} left</span>
           </div>
         </div>
         <p className="mx-auto mt-2.5 max-w-3xl px-4 text-center text-xs text-ink-3">
           {state.selected ? (
             <>
-              Tap where <b className="text-ink-2">{byNumber(state.selected).name}</b> belongs
+              Tap where <span className="font-medium text-ink-2">{byNumber(state.selected).name}</span> belongs
             </>
           ) : (
             <>Drag a tile onto the table, or tap a tile then tap its cell</>
@@ -409,7 +407,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
 
       {/* Drag ghost */}
       {dragging && (
-        <div ref={ghost} className="pointer-events-none fixed left-0 top-0 z-[70] h-[86px] w-[74px]" style={{ filter: 'drop-shadow(0 20px 30px rgb(0 0 0 / 0.5))' }} aria-hidden>
+        <div ref={ghost} className="pointer-events-none fixed left-0 top-0 z-[70] h-[86px] w-[74px]" style={{ filter: 'drop-shadow(0 8px 16px rgb(0 0 0 / 0.25))' }} aria-hidden>
           <TrayTile e={byNumber(dragging)} difficulty={config.difficulty} selected />
         </div>
       )}
@@ -417,16 +415,16 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
       {/* Countdown */}
       <AnimatePresence>
         {state.phase === 'countdown' && count > 0 && (
-          <motion.div className="fixed inset-0 z-40 grid place-items-center bg-bg/70 backdrop-blur-md" exit={{ opacity: 0 }}>
+          <motion.div className="fixed inset-0 z-40 grid place-items-center bg-bg/90" exit={{ opacity: 0 }}>
             <div className="text-center">
               <AnimatePresence mode="popLayout">
                 <motion.div
                   key={count}
-                  className="font-display text-grad text-[140px] font-bold leading-none"
-                  initial={{ scale: 2, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.4, opacity: 0 }}
-                  transition={{ type: 'spring', damping: 14, stiffness: 200 }}
+                  className="font-display text-[128px] font-medium leading-none tabular-nums"
+                  initial={{ y: 8, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -8, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 >
                   {count}
                 </motion.div>
@@ -443,13 +441,13 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel }: Props) {
 
       <Sheet open={confirmLeave} onClose={() => setConfirmLeave(false)} label="Leave round">
         <div className="p-7 pt-9">
-          <h2 className="font-display text-2xl font-semibold">Leave this round?</h2>
+          <h2 className="font-display text-2xl font-medium">Leave this round?</h2>
           <p className="mt-2 text-ink-2">Your progress in this round won't be saved.</p>
           <div className="mt-6 flex gap-3">
-            <button className="btn-ghost h-12 flex-1 rounded-2xl font-medium" onClick={() => setConfirmLeave(false)}>
+            <button className="btn-ghost h-12 flex-1 rounded-[10px] font-medium" onClick={() => setConfirmLeave(false)}>
               Keep playing
             </button>
-            <button className="h-12 flex-1 rounded-2xl bg-bad/15 font-medium text-bad" onClick={onExit}>
+            <button className="h-12 flex-1 rounded-[10px] bg-bad/15 font-medium text-bad transition-colors hover:bg-bad/20" onClick={onExit}>
               Leave
             </button>
           </div>
@@ -477,14 +475,14 @@ const slotNumber = (key: string) => ELEMENT_AT.get(key) ?? -1;
 
 function TrayTile({ e, difficulty, selected }: { e: Element; difficulty: Difficulty; selected: boolean }) {
   return (
-    <div className={`h-full w-full rounded-2xl transition-shadow ${selected ? 'ring-2 ring-accent-2 ring-offset-2 ring-offset-bg' : ''}`} style={{ '--c': catVar(e.category) } as CSSProperties}>
+    <div className={`h-full w-full rounded-xl ${selected ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg' : ''}`} style={{ '--c': catVar(e.category) } as CSSProperties}>
       <ElementTile
         element={e}
         size={74}
         showNumber={difficulty === 'learner'}
         showName={difficulty !== 'expert'}
-        color={difficulty === 'learner' ? undefined : 'var(--accent-2)'}
-        className="rounded-2xl"
+        color={difficulty === 'learner' ? undefined : 'var(--ink-3)'}
+        className="rounded-xl"
       />
     </div>
   );
@@ -497,17 +495,17 @@ function ComboBadge({ combo, mult }: { combo: number; mult: number }) {
         {combo >= 3 && (
           <motion.div
             key={mult}
-            initial={{ scale: 0.5, opacity: 0, y: -6 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.6, opacity: 0 }}
-            transition={{ type: 'spring', damping: 12, stiffness: 300 }}
-            className="flex items-center gap-2 rounded-full border border-line-strong bg-surface-2 px-3 py-1 backdrop-blur"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="flex items-center gap-2 rounded-lg border border-line-strong bg-surface-2 px-3 py-1"
           >
             <span className="text-xs text-ink-2">Combo</span>
-            <motion.span key={combo} initial={{ scale: 1.6 }} animate={{ scale: 1 }} className="font-display text-sm font-bold tabular-nums">
+            <motion.span key={combo} initial={{ opacity: 0.4 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} className="font-display text-sm font-medium tabular-nums">
               {combo}
             </motion.span>
-            <span className="text-grad font-display text-sm font-bold">×{mult}</span>
+            <span className="font-display text-sm font-medium tabular-nums text-accent-ink">×{mult}</span>
           </motion.div>
         )}
       </AnimatePresence>

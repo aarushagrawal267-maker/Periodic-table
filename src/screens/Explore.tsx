@@ -72,7 +72,7 @@ export function Explore({ symbol }: { symbol?: string }) {
     if (lens === 'state') return STATE_COLORS[e.state] ?? null;
     if (lens === 'mastery') {
       const s = mastery[e.number]?.s ?? 0;
-      return s === 0 ? null : `color-mix(in oklab, var(--accent-3) ${20 + s * 16}%, var(--accent))`;
+      return s === 0 ? null : `color-mix(in oklab, var(--accent) ${20 + s * 16}%, var(--line-strong))`;
     }
     const v = L.value!(e);
     if (v === null) return null;
@@ -87,25 +87,25 @@ export function Explore({ symbol }: { symbol?: string }) {
     <div className="mx-auto max-w-[1400px] px-3 pb-16 pt-8 sm:px-6 sm:pt-10" style={{ '--heat-lo': '#3b4cc0', '--heat-hi': '#ff6b4a' } as CSSProperties}>
       <div className="flex flex-col gap-5 px-1 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-semibold text-accent-2">Explore</p>
-          <h1 className="font-display mt-1 text-4xl font-semibold sm:text-5xl">The living table</h1>
+          <p className="text-sm text-ink-3">Explore</p>
+          <h1 className="font-display mt-1 text-4xl font-medium sm:text-5xl">The living table</h1>
           <p className="mt-2 max-w-xl text-ink-2">Switch lenses to see the patterns chemists see. Tap any element for its full story.</p>
         </div>
         <label className="relative block w-full lg:w-80">
-          <Search size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-3" />
+          <Search size={16} strokeWidth={1.75} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-3" />
           <input
             value={query}
             onChange={(ev) => setQuery(ev.target.value)}
             onKeyDown={(ev) => {
               if (ev.key === 'Enter' && matches?.size) openDetail([...matches][0]);
             }}
-            placeholder="Search name, symbol, number…"
+            placeholder="Name, symbol or number"
             aria-label="Search elements"
-            className="h-12 w-full rounded-2xl border border-line bg-surface pl-11 pr-10 text-[15px] outline-none transition-colors placeholder:text-ink-3 focus:border-accent-2"
+            className="h-11 w-full rounded-[10px] border border-line bg-surface pl-11 pr-10 text-[15px] outline-none transition-colors placeholder:text-ink-3 focus:border-accent"
           />
           {query && (
-            <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full hover:bg-surface-2" aria-label="Clear search">
-              <X size={15} />
+            <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-md hover:bg-surface-2" aria-label="Clear search">
+              <X size={16} strokeWidth={1.75} />
             </button>
           )}
         </label>
@@ -113,8 +113,8 @@ export function Explore({ symbol }: { symbol?: string }) {
 
       <div className="no-scrollbar -mx-3 mt-6 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-1" role="tablist" aria-label="Colour the table by">
         {LENSES.map((l) => (
-          <button key={l.id} role="tab" aria-selected={lens === l.id} onClick={() => setLens(l.id)} className={`relative shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${lens === l.id ? 'text-bg' : 'border border-line bg-surface text-ink-2 hover:text-ink'}`}>
-            {lens === l.id && <motion.span layoutId="lens-pill" className="absolute inset-0 rounded-full bg-ink" transition={{ type: 'spring', damping: 30, stiffness: 400 }} />}
+          <button key={l.id} role="tab" aria-selected={lens === l.id} onClick={() => setLens(l.id)} className={`relative shrink-0 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${lens === l.id ? 'border-transparent text-bg' : 'border-line bg-surface text-ink-2 hover:text-ink'}`}>
+            {lens === l.id && <motion.span layoutId="lens-pill" className="absolute -inset-px rounded-lg bg-ink" transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} />}
             <span className="relative">{l.label}</span>
           </button>
         ))}
@@ -136,7 +136,7 @@ export function Explore({ symbol }: { symbol?: string }) {
                 onMouseEnter={() => setHovered(e)}
                 onMouseLeave={() => setHovered((h) => (h === e ? null : h))}
                 onFocus={() => setHovered(e)}
-                className="block h-full w-full transition-[transform,opacity,filter] duration-200 hover:z-10 hover:scale-[1.18] focus-visible:z-10 focus-visible:scale-110"
+                className="block h-full w-full rounded-[inherit] transition-[opacity,filter] duration-150 hover:z-10 focus-visible:z-10"
                 style={{ opacity: d ? 0.14 : 1, filter: d ? 'grayscale(1)' : undefined }}
                 aria-label={`${e.name}, ${e.number}${L.value ? `, ${L.label} ${formatNumber(L.value(e))}` : ''}`}
               >
@@ -159,7 +159,7 @@ export function Explore({ symbol }: { symbol?: string }) {
           <ul className="flex flex-wrap gap-2" onMouseLeave={() => setHoverCat(null)}>
             {CATEGORIES.map((c) => (
               <li key={c.id}>
-                <button onMouseEnter={() => setHoverCat(c.id)} onFocus={() => setHoverCat(c.id)} onBlur={() => setHoverCat(null)} onClick={() => setQuery(c.label)} className="flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-sm transition-colors hover:bg-surface-2">
+                <button onMouseEnter={() => setHoverCat(c.id)} onFocus={() => setHoverCat(c.id)} onBlur={() => setHoverCat(null)} onClick={() => setQuery(c.label)} className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-1.5 text-sm transition-colors hover:bg-surface-2">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ background: catVar(c.id) }} />
                   {c.label}
                 </button>
@@ -169,7 +169,7 @@ export function Explore({ symbol }: { symbol?: string }) {
         ) : lens === 'state' ? (
           <div className="flex flex-wrap gap-2">
             {Object.entries(STATE_COLORS).map(([k, v]) => (
-              <span key={k} className="flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-sm">
+              <span key={k} className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-1.5 text-sm">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: v }} />
                 {k}
               </span>
@@ -178,7 +178,7 @@ export function Explore({ symbol }: { symbol?: string }) {
         ) : lens === 'mastery' ? (
           <div className="flex items-center gap-3 text-sm text-ink-2">
             <span>New</span>
-            <div className="h-2.5 w-48 rounded-full" style={{ background: 'linear-gradient(90deg, var(--line-strong), var(--accent), var(--accent-3))' }} />
+            <div className="h-2.5 w-48 rounded-full" style={{ background: 'linear-gradient(90deg, color-mix(in oklab, var(--accent) 36%, var(--line-strong)), var(--accent))' }} />
             <span>Mastered</span>
           </div>
         ) : (
@@ -202,19 +202,19 @@ export function Explore({ symbol }: { symbol?: string }) {
 
 function Preview({ e, lens }: { e: Element; lens: Lens }) {
   return (
-    <div className="glass flex items-center gap-4 rounded-2xl p-3 pr-5" style={{ boxShadow: 'var(--shadow-lg)' }}>
+    <div className="solid flex items-center gap-4 rounded-xl border border-line p-3 pr-5" style={{ boxShadow: 'var(--shadow-md)' }}>
       <div className="h-16 w-16 shrink-0">
         <ElementTile element={e} size={64} showName={false} />
       </div>
       <div className="min-w-0">
-        <div className="font-display text-lg font-semibold leading-tight">{e.name}</div>
-        <div className="text-xs" style={{ color: catVar(e.category) }}>
+        <div className="font-display text-lg font-medium leading-tight">{e.name}</div>
+        <div className="cat-ink text-xs" style={{ '--c': catVar(e.category) } as CSSProperties}>
           {categoryLabel(e.category)}
         </div>
         <div className="mt-1 text-xs text-ink-2">
           {lens.value ? (
             <>
-              {lens.label}: <b className="text-ink">{lens.id === 'year' && e.ancient ? 'Ancient' : formatNumber(lens.value(e))}</b> {lens.value(e) !== null && lens.id !== 'year' ? lens.unit : ''}
+              {lens.label}: <span className="font-medium tabular-nums text-ink">{lens.id === 'year' && e.ancient ? 'Ancient' : formatNumber(lens.value(e))}</span> {lens.value(e) !== null && lens.id !== 'year' ? lens.unit : ''}
             </>
           ) : (
             <>Mass {formatNumber(e.mass, 5)} u · {e.state}</>

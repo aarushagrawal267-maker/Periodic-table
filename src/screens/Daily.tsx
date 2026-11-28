@@ -45,23 +45,23 @@ export function Daily() {
   return (
     <div className="relative min-h-dvh">
       <div className="mx-auto max-w-3xl px-5 pb-16 pt-6">
-        <button onClick={() => go('/')} className="btn-ghost grid h-10 w-10 place-items-center rounded-full" aria-label="Back to home">
-          <ArrowLeft size={18} />
+        <button onClick={() => go('/')} className="btn-ghost grid h-10 w-10 place-items-center rounded-[10px]" aria-label="Back to home">
+          <ArrowLeft size={18} strokeWidth={1.75} />
         </button>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-8 text-center">
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-sm text-ink-2">
-            <CalendarDays size={15} /> {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className="mt-8 text-center">
+          <div className="mx-auto inline-flex items-center gap-2 text-sm text-ink-2">
+            <CalendarDays size={16} strokeWidth={1.75} className="text-ink-3" /> {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
           </div>
-          <h1 className="font-display mt-5 text-5xl font-semibold sm:text-6xl">
-            Daily <span className="text-grad">#{n}</span>
+          <h1 className="font-display mt-5 text-5xl font-medium sm:text-6xl">
+            Daily #{n}
           </h1>
           <p className="mx-auto mt-3 max-w-md text-ink-2">
             {DAILY_SIZE} elements scattered across the whole table. Same puzzle for everyone, every day. One attempt.
           </p>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="card mx-auto mt-10 max-w-xl p-6">
-          <MiniTable highlight={result ? new Set(targets) : new Set()} className="w-full" color={(x) => (!result && targets.includes(x) ? 'var(--accent-2)' : undefined)} label="Today's elements on the table" />
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.06 }} className="card mx-auto mt-10 max-w-xl p-6">
+          <MiniTable highlight={result ? new Set(targets) : new Set()} className="w-full" color={(x) => (!result && targets.includes(x) ? 'var(--accent)' : undefined)} label="Today's elements on the table" />
           <div className="mt-6 grid grid-cols-3 gap-3 text-center">
             <Stat icon={Target} label="Elements" value={String(DAILY_SIZE)} />
             <Stat icon={Flame} label="Streak" value={`${streak} day${streak === 1 ? '' : 's'}`} />
@@ -73,7 +73,7 @@ export function Daily() {
           {summary ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
               <p className={`text-sm font-medium ${summary.stars ? 'text-good' : 'text-ink-3'}`}>{summary.stars ? 'Completed today' : 'Attempt used today. A fresh one arrives at midnight.'}</p>
-              <div className="font-display mt-1 text-4xl font-semibold tabular-nums">{summary.score.toLocaleString('en-US')} pts</div>
+              <div className="font-display mt-1 text-4xl font-medium tabular-nums">{summary.score.toLocaleString('en-US')} pts</div>
               <p className="mt-1 text-sm text-ink-2">
                 {formatTime(summary.timeMs)} · {summary.mistakes} mistake{summary.mistakes === 1 ? '' : 's'}
               </p>
@@ -86,7 +86,7 @@ export function Daily() {
                 <ShareButton summary={summary} total={DAILY_SIZE} />
               </div>
               <a href="#/play/full" className="mt-4 inline-block text-sm font-medium text-ink-2 underline-offset-4 hover:text-ink hover:underline">
-                Keep practising with the full table →
+                Keep practising with the full table
               </a>
             </motion.div>
           ) : (
@@ -95,8 +95,8 @@ export function Daily() {
                 startDaily(key);
                 setPlaying(true);
               }}
-              className="btn-primary shine flex h-16 w-full items-center justify-center gap-2 rounded-2xl text-lg">
-              <Play size={20} className="fill-current" /> Start today's challenge
+              className="btn-primary flex h-12 w-full items-center justify-center gap-2 rounded-[10px] text-base">
+              <Play size={16} strokeWidth={1.75} /> Start today's challenge
             </button>
           )}
         </div>
@@ -107,10 +107,10 @@ export function Daily() {
 
 function Stat({ icon: I, label, value }: { icon: typeof Flame; label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-2xl bg-surface p-3">
-      <I size={16} className="mx-auto text-ink-3" />
-      <div className="font-display mt-1.5 text-lg font-semibold tabular-nums">{value}</div>
-      <div className="text-[11px] uppercase tracking-wider text-ink-3">{label}</div>
+    <div className="rounded-xl border border-line p-3">
+      <I size={16} strokeWidth={1.75} className="mx-auto text-ink-3" />
+      <div className="font-display mt-2 text-lg font-medium tabular-nums">{value}</div>
+      <div className="text-xs text-ink-3">{label}</div>
     </div>
   );
 }
