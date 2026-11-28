@@ -84,6 +84,7 @@ Without any configuration the app is guest-only and makes no network calls. To t
 | `npm run test:rules` | Test the Firestore security rules on the Firebase emulator (needs Java) |
 | `npm run test:accounts` | Sync tests and account browser tests on the Firebase emulators (needs Java) |
 | `npm run data` | Rebuild `src/data/elements.json` from the PubChem export and the learning content |
+| `node scripts/brand-icons.mjs` | Redraw the app icons in `public/` (SVG and PNG) from the mark in `src/lib/brand.ts` |
 | `node scripts/og-image.mjs` | Re-render the link-preview image `public/og.png` from `scripts/og-image.html` |
 | `node --test social/publish/` | Tests for the social media posting scripts |
 

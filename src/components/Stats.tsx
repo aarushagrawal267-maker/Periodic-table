@@ -39,10 +39,14 @@ export function Elapsed({ start, end, running }: { start: number; end: number; r
   return <span className="tabular-nums">{formatTime(Math.max(0, ms))}</span>;
 }
 
-/** Circular progress ring: a hairline track and one arc, in the accent unless a colour is given. */
+/**
+ * Circular progress ring: a hairline track and one arc, in the accent (cobalt, the colour of progress everywhere)
+ * unless a colour is given. At zero the arc is not drawn at all, so its round cap never leaves a stray dot.
+ */
 export function Ring({ value, size = 56, stroke = 6, children, color }: { value: number; size?: number; stroke?: number; children?: React.ReactNode; color?: string }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
+  const v = Math.min(1, Math.max(0, value || 0));
   return (
     <div className="relative grid shrink-0 place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90" aria-hidden>
@@ -56,7 +60,8 @@ export function Ring({ value, size = 56, stroke = 6, children, color }: { value:
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={c}
-          strokeDashoffset={c * (1 - Math.min(1, Math.max(0, value)))}
+          strokeDashoffset={c * (1 - v)}
+          opacity={v > 0 ? 1 : 0}
           style={{ transition: 'stroke-dashoffset var(--dur-enter) var(--ease-out)' }}
         />
       </svg>

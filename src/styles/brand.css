@@ -1,0 +1,59 @@
+/*
+ * Brand: the mark and the accent's place in the header (Shell.tsx).
+ * The mark's squares are filled with the --cat-* variables in the markup, so the theme and the colour-blind palette apply.
+ */
+
+/* The mark never takes a hover or focus effect of its own; the link around it carries the focus ring. */
+.logo-mark {
+  display: block;
+}
+
+/*
+ * The current section in the top nav: a 2px cobalt bar on the header's bottom edge, under the label.
+ * The header row is 64px from md and the link 36px, centred, so 14px below the link is the header's edge.
+ */
+.nav-mark {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -14px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--accent);
+  pointer-events: none;
+  transform-origin: center;
+  animation: nav-mark-in var(--dur-menu) var(--ease-out) both;
+}
+@media (min-width: 1024px) {
+  .nav-mark {
+    left: 12px;
+    right: 12px;
+  }
+}
+
+/* It draws out from the middle once when the section changes. Off with Reduce motion (index.css collapses it). */
+@keyframes nav-mark-in {
+  from {
+    transform: scaleX(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+.reduce-motion .nav-mark {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-mark {
+    animation: none;
+  }
+}
+
+/* Windows high contrast: the bar keeps showing as the system highlight colour. */
+@media (forced-colors: active) {
+  .nav-mark {
+    background: Highlight;
+  }
+}

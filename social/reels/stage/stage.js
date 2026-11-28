@@ -109,13 +109,23 @@
     arrowUpRight: ['M7 7h10v10', 'M7 17 17 7'],
   };
 
-  /** LogoMark from src/components/Shell.tsx. */
+  /**
+   * LogoMark from src/components/Shell.tsx: the table's silhouette as flat squares in category colours
+   * (geometry from src/lib/brand.ts: 5 x 3 cells of 8 with gaps of 2). `size` is the side of the old square mark;
+   * the new mark is 0.64 of that tall and wider than tall, like the header's 18px mark beside 17px type.
+   */
+  const MARK_SQUARES = [
+    [0, 0, 'nonmetal'], [4, 0, 'noble-gas'],
+    [0, 1, 'alkali-metal'], [1, 1, 'alkaline-earth-metal'], [3, 1, 'halogen'], [4, 1, 'noble-gas'],
+    [0, 2, 'alkali-metal'], [1, 2, 'alkaline-earth-metal'], [2, 2, 'transition-metal'], [3, 2, 'halogen'], [4, 2, 'noble-gas'],
+  ];
   function logoMark(size) {
     const s = document.createElementNS(SVG, 'svg');
-    s.setAttribute('viewBox', '0 0 28 28');
-    s.setAttribute('width', size);
-    s.setAttribute('height', size);
-    s.innerHTML = '<rect x="0.75" y="0.75" width="26.5" height="26.5" rx="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="14" y="18.5" text-anchor="middle" font-family="Figtree Variable" font-size="11" font-weight="600" fill="currentColor">Pa</text>';
+    const height = Math.round(size * 0.64);
+    s.setAttribute('viewBox', '0 0 48 28');
+    s.setAttribute('width', Math.round((height * 48) / 28));
+    s.setAttribute('height', height);
+    s.innerHTML = MARK_SQUARES.map(([c, r, cat]) => `<rect x="${c * 10}" y="${r * 10}" width="8" height="8" rx="1.75" fill="${catVar(cat)}"/>`).join('');
     s.style.flex = 'none';
     return s;
   }

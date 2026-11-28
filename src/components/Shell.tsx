@@ -1,6 +1,8 @@
 import { BarChart3, CalendarDays, Flame, Gamepad2, GraduationCap, House, Settings, Telescope } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { MARK_HEIGHT, MARK_SQUARES, MARK_WIDTH, markRect } from '../lib/brand';
 import { todayKey } from '../lib/daily';
+import { catVar } from '../lib/elements';
 import type { Route } from '../lib/router';
 import { levelFromXp } from '../lib/scoring';
 import { liveStreak, useProgress } from '../store/progress';
@@ -8,6 +10,7 @@ import { useUi } from '../store/ui';
 import { AccountEntry, useAccountSlot } from './account/AccountEntry';
 import { GoalRingBadge } from './DailyGoal';
 import { Ring } from './Stats';
+import '../styles/brand.css';
 
 const NAV = [
   { path: '/', name: 'home', label: 'Home', icon: House, mobile: true },
@@ -36,20 +39,32 @@ const GOAL_SHOWN = {
 const HeaderAccount = import.meta.env.VITE_FIREBASE_PROJECT_ID ? AccountEntry : () => null;
 const useHeaderAccount = import.meta.env.VITE_FIREBASE_PROJECT_ID ? useAccountSlot : (): keyof typeof GOAL_SHOWN => 'none';
 
-/** Flat mark: the product's own element square, "Pa". The app icon adds its atomic number, 91, in the corner. */
-export function LogoMark({ size = 28 }: { size?: number }) {
+/**
+ * The mark: the periodic table's silhouette as flat squares in the chart's category colours, tall at both ends and
+ * low in the middle (geometry in src/lib/brand.ts, shared with the app icons). The fills are the theme's category
+ * variables, so it follows light, dark and the colour-blind palette. `size` is its height; it is wider than tall,
+ * like the chart.
+ */
+export function LogoMark({ size = 18 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 28 28" aria-hidden className="shrink-0 text-ink">
-      <rect x="0.75" y="0.75" width="26.5" height="26.5" rx="6.25" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <text x="14" y="18.5" textAnchor="middle" fontFamily="var(--font-sans)" fontSize="11" fontWeight="600" fill="currentColor">
-        Pa
-      </text>
+    <svg
+      width={Math.round((size * MARK_WIDTH) / MARK_HEIGHT)}
+      height={size}
+      viewBox={`0 0 ${MARK_WIDTH} ${MARK_HEIGHT}`}
+      aria-hidden
+      focusable="false"
+      className="logo-mark shrink-0"
+    >
+      {MARK_SQUARES.map((s) => {
+        const r = markRect(s);
+        return <rect key={s.z} x={r.x} y={r.y} width={r.size} height={r.size} rx={r.radius} fill={catVar(s.category)} />;
+      })}
     </svg>
   );
 }
 
 /** `compact`: below 340px only the mark shows, to leave room for the account avatar in the header. */
-export function Logo({ size = 28, compact = false }: { size?: number; compact?: boolean }) {
+export function Logo({ size = 18, compact = false }: { size?: number; compact?: boolean }) {
   return (
     <a href="#/" className="-mx-2 flex h-11 items-center gap-2 rounded-control px-2 md:h-9" aria-label="Periodica home">
       <LogoMark size={size} />
@@ -88,9 +103,11 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
                   key={n.path}
                   href={`#${n.path}`}
                   aria-current={on ? 'page' : undefined}
-                  className={`flex h-9 items-center rounded-control px-2 text-[15px] font-medium lg:px-3 transition-colors duration-150 ease-out ${on ? 'bg-surface-2 text-ink shadow-[var(--highlight)]' : 'text-ink-2 hover:text-ink'}`}
+                  className={`relative flex h-9 items-center rounded-control px-2 text-[15px] font-medium lg:px-3 transition-colors duration-150 ease-out ${on ? 'text-ink' : 'text-ink-2 hover:bg-surface-2 hover:text-ink'}`}
                 >
                   {n.label}
+                  {/* The current section: a 2px cobalt bar on the header's bottom edge, the top bar's twin of the tab bar marker. */}
+                  {on && <span aria-hidden className="nav-mark" />}
                 </a>
               );
             })}

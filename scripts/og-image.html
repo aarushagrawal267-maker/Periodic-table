@@ -21,8 +21,8 @@
     --ink: #efe9de;
     --ink-2: #aaa398;
     --ink-3: #969085;
-    --accent: #6ea3ff;
-    --accent-soft: rgb(110 163 255 / 0.12);
+    --accent: #5b94ff;
+    --accent-soft: rgb(91 148 255 / 0.14);
     --tile-tint: 16%;
     --tile-edge: 42%;
     --cell-ink-mix: 66%;
@@ -71,7 +71,8 @@
     display: flex; flex-direction: column; justify-content: center;
     padding-left: 24px;
   }
-  .mark { display: flex; align-items: center; gap: 18px; }
+  .mark { display: flex; align-items: center; gap: 22px; }
+  .logo { display: block; flex: none; }
   .word { font-size: 64px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; }
   .line { font-size: 30px; line-height: 1.25; color: var(--ink-2); margin-top: 12px; font-weight: 400; }
 </style>
@@ -80,10 +81,8 @@
   <div class="table" id="t">
     <div class="title">
       <div class="mark">
-        <svg width="56" height="56" viewBox="0 0 28 28" aria-hidden="true">
-          <rect x="0.75" y="0.75" width="26.5" height="26.5" rx="6.25" fill="none" stroke="#efe9de" stroke-width="1.5"/>
-          <text x="14" y="18.5" text-anchor="middle" font-family="Figtree Variable" font-size="11" font-weight="600" fill="#efe9de">Pa</text>
-        </svg>
+        <!-- The mark (src/lib/brand.ts), drawn in by scripts/og-image.mjs. -->
+        <svg id="mark" class="logo" aria-hidden="true"></svg>
         <span class="word">Periodica</span>
       </div>
       <p class="line">Learn the periodic table by playing. Free, no sign-up.</p>
@@ -107,6 +106,8 @@
   ];
   // One empty place on the table, the hint target of the puzzle: the student places it.
   const EMPTY = 17;
+  // The mark's fills are the category variables, as in the header.
+  for (const [k, v] of Object.entries(CAT)) document.documentElement.style.setProperty(`--cat-${k}`, v);
   const t = document.getElementById('t');
   for (const [n, sym, name, cat, row, col] of E) {
     const d = document.createElement('div');
