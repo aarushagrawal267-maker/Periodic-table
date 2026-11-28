@@ -66,7 +66,7 @@ export const REGIONS: Region[] = [
     name: 'The Full Table',
     tagline: 'All 118 elements. The ultimate test.',
     short: 'All 118',
-    accent: 'var(--accent-2)',
+    accent: 'var(--ink-3)',
     numbers: ELEMENTS.map((e) => e.number),
   },
 ];
