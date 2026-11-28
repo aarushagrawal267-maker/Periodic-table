@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { ArrowRight, Check, Home, RotateCcw, Share2, Star, Trophy, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type Ref } from 'react';
 import { byNumber } from '../lib/elements';
 import { formatTime, levelFromXp, titleForLevel } from '../lib/scoring';
 import { dailyNumber } from '../lib/daily';
@@ -8,6 +8,8 @@ import { useProgress, type RoundOutcome, type RoundSummary } from '../store/prog
 import { useSettings } from '../store/settings';
 import { useUi } from '../store/ui';
 import { ACHIEVEMENTS } from '../lib/achievements';
+import { CONFETTI_COUNT, roundSeed, type Finish } from '../lib/celebrate';
+import { Confetti, MasterTrophy, useCalm } from './Celebrate';
 import { ElementChip } from './ElementTile';
 import { MiniTable } from './MiniTable';
 import { Icon, TIER_COLOR } from './Icon';
@@ -28,14 +30,18 @@ interface Props {
   /** Overrides for the headline and the line under it (the end of a Timed Challenge level). */
   headline?: string;
   message?: string;
+  /** A Timed Challenge finish: a level cleared, or the master finish (all 118). Celebrated with confetti, and a trophy for the master. */
+  finish?: 'level' | 'master';
 }
 
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export function Results({ summary: s, outcome: o, title, total, onReplay, onNext, nextLabel, onExit, exitLabel = 'Done', headline: headlineOverride, message }: Props) {
+export function Results({ summary: s, outcome: o, title, total, onReplay, onNext, nextLabel, onExit, exitLabel = 'Done', headline: headlineOverride, message, finish }: Props) {
   const xp = useProgress((p) => p.xp);
   const openDetail = useUi((u) => u.openDetail);
   const reduce = useSettings((x) => x.reduceMotion);
+  /** The setting or the OS: no confetti, and a trophy that stands still. */
+  const calm = useCalm();
   const lvl = levelFromXp(xp);
   const before = levelFromXp(Math.max(0, xp - o.xpGained));
   const levelledUp = lvl.level > before.level;
@@ -56,6 +62,13 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
   const heading = useRef<HTMLHeadingElement>(null);
   const exitRef = useRef(onExit);
   exitRef.current = onExit;
+  const starsRef = useRef<HTMLDivElement>(null);
+
+  // Confetti only for a real celebration: three stars, a Timed Challenge level cleared, or the master finish.
+  const celebrate: Finish | null = !s.completed ? null : finish === 'master' ? 'master' : finish === 'level' ? 'level' : s.stars >= 3 ? 'stars' : null;
+  // Made of the round's own elements (all of them for the master finish), the same every time this result renders.
+  const confettiElements = useMemo(() => (celebrate === 'master' ? [] : Object.keys(s.results).map(Number)), [celebrate, s.results]);
+  const seed = roundSeed([s.score, s.timeMs, s.correct, s.mistakes]);
 
   // Modal behaviour (WCAG 2.4.3): focus moves in, Tab stays in, Escape exits, the page behind is inert.
   useEffect(() => {
@@ -98,14 +111,17 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
 
   return (
     <motion.div ref={overlay} className="fixed inset-0 z-50 scroll-pb-40 overflow-y-auto bg-bg sm:scroll-pb-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={tween(DUR.menu)}>
-      <div ref={dialog} className="mx-auto flex min-h-full max-w-xl flex-col justify-center px-4 py-8 sm:px-6" role="dialog" aria-modal="true" aria-labelledby="results-title">
+      {/* Decorative and behind the whole dialog (text, card and actions stay on top), never taking a click; not rendered at all when motion is reduced. */}
+      {celebrate && !calm && <Confetti seed={seed} count={CONFETTI_COUNT[celebrate]} elements={confettiElements} origin={starsRef} />}
+      <div ref={dialog} className="relative z-[1] mx-auto flex min-h-full max-w-xl flex-col justify-center px-4 py-8 sm:px-6" role="dialog" aria-modal="true" aria-labelledby="results-title">
         <motion.div className="text-center" {...enter(0)}>
+          {finish === 'master' && s.completed && <MasterTrophy still={calm} />}
           <p className="text-sm text-ink-2">{s.kind === 'daily' && s.dailyKey ? `Daily challenge #${dailyNumber(s.dailyKey)}` : title}</p>
           <h2 ref={heading} id="results-title" tabIndex={-1} className="t-display mt-2" style={{ outline: 'none' }}>
             {headline}
           </h2>
           <p className="mx-auto mt-3 max-w-md text-ink-2">{message ?? encouragement(s, acc, attempts, slipped.length > 0, total)}</p>
-          <Stars stars={s.stars} reduce={reduce} />
+          <Stars stars={s.stars} reduce={reduce} ref={starsRef} />
           {s.kind === 'daily' && <TrailSquares trail={s.trail} className="mt-4" />}
         </motion.div>
 
@@ -264,11 +280,11 @@ function enter(delay: number) {
 
 /**
  * Three stars, the middle one larger: gold fill with a darker gold edge, so they read as objects on the dark page.
- * They come in one after another with a small scale, the only celebration on the screen.
+ * They come in one after another with a small scale; confetti rises from behind them on a real celebration.
  */
-function Stars({ stars, reduce }: { stars: number; reduce: boolean }) {
+function Stars({ stars, reduce, ref }: { stars: number; reduce: boolean; ref?: Ref<HTMLDivElement> }) {
   return (
-    <div className="mt-6 flex items-end justify-center gap-3" role="img" aria-label={`${stars} of 3 stars`}>
+    <div ref={ref} className="mt-6 flex items-end justify-center gap-3" role="img" aria-label={`${stars} of 3 stars`}>
       {[0, 1, 2].map((i) => {
         const on = i < stars;
         return (

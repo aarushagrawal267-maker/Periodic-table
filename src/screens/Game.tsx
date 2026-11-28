@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useIsPresent } from 'motion/react';
 import { ArrowLeft, Lightbulb, Pause, Play, Shuffle, Timer, Volume2, VolumeX, ZoomIn, ZoomOut } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore, type KeyboardEvent, type PointerEvent, type RefObject } from 'react';
+import { MissMark, SnapBurst, useCalm } from '../components/Celebrate';
 import { ElementTile, tileRadius } from '../components/ElementTile';
 import { DUR, EASE, tween } from '../components/motion';
 import { PeriodicGrid, type CellRect } from '../components/PeriodicGrid';
@@ -9,6 +10,7 @@ import { Sheet } from '../components/Sheet';
 import { Results, makeBackgroundInert } from '../components/Results';
 import { ELEMENTS, byNumber, catVar, type Element } from '../lib/elements';
 import { createGame, gameReducer, hand, summarize, timeLeft, EXPERT_LIVES, HAND_SIZE, type GameState } from '../lib/game';
+import { computeLayout } from '../lib/layout';
 import { haptic, sfx } from '../lib/feedback';
 import { formatTime, multiplier } from '../lib/scoring';
 import { useProgress, type RoundOutcome, type RoundSummary } from '../store/progress';
@@ -40,8 +42,11 @@ interface Props {
   exitLabel?: string;
   /** Called once, on the first placement attempt or hint. The daily only counts as attempted from then on. */
   onFirstMove?: () => void;
-  /** Replaces the results headline and message when the round is completed (Timed Challenge levels). */
-  finale?: { headline: string; message: string };
+  /**
+   * Replaces the results headline and message when the round is completed (Timed Challenge levels).
+   * `kind` says which finish it is, so the results screen celebrates it: a level cleared, or the master finish.
+   */
+  finale?: { headline: string; message: string; kind: 'level' | 'master' };
 }
 
 export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, onFirstMove, finale }: Props) {
@@ -54,6 +59,10 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
   const sound = useSettings((s) => s.sound);
   const setSettings = useSettings((s) => s.set);
   const reduceMotion = useSettings((s) => s.reduceMotion);
+  /** Reduce motion from the setting or the OS: no snap, pulse, shake or flash, only still equivalents. */
+  const calm = useCalm();
+  /** The miss whose still red edge is showing (reduced motion only), for about a second. */
+  const [missHold, setMissHold] = useState<number | null>(null);
   const openDetail = useUi((s) => s.openDetail);
   const recorded = useRef(false);
   const [tip, setTip] = useState<{ id: number; text: string } | null>(null);
@@ -61,6 +70,8 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
   const trayRef = useRef<HTMLElement>(null);
   const tilesRef = useRef<HTMLDivElement>(null);
   const tileSize = useTrayTileSize(tilesRef);
+  const boardWrap = useRef<HTMLDivElement>(null);
+  const wrapWidth = useWidth(boardWrap);
   /** From sm the board may keep bigger cells; on phones it shrinks to 34 before it scrolls, inside the 16px gutter. */
   const wide = useWide();
   const bigBoard = config.targets.length > 40 || !!config.view;
@@ -175,6 +186,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
       haptic([30, 40, 30]);
       const text = missTip(e, config.difficulty);
       setTip({ id: ev.id, text });
+      setMissHold(ev.id);
       say(`Not there. ${e.name} belongs somewhere else.${expert ? ` ${state.lives} lives left.` : ` ${text}`}`);
     }
 
@@ -210,6 +222,13 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
       say(`Hint: ${e.name} goes ${whereIs(e)}.`);
     }
   }, [state.hint, say]);
+
+  // The still miss marker (reduced motion) clears after a second, like the animated flash.
+  useEffect(() => {
+    if (missHold === null) return;
+    const t = setTimeout(() => setMissHold((h) => (h === missHold ? null : h)), 1000);
+    return () => clearTimeout(t);
+  }, [missHold]);
 
   // Miss bubbles fade after about 3 seconds.
   useEffect(() => {
@@ -371,23 +390,16 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
           aria-label={`${e.symbol}, ${e.name}, placed. Open details`}
           tabIndex={-1}
         >
-          <motion.div
-            className="h-full w-full"
-            initial={fresh ? { scale: 1.12, opacity: 0 } : false}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={tween(DUR.enter)}
-          >
+          {/* The snap: the tile pops into its cell and a burst in its category colour leaves the rim, once. */}
+          <div className={`h-full w-full ${fresh && !calm ? 'snap-pop' : ''}`}>
             <ElementTile element={e} size={rect.size} showNumber={rect.size >= 44} quietNumber />
-          </motion.div>
+          </div>
           {fresh && (
             <>
-              <span
-                className="pointer-events-none absolute inset-0"
-                style={{ borderRadius: tileRadius(rect.size), border: `2px solid ${catVar(e.category)}`, animation: 'ripple 0.7s var(--ease-out) forwards' }}
-              />
+              {!calm && <SnapBurst key={`burst-${state.event!.id}`} category={e.category} size={rect.size} radius={tileRadius(rect.size)} n={e.number} />}
               <motion.span
                 key={state.event!.id}
-                className="num pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2 whitespace-nowrap rounded-tag bg-bg px-1 text-sm font-medium text-good"
+                className="num pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2 whitespace-nowrap rounded-tag bg-surface px-1 text-sm font-medium text-good"
                 initial={{ y: -4, opacity: 1 }}
                 animate={{ y: -24, opacity: 0 }}
                 transition={{ duration: 0.8, ease: EASE, opacity: { duration: 0.8, delay: 0.3, ease: EASE } }}
@@ -403,6 +415,9 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
       return <div className="h-full w-full bg-[var(--cell-empty)]" style={{ borderRadius: tileRadius(rect.size) }} aria-hidden />;
     }
     const missed = state.event?.kind === 'miss' && state.event.row === e.row && state.event.col === e.col;
+    // Reduced motion: no flash, a still red edge and cross for about a second instead.
+    const missStill = missed && calm && missHold === state.event!.id;
+    const missFx = missed && !calm ? 'miss-flash' : missStill ? 'miss-static' : '';
     const isOver = over === key;
     const isHint = hintTarget?.number === e.number;
     const tint = learner ? `color-mix(in oklab, ${catVar(e.category)} 16%, var(--cell-empty))` : undefined;
@@ -417,7 +432,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
         onKeyDown={onSlotKey}
         onClick={() => state.selected && placeAt(state.selected, e.row, e.col)}
         aria-label={`Period ${e.period}, ${e.group ? `group ${e.group}` : 'f-block'}, empty${isHint ? ', hint' : ''}${state.selected ? `. Place ${byNumber(state.selected).name} here` : ''}`}
-        className={`slot relative h-full w-full transition-[transform,background-color,border-color] duration-[var(--dur-press)] ease-out ${state.selected ? 'slot-armed' : ''} ${missed ? 'flash-bad' : ''} ${isHint ? 'is-target' : ''}`}
+        className={`slot board-slot relative h-full w-full transition-[transform,background-color,border-color] duration-[var(--dur-press)] ease-out ${state.selected ? 'slot-armed' : ''} ${missFx} ${isHint ? 'is-target' : ''}`}
         style={{
           borderRadius: tileRadius(rect.size),
           background: isOver || isHint ? 'var(--accent-soft)' : tint,
@@ -426,7 +441,9 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
           transform: isOver ? 'scale(1.04)' : undefined,
           cursor: state.selected ? 'pointer' : 'default',
         }}
-      />
+      >
+        {(missed && !calm) || missStill ? <MissMark size={rect.size} still={missStill} /> : null}
+      </button>
     );
   };
 
@@ -439,6 +456,18 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
     <>Drag a tile onto the table, or tap a tile, then its cell</>
   );
   const mult = multiplier(state.combo);
+
+  // The sheet's width: a table that tops out at the biggest cell size leaves paper to spare, so the sheet hugs it.
+  const gridNumbers = config.view ?? config.targets;
+  const minCell = !wide ? 28 : bigBoard ? 34 : 38;
+  const sheetWidth = useMemo(() => {
+    if (!wrapWidth) return undefined;
+    const pad = (wide ? SHEET_PAD_X.wide : SHEET_PAD_X.phone) * 2 + 2;
+    const inner = wrapWidth - pad;
+    const t = computeLayout(gridNumbers, (inner - GRID_AXIS) * boardZoom, { min: minCell * boardZoom, max: MAX_CELL * boardZoom, gap: 4 });
+    const needed = GRID_AXIS + t.width / Math.min(boardZoom, 1) + 6;
+    return needed < inner ? Math.ceil(needed + pad) : undefined;
+  }, [wrapWidth, wide, gridNumbers, boardZoom, minCell]);
 
   return (
     <div className="relative flex min-h-dvh flex-col">
@@ -517,18 +546,23 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
         {/* The board sits centred between header and hand on every width, so no empty band is left above the tray.
             On phones it keeps the 16px page gutter like every other screen; a table too wide for it scrolls inside it. */}
         <div aria-hidden className="flex-1" />
-        <div className="relative mx-auto w-full max-w-7xl">
-          <ComboBadge combo={state.combo} mult={mult} />
-          <PeriodicGrid
-            numbers={config.view ?? config.targets}
-            renderCell={renderCell}
-            // Phones: 28px lets a small board (the first twenty, a lesson) fit the width with no swipe; big boards still scroll.
-            minCell={!wide ? 28 : bigBoard ? 34 : 38}
-            maxCell={72}
-            zoom={boardZoom}
-            showAxes
-            className="pb-2 pt-6 sm:pt-8"
-          />
+        <div ref={boardWrap} className="relative mx-auto w-full max-w-7xl">
+          {/* The printed wall chart: the board sits on one paper sheet with the group and period numbers on its edges.
+              The sheet hugs a small table and spans the width for a big one. */}
+          <div className="chart-sheet" style={{ width: sheetWidth }}>
+            <ComboBadge combo={state.combo} mult={mult} calm={calm} />
+            <PeriodicGrid
+              numbers={gridNumbers}
+              renderCell={renderCell}
+              // Phones: 28px lets a small board (the first twenty, a lesson) fit the width with no swipe; big boards still scroll.
+              minCell={minCell}
+              maxCell={MAX_CELL}
+              zoom={boardZoom}
+              showAxes
+              // Room inside the sheet for the combo badge above and for a snap to open at the edges.
+              className={SHEET_PAD_CLASS}
+            />
+          </div>
           {/* On phones the guide sits under the table it talks about; from sm it sits under the tray. */}
           {/* A big board on a short phone needs every pixel above the tray, so there the guide steps aside rather than
               add a vertical scroll to a board that already scrolls sideways. */}
@@ -578,6 +612,9 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
                   difficulty={config.difficulty}
                   selected={state.selected === n}
                   missed={state.event?.kind === 'miss' && state.event.number === n}
+                  missId={state.event?.kind === 'miss' && state.event.number === n ? state.event.id : undefined}
+                  calm={calm}
+                  hold={state.event?.kind === 'miss' && missHold === state.event.id}
                   dimmed={dragging === n}
                   size={tileSize}
                   onPointerDown={(ev) => onTileDown(ev, n)}
@@ -703,6 +740,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
           exitLabel={exitLabel}
           headline={result.summary.completed ? finale?.headline : undefined}
           message={result.summary.completed ? finale?.message : undefined}
+          finish={result.summary.completed ? finale?.kind : undefined}
         />
       )}
     </div>
@@ -758,6 +796,11 @@ interface TrayButtonProps {
   difficulty: Difficulty;
   selected: boolean;
   missed: boolean;
+  /** The miss event, so a second miss on the same tile shakes again. */
+  missId?: number;
+  /** Reduced motion: no shake, a still red ring while `hold` instead. */
+  calm: boolean;
+  hold: boolean;
   dimmed: boolean;
   /** Type size of the printed tile (see TrayTile). */
   size: number;
@@ -768,7 +811,7 @@ interface TrayButtonProps {
   onActivate: () => void;
 }
 
-function TrayButton({ e, index, difficulty, selected, missed, dimmed, size, onActivate, ...pointer }: TrayButtonProps) {
+function TrayButton({ e, index, difficulty, selected, missed, missId, calm, hold, dimmed, size, onActivate, ...pointer }: TrayButtonProps) {
   // While a placed tile animates out it must not take clicks or focus.
   const present = useIsPresent();
   const onKeyDown = (ev: KeyboardEvent<HTMLButtonElement>) => {
@@ -804,10 +847,18 @@ function TrayButton({ e, index, difficulty, selected, missed, dimmed, size, onAc
       transition={tween(DUR.menu)}
       {...(present ? pointer : {})}
       onKeyDown={present ? onKeyDown : undefined}
-      className={`relative aspect-[15/17] min-h-0 min-w-0 max-w-[72px] flex-1 basis-0 cursor-grab touch-none rounded-control sm:aspect-auto sm:h-[84px] sm:w-[72px] sm:flex-none ${missed ? 'animate-shake' : ''}`}
+      className="relative aspect-[15/17] min-h-0 min-w-0 max-w-[72px] flex-1 basis-0 cursor-grab touch-none rounded-control sm:aspect-auto sm:h-[84px] sm:w-[72px] sm:flex-none"
       style={{ pointerEvents: present ? undefined : 'none' }}
     >
-      <TrayTile e={e} difficulty={difficulty} selected={selected} size={size} />
+      {/* The shake lives on the printed tile, not the button, so it never fights the button's lift. */}
+      <TrayTile
+        key={missed ? `miss-${missId}` : 'tile'}
+        e={e}
+        difficulty={difficulty}
+        selected={selected}
+        size={size}
+        className={missed && !calm ? 'tray-miss' : missed && hold ? 'tray-miss-static' : ''}
+      />
       <kbd aria-hidden className="kbd absolute -bottom-3 left-1/2 hidden -translate-x-1/2 sm:inline-grid">
         {index + 1}
       </kbd>
@@ -820,10 +871,10 @@ function TrayButton({ e, index, difficulty, selected, missed, dimmed, size, onAc
  * matching category colours. A tile takes its category colour once it lands on the table.
  * Learner still shows the atomic number in the corner.
  */
-function TrayTile({ e, difficulty, selected, size = 80 }: { e: Element; difficulty: Difficulty; selected: boolean; size?: number }) {
+function TrayTile({ e, difficulty, selected, size = 80, className = '' }: { e: Element; difficulty: Difficulty; selected: boolean; size?: number; className?: string }) {
   const learner = difficulty === 'learner';
   return (
-    <div className={`relative h-full w-full rounded-control ${selected ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg' : ''}`}>
+    <div className={`relative h-full w-full rounded-control ${selected ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg' : ''} ${className}`}>
       <ElementTile
         element={e}
         size={size}
@@ -843,6 +894,26 @@ function TrayTile({ e, difficulty, selected, size = 80 }: { e: Element; difficul
       )}
     </div>
   );
+}
+
+/** PeriodicGrid's axis band (group and period numbers), in px. */
+const GRID_AXIS = 18;
+const MAX_CELL = 72;
+/** Horizontal room between the sheet's edge and the table, per side (must match SHEET_PAD_CLASS). */
+const SHEET_PAD_X = { phone: 8, wide: 20 } as const;
+const SHEET_PAD_CLASS = 'px-2 pb-4 pt-8 sm:px-5 sm:pb-6 sm:pt-10';
+
+/** Width of an element, kept up to date. */
+function useWidth(ref: RefObject<HTMLElement | null>) {
+  const [w, setW] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setW(Math.round(entry.contentRect.width)));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref]);
+  return w;
 }
 
 const WIDE = '(min-width: 640px)';
@@ -887,22 +958,27 @@ function useTrayTileSize(ref: RefObject<HTMLDivElement | null>) {
   return size;
 }
 
-/** The combo, as a quiet annotation centred above the board: how many in a row, and the multiplier it earns. */
-function ComboBadge({ combo, mult }: { combo: number; mult: number }) {
+/**
+ * The combo, centred at the top of the chart sheet: how many in a row, and the multiplier it earns.
+ * From 5 in a row it takes the accent, firmer at x2 and filled at x3, and pulses once each time it goes up
+ * (a bigger pulse with a ring when the multiplier steps up). Reduced motion keeps the look, not the pulse.
+ */
+function ComboBadge({ combo, mult, calm }: { combo: number; mult: number; calm: boolean }) {
+  const tier = mult >= 3 ? 'combo-max' : mult >= 2 ? 'combo-high' : combo >= 5 ? 'combo-hot' : '';
+  const step = multiplier(combo) > multiplier(combo - 1);
+  const pulse = calm ? '' : step ? 'combo-pulse-step' : combo >= 5 ? 'combo-pulse' : '';
   return (
-    <div className="pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2">
+    <div className="pointer-events-none absolute left-1/2 top-1 z-20 -translate-x-1/2 sm:top-2">
       <AnimatePresence>
         {combo >= 3 && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={tween(DUR.menu)}
-            className="flex h-6 items-baseline gap-2 text-sm leading-6"
-          >
-            <span className="text-xs text-ink-3">Combo</span>
-            <span className="num font-medium text-ink">{combo}</span>
-            <span className="num font-medium text-accent">×{mult}</span>
+          <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={tween(DUR.menu)} data-testid="combo">
+            {/* Keyed by the count, so the pulse plays once per step up and never loops. */}
+            <span key={combo} className={`combo-badge ${tier} ${pulse}`} data-tier={tier || 'base'}>
+              <span className="combo-label">Combo</span>
+              <span className="combo-count num">{combo}</span>
+              <span className="combo-mult num">×{mult}</span>
+              {step && !calm && <span aria-hidden className="combo-ring" />}
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
