@@ -11,8 +11,7 @@ import { Ring } from '../components/Stats';
 import { rise } from '../components/motion';
 import { DAILY_SIZE, dailyNumber, todayKey } from '../lib/daily';
 import { formatDate } from '../lib/date';
-import { ELEMENTS, byNumber, bySymbol, catVar, categoryLabel, formatNumber, type Element } from '../lib/elements';
-import { THINGS } from '../lib/everyday';
+import { ELEMENTS, byNumber, catVar, categoryLabel, formatNumber, type Element } from '../lib/elements';
 import { hashString } from '../lib/random';
 import { REGIONS } from '../lib/regions';
 import { CHAPTERS, type Chapter } from '../lib/chapters';
@@ -21,7 +20,7 @@ import { levelFromXp, titleForLevel } from '../lib/scoring';
 import { liveStreak, masteredCount, useProgress, type Mastery } from '../store/progress';
 import { useUi } from '../store/ui';
 import { Countdown } from './Daily';
-import { MatchArt, QuizArt } from './Play';
+import { LifeArt, MatchArt, QuizArt } from '../components/ModeArt';
 
 /** Hydrogen to calcium: the first two chapters of the learning path. */
 const FIRST_CHAPTERS = CHAPTERS.slice(0, 2);
@@ -32,10 +31,12 @@ const learningCount = (m: Record<number, Mastery>) => Object.values(m).filter((x
 /** Met: right at least once (strength 1 or more). The same rule lights up the first 20 and the table map. */
 const isMet = (m: Record<number, Mastery>, n: number) => (m[n]?.s ?? 0) >= 1;
 
-/** Two everyday objects from In real life, shown with the elements inside them. */
-const LIFE_SAMPLES = ['phone', 'fireworks'].map((id) => THINGS.find((t) => t.id === id)!).filter(Boolean);
 
-const PAGE = 'mx-auto max-w-7xl px-4 sm:px-6';
+/**
+ * Every Home section shares the hero's column: 1088px is the width at which the whole table, the headline and both
+ * buttons fit a 1280x900 first screen, and the sections below line up with the table's edges.
+ */
+const PAGE = 'mx-auto max-w-[1088px] px-4 sm:px-6';
 
 export function Home() {
   const p = useProgress();
@@ -75,7 +76,7 @@ export function Home() {
         Hero: the whole wall chart is the first thing you see. A compact text row (headline left; the line and the actions right)
         sits above the table, so at 1280x900 both fit the first screen. The hero is as wide as the table at its largest (54px cells).
       */}
-      <section aria-labelledby="home-title" className="mx-auto max-w-[1088px] px-4 pt-8 sm:px-6">
+      <section aria-labelledby="home-title" className={`${PAGE} pt-8`}>
         <motion.div {...rise} className="grid gap-x-12 gap-y-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-end">
           {starter ? (
             <>
@@ -140,7 +141,7 @@ export function Home() {
       <section aria-labelledby="today-title" className={`${PAGE} mt-12 md:mt-16`}>
         <SectionHeader id="today-title" title="Today" aside={<span className="meta">{formatDate()}</span>} />
         {starter ? (
-          <div className="grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:items-start">
+          <div className="grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
             <FirstTwenty done={firstDone} mastery={p.mastery} />
             {todayStack}
           </div>
@@ -197,24 +198,9 @@ export function Home() {
         <SectionHeader id="practise-title" title="More ways to practise" sub="Quick rounds for when you have five minutes" />
         <div className="grid gap-3 md:grid-cols-3 md:gap-4">
           <PracticeCard href="#/life" title="In real life" action="Spot the elements" body="What’s inside your phone? Why are fireworks red? Spot the elements hiding in everyday things.">
-            <ul className="flex h-16 flex-col sm:h-20 md:h-24 divide-y divide-line border-y border-line" aria-hidden>
-              {LIFE_SAMPLES.map((t) => (
-                <li key={t.id} className="flex flex-1 items-center justify-between gap-4">
-                  <span className="text-sm text-ink-2">{t.name}</span>
-                  {/* At md the three cards are narrow: four 28px chips beside the label would run past the card. */}
-                  <span className="flex shrink-0 gap-1 md:max-lg:hidden">
-                    {t.contains.map(([sym]) => (
-                      <ElementChip key={sym} element={bySymbol.get(sym.toLowerCase())!} size={28} />
-                    ))}
-                  </span>
-                  <span className="hidden shrink-0 gap-0.5 md:max-lg:flex">
-                    {t.contains.map(([sym]) => (
-                      <ElementChip key={sym} element={bySymbol.get(sym.toLowerCase())!} size={22} />
-                    ))}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <span aria-hidden className="grid h-16 place-items-center rounded-control bg-surface-2 sm:h-20 md:h-24">
+              <LifeArt />
+            </span>
           </PracticeCard>
           <PracticeCard href="#/quiz" title="Quick quiz" action="Take a quiz" body="Ten fast questions on symbols, numbers, families and facts, weighted towards the elements you haven’t nailed yet.">
             <span aria-hidden className="grid h-16 place-items-center rounded-control bg-surface-2 sm:h-20 md:h-24">
