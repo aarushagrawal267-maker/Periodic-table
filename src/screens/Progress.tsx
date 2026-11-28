@@ -69,7 +69,7 @@ export function ProgressScreen() {
         </div>
         <Stat label="Mastered" value={fmt(mastered)} note={`of ${ELEMENTS.length} elements`} />
         <Stat label="Learning" value={fmt(learning)} note="in progress" />
-        <Stat label="Rounds" value={fmt(p.stats.rounds)} note={p.stats.playMs ? `${formatTime(p.stats.playMs)} played` : 'Every lesson and game adds XP'} />
+        <Stat label="Rounds" value={fmt(p.stats.rounds)} note={p.stats.playMs ? `${formatTime(p.stats.playMs)} (min:s) played` : 'Finished rounds count here'} />
         <Stat label="Accuracy" value={attempts ? `${acc}%` : '–'} note={attempts ? `${fmt(p.stats.placements)} of ${fmt(attempts)} right` : 'No placements yet'} />
         <Stat label="Best combo" value={fmt(p.stats.bestCombo)} note="answers in a row" />
         <Stat label="Best streak" value={fmt(streak)} note={streak === 1 ? 'day in a row' : 'days in a row'} />
@@ -108,7 +108,7 @@ export function ProgressScreen() {
           <a href="#/learn" className="card card-link mb-4 flex items-center gap-4 p-4 sm:p-5">
             <span className="min-w-0 flex-1">
               <span className="block font-medium">Your map is empty</span>
-              <span className="mt-1 block text-sm text-ink-2">Finish the first lesson and hydrogen to neon start to print in</span>
+              <span className="mt-1 block text-sm text-ink-2">Finish the first lesson, and hydrogen to neon start to appear here.</span>
             </span>
             <ArrowRight aria-hidden size={18} strokeWidth={1.5} className="shrink-0 text-ink-3" />
           </a>

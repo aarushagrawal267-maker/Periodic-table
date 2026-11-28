@@ -26,7 +26,7 @@ export function ChallengeHub() {
           </p>
           <h1 className="t-title mt-2">Beat the clock</h1>
           <p className="mt-3 max-w-xl text-ink-2">
-            Six levels. Each adds more elements and gives you less time for each one. Clear a level to open the next, and place all 118 to become a Master of the Periodic Table. Pause whenever you need to.
+            Six levels. Each adds more elements and gives you less time for each one. Clear a level to open the next, and place all 118 to become a master of the periodic table. Pause whenever you need to.
           </p>
         </div>
         <DifficultyPicker />
@@ -36,7 +36,7 @@ export function ChallengeHub() {
         <div className="card mt-8 flex items-center gap-4 p-4 sm:p-6" style={{ borderColor: 'var(--star-line)' }}>
           <Star size={28} strokeWidth={1.5} aria-hidden style={{ fill: 'var(--star)', color: 'var(--star-line)' }} />
           <div>
-            <h2 className="text-base font-medium leading-6">Master of the Periodic Table</h2>
+            <h2 className="text-base font-medium leading-6">Master of the periodic table</h2>
             <p className="mt-1 text-sm leading-5 text-ink-2">You placed all 118 elements against the clock.</p>
           </div>
         </div>
@@ -61,12 +61,12 @@ function LevelRow({ level: l }: { level: ChallengeLevel }) {
   const b = challengeBest(best, l.id, difficulty);
   const body = (
     <>
-      <MiniTable highlight={set} className={`w-24 shrink-0 sm:w-28 ${open ? '' : 'opacity-50'}`} label={`Level ${l.level}: elements 1 to ${l.numbers.length} highlighted`} />
+      <MiniTable highlight={set} className={`w-24 shrink-0 sm:w-28 ${open ? '' : 'opacity-40 grayscale'}`} label={`Level ${l.level}: elements 1 to ${l.numbers.length} highlighted`} />
       <div className="min-w-0 flex-1">
         <p className="meta">Level {l.level}</p>
-        <h2 className="mt-1 text-base font-medium leading-6">{l.title}</h2>
+        <h2 className={`mt-1 text-base font-medium leading-6 ${open ? '' : 'text-ink-2'}`}>{l.title}</h2>
         <p className="mt-1 text-sm leading-5 text-ink-2">
-          {l.numbers.length} elements, {l.secondsPerElement} s each ({formatTime(l.timeLimitMs)})
+          {l.numbers.length} elements, {l.secondsPerElement} s each · <span className="whitespace-nowrap">{formatTime(l.timeLimitMs)} in total</span>
         </p>
         <div className="mt-3">
           {open ? (
@@ -93,7 +93,7 @@ function LevelRow({ level: l }: { level: ChallengeLevel }) {
       {body}
     </a>
   ) : (
-    <div className="card flex h-full items-center gap-3 p-4 sm:gap-4" aria-disabled="true">
+    <div className="card flex h-full items-center gap-3 border-dashed p-4 sm:gap-4" aria-disabled="true">
       {body}
     </div>
   );
@@ -126,7 +126,7 @@ export function ChallengeGame({ levelId }: { levelId: string }) {
       finale={
         next
           ? { headline: `Level ${level.level} complete`, message: `Level ${next.level} is open: ${next.numbers.length} elements, ${next.secondsPerElement} seconds each.` }
-          : { headline: 'Master of the Periodic Table', message: "You've placed all 118 elements against the clock. You are a chemistry wizard." }
+          : { headline: 'Master of the periodic table', message: "You've placed all 118 elements against the clock. You are a chemistry wizard." }
       }
     />
   );

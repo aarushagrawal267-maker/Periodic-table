@@ -72,7 +72,7 @@ function BestStars({ stars, score }: { stars?: number; score?: number }) {
           return <Star key={i} size={16} strokeWidth={1.5} aria-hidden style={on ? { fill: 'var(--star)', color: 'var(--star-line)' } : { fill: 'var(--surface-2)', color: 'var(--ink-3)' }} />;
         })}
       </span>
-      {score !== undefined && <span className="num text-sm text-ink-2">{score.toLocaleString('en-US')}</span>}
+      {score !== undefined && <span className="num text-sm text-ink-2">Best {score.toLocaleString('en-US')}</span>}
     </span>
   );
 }
@@ -87,7 +87,7 @@ function RegionCounts({ known, total, cleared }: { known: number; total: number;
       {cleared > 0 && (
         <>
           <span aria-hidden className="max-[359px]:hidden">·</span>
-          <span className="max-[359px]:basis-full">{cleared}/3 cleared</span>
+          <span className="max-[359px]:basis-full">cleared on {cleared} of 3 levels</span>
         </>
       )}
     </p>
@@ -102,7 +102,7 @@ function RegionRow({ region: r }: { region: Region }) {
       <MiniTable highlight={set} className="w-24 shrink-0 sm:w-28" label={`${r.name} highlighted on the periodic table`} />
       <div className="min-w-0 flex-1">
         <h2 className="text-base font-medium leading-6">{r.name}</h2>
-        <p className="mt-1 line-clamp-2 text-sm leading-5 text-ink-2">{caption(r.tagline)}</p>
+        <p className="mt-1 text-sm leading-5 text-ink-2">{caption(r.tagline)}</p>
         <div className="mt-3">
           <BestStars stars={b?.stars} score={b?.score} />
         </div>
@@ -146,7 +146,7 @@ function ChallengeCard() {
           <span
             key={l.id}
             className="rounded-[3px]"
-            style={{ height: `${30 + (i / (CHALLENGE_LEVELS.length - 1)) * 70}%`, background: i < cleared ? 'var(--accent)' : 'var(--surface-2)' }}
+            style={{ height: `${30 + (i / (CHALLENGE_LEVELS.length - 1)) * 70}%`, background: i < cleared ? 'var(--accent)' : 'var(--line-strong)' }}
           />
         ))}
       </div>
@@ -154,7 +154,7 @@ function ChallengeCard() {
         <h2 className="flex items-center gap-2 text-base font-medium leading-6">
           <Timer size={16} strokeWidth={1.5} aria-hidden /> Timed challenge
         </h2>
-        <p className="mt-1 text-sm leading-5 text-ink-2">Six levels against the clock, from 10 elements up to all 118. Pause whenever you need to</p>
+        <p className="mt-1 text-sm leading-5 text-ink-2">Six levels against the clock, from 10 elements up to all 118. Pause whenever you need to.</p>
         <p className="meta mt-3">{cleared}/6 levels cleared</p>
       </div>
       <ArrowRight size={16} strokeWidth={1.5} aria-hidden className="hidden shrink-0 text-ink-2 sm:block" />

@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react';
 
 /** Hash routes so the app works on any static host without rewrite rules. */
 export type Route =
-  | { name: 'home' }
+  | { name: 'home'; unknown?: boolean }
   | { name: 'play' }
   | { name: 'game'; region: string }
   | { name: 'daily' }
@@ -39,7 +39,8 @@ export function parse(hash: string): Route {
     case 'challenge':
       return { name: 'challenge', level: b };
     default:
-      return { name: 'home' };
+      // An address that matches no screen shows Home, flagged so the page can say the link was not found.
+      return a ? { name: 'home', unknown: true } : { name: 'home' };
   }
 }
 

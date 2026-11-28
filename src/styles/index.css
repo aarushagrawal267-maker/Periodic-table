@@ -147,6 +147,20 @@
 @layer base {
   /* ------------------------------------------------------------------ base */
 
+  /* No word left alone on a heading's last line, and no orphaned last word in body copy. */
+  h1,
+  h2,
+  h3,
+  dt {
+    text-wrap: balance;
+  }
+  p,
+  li,
+  dd,
+  figcaption {
+    text-wrap: pretty;
+  }
+
   html {
     background: var(--bg);
     -webkit-tap-highlight-color: transparent;

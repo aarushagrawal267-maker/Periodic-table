@@ -44,6 +44,17 @@ export function App() {
   }, [colorblind, reduceMotion]);
 
   const best = useProgress((s) => s.best);
+  // Mistyped or out-of-date links fall back to an ordinary page; say so rather than pretend nothing happened.
+  const notFound =
+    route.name === 'home' && route.unknown
+      ? 'the home page'
+      : route.name === 'game' && !regionById(route.region)
+        ? 'the home page'
+        : route.name === 'learn' && route.chapter && route.chapter !== 'review' && !chapterById(route.chapter)
+          ? 'the learning path'
+          : route.name === 'challenge' && route.level && !challengeLevelById(route.level)
+            ? 'the timed challenge'
+            : null;
   const challengeLevel = route.name === 'challenge' && route.level ? challengeLevelById(route.level) : undefined;
   const challengePlayable = !!challengeLevel && challengeUnlocked(best, challengeLevel);
 
@@ -150,6 +161,14 @@ export function App() {
               exit={{ opacity: 0, transition: { duration: DUR.menu, ease: EASE } }}
               transition={{ duration: DUR.enter, ease: EASE }}
             >
+              {notFound && (
+                <p role="status" className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
+                  <span className="inline-flex items-center gap-2 rounded-control border border-line bg-surface px-3 py-2 text-sm text-ink-2">
+                    <span className="dot" style={{ background: 'var(--ink-3)' }} aria-hidden />
+                    That link did not match a page, so here is {notFound}.
+                  </span>
+                </p>
+              )}
               {/* RouteFocus shares the boundary, so after a lazy screen loads it still finds that screen's h1. */}
               <Suspense fallback={null}>
                 {screen}

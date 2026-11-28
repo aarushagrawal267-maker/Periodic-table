@@ -18,12 +18,12 @@ export interface ChallengeLevel {
 }
 
 const LADDER: [count: number, secondsPerElement: number, title: string][] = [
-  [10, 30, 'Hydrogen to Neon'],
-  [25, 25, 'Up to Manganese'],
-  [50, 20, 'Up to Tin'],
-  [75, 15, 'Up to Rhenium'],
-  [100, 10, 'Up to Fermium'],
-  [118, 8, 'The Whole Table'],
+  [10, 30, 'Hydrogen to neon'],
+  [25, 25, 'Up to manganese'],
+  [50, 20, 'Up to tin'],
+  [75, 15, 'Up to rhenium'],
+  [100, 10, 'Up to fermium'],
+  [118, 8, 'The whole table'],
 ];
 
 export const CHALLENGE_LEVELS: ChallengeLevel[] = LADDER.map(([count, secs, title], i) => ({

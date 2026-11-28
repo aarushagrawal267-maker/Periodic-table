@@ -242,7 +242,7 @@ function AtomModel({ e }: { e: Element }) {
         })}
       </svg>
       <figcaption className="mt-3 text-center text-[13px] text-ink-2">
-        Shells <span className="mono text-ink">{sh.join(' · ')}</span>
+        Shells <span className="mono whitespace-nowrap text-ink">{sh.join('·')}</span>
       </figcaption>
     </figure>
   );

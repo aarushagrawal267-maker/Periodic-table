@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ArrowRight, BarChart3, CalendarDays, ChevronRight, GraduationCap, RefreshCw, Star } from 'lucide-react';
+import { ArrowRight, BarChart3, BookOpen, CalendarDays, ChevronRight, ClipboardCheck, GraduationCap, Hand, Layers, RefreshCw, ShieldCheck, Star, Trophy } from 'lucide-react';
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { goalLabel, useDailyGoal } from '../components/DailyGoal';
 import { ElementChip, ElementTile } from '../components/ElementTile';
@@ -73,7 +73,7 @@ export function Home() {
           {starter ? (
             <>
               <h1 id="home-title" className="t-display max-w-xl">
-                Learn the first 20 elements. Three minutes at a time
+                Learn the first 20 elements, three minutes at a time
               </h1>
               <p className="mt-4 max-w-lg text-lg leading-7 text-ink-2">
                 {returning
@@ -172,9 +172,15 @@ export function Home() {
               {LIFE_SAMPLES.map((t) => (
                 <li key={t.id} className="flex flex-1 items-center justify-between gap-4">
                   <span className="text-sm text-ink-2">{t.name}</span>
-                  <span className="flex gap-1">
+                  {/* At md the three cards are narrow: four 28px chips beside the label would run past the card. */}
+                  <span className="flex shrink-0 gap-1 md:max-lg:hidden">
                     {t.contains.map(([sym]) => (
                       <ElementChip key={sym} element={bySymbol.get(sym.toLowerCase())!} size={28} />
+                    ))}
+                  </span>
+                  <span className="hidden shrink-0 gap-0.5 md:max-lg:flex">
+                    {t.contains.map(([sym]) => (
+                      <ElementChip key={sym} element={bySymbol.get(sym.toLowerCase())!} size={22} />
                     ))}
                   </span>
                 </li>
@@ -322,7 +328,7 @@ function DailyRow({ bonus }: { bonus: boolean }) {
         <>
           {done && <TrailSquares trail={today!.trail} animate={false} className="mt-3 justify-start!" />}
           <span className="meta mt-2 block">
-            {streak} day streak <span className="whitespace-nowrap">· next in <Countdown /></span>
+            {streak ? `${streak}-day streak` : 'No streak yet'} <span className="whitespace-nowrap">· next in <Countdown /></span>
           </span>
         </>
       }
@@ -534,7 +540,7 @@ function LevelStrip({ level, progress, toNext, learning, mastered, achievements 
 function ElementOfTheDay({ e }: { e: Element }) {
   const openDetail = useUi((s) => s.openDetail);
   const c = catVar(e.category);
-  const place = e.group ? `Group ${e.group} · period ${e.period}` : `Period ${e.period}`;
+  const place = e.group ? `Group ${e.group} · Period ${e.period}` : `Period ${e.period}`;
   const facts: [string, string][] = [
     ['State at 20 °C', e.state],
     ['Discovered', e.ancient ? 'Ancient' : (e.year?.toString() ?? '—')],
@@ -613,51 +619,74 @@ function PracticeCard({ href, title, action, body, children }: { href: string; t
   );
 }
 
+/** One point in the two closing sections: an icon tile, a title and two short lines, in a card like the rest of the page. */
+function InfoCard({ icon, step, title, body }: { icon: ReactNode; step?: number; title: string; body: string }) {
+  return (
+    <li className="card flex h-full flex-col p-4 sm:p-5">
+      <span className="flex items-center gap-3">
+        <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-control bg-surface-2 text-ink-2">
+          {icon}
+        </span>
+        {step !== undefined && <span className="meta">Step {step}</span>}
+      </span>
+      <h3 className="mt-4 text-base font-medium leading-6">{title}</h3>
+      <p className="mt-1 text-sm leading-5 text-ink-2">{body}</p>
+    </li>
+  );
+}
+
 function HowItWorks() {
   const steps = [
-    { title: 'Place', body: 'Drag tiles onto the table, or tap a tile and then its cell. Fast, correct moves build your combo.' },
-    { title: 'Learn', body: 'Every element opens into a card: what it is, where you meet it, and one fact worth remembering.' },
-    { title: 'Master', body: 'Periodica tracks each element. Get it right first time, again and again, and it lights up on your map.' },
+    { icon: <Hand size={18} strokeWidth={1.5} />, title: 'Place', body: 'Drag tiles onto the table, or tap a tile and then its cell. Fast, correct moves build your combo.' },
+    { icon: <BookOpen size={18} strokeWidth={1.5} />, title: 'Learn', body: 'Every element opens into a card: what it is, where you meet it, and one fact worth remembering.' },
+    { icon: <Trophy size={18} strokeWidth={1.5} />, title: 'Master', body: 'Periodica tracks each element. Get it right first time, again and again, and it lights up on your map.' },
   ];
   return (
     <section aria-labelledby="how-title" className={`${PAGE} mt-12 md:mt-16`}>
-      <SectionHeader id="how-title" title="How it works" />
-      <ol className="grid gap-6 border-t border-line pt-6 md:grid-cols-3 md:gap-8">
+      <SectionHeader id="how-title" title="How it works" sub="Three steps, a few minutes a day" />
+      <ol className="grid gap-3 md:grid-cols-3 md:gap-4">
         {steps.map((s, i) => (
-          <li key={s.title}>
-            <h3 className="text-base font-medium leading-6">
-              <span className="mono mr-3 text-sm text-ink-3">{i + 1}</span>
-              {s.title}
-            </h3>
-            <p className="mt-1 text-sm text-ink-2">{s.body}</p>
-          </li>
+          <InfoCard key={s.title} icon={s.icon} step={i + 1} title={s.title} body={s.body} />
         ))}
       </ol>
     </section>
   );
 }
 
-/** A short, honest note for teachers and parents deciding whether to recommend the app. Quiet, like a colophon. */
+/** A short, honest note for teachers and parents deciding whether to recommend the app. */
 function ForTeachers() {
   const points = [
-    { title: 'What it covers', body: 'Starts with elements 1 to 20, then the groups: alkali metals, halogens, noble gases and more, through to the whole table.' },
     {
-      title: 'Accounts are optional',
-      body: 'Students can play without signing up, and progress stays in this browser. If they sign in with Google or an email, progress is saved to their account with Google Firebase and follows them to any device. On a shared computer, closing the browser or signing out clears it.',
+      icon: <Layers size={18} strokeWidth={1.5} />,
+      title: 'What it covers',
+      body: 'All 118 elements: names, symbols, atomic numbers and where each one sits, from hydrogen to the elements made in the lab.',
     },
-    { title: 'Easy to check', body: 'Students can open Progress and show you a summary of the elements they have started and mastered.' },
+    // Only promise sign-in when this build actually has accounts (a Firebase project is set).
+    import.meta.env.VITE_FIREBASE_PROJECT_ID
+      ? {
+          icon: <ShieldCheck size={18} strokeWidth={1.5} />,
+          title: 'Accounts are optional',
+          body: 'Students can play without signing up. Signing in with Google or an email saves progress to their account, so it follows them to any device.',
+        }
+      : {
+          icon: <ShieldCheck size={18} strokeWidth={1.5} />,
+          title: 'No sign-up needed',
+          body: 'Students start straight away, with no account or email. Progress is saved in this browser, and nothing is sent anywhere.',
+        },
+    {
+      icon: <ClipboardCheck size={18} strokeWidth={1.5} />,
+      title: 'Easy to check',
+      body: 'Students can open Progress and show you a summary of the elements they have started and mastered.',
+    },
   ];
   return (
     <section aria-labelledby="teachers-title" className={`${PAGE} mt-12 md:mt-16`}>
       <SectionHeader id="teachers-title" title="For teachers and parents" sub="Free, private, and built around short practice" />
-      <dl className="grid gap-6 border-t border-line pt-6 md:grid-cols-3 md:gap-8">
+      <ul className="grid gap-3 md:grid-cols-3 md:gap-4">
         {points.map((pt) => (
-          <div key={pt.title}>
-            <dt className="text-base font-medium leading-6">{pt.title}</dt>
-            <dd className="mt-1 text-sm text-ink-2">{pt.body}</dd>
-          </div>
+          <InfoCard key={pt.title} icon={pt.icon} title={pt.title} body={pt.body} />
         ))}
-      </dl>
+      </ul>
     </section>
   );
 }

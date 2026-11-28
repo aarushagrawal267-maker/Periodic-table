@@ -1,5 +1,5 @@
 import { Search, X } from 'lucide-react';
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import { ElementTile, tileRadius } from '../components/ElementTile';
 import { PeriodicGrid } from '../components/PeriodicGrid';
 import { useGridRoving } from '../components/useGridRoving';
@@ -50,6 +50,16 @@ const valueText = (lens: Lens, e: Element) => {
 };
 
 export function Explore({ symbol }: { symbol?: string }) {
+  // Phones keep 38px tiles and scroll; from 640px (tablets) 34px is enough for the whole table to fit the width.
+  const fitsTablet = useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia('(min-width: 640px)');
+      mq.addEventListener('change', cb);
+      return () => mq.removeEventListener('change', cb);
+    },
+    () => window.matchMedia('(min-width: 640px)').matches,
+    () => false,
+  );
   const [lens, setLens] = useState('category');
   const [query, setQuery] = useState('');
   const [hoverCat, setHoverCat] = useState<Category | null>(null);
@@ -188,7 +198,7 @@ export function Explore({ symbol }: { symbol?: string }) {
       {/* One Tab stop for the whole table; arrow keys move between elements. */}
       <div id="explore-table" className="relative -mx-4 mt-4 sm:mx-0 sm:mt-6" data-roving role="group" aria-label="Periodic table. Use the arrow keys to move between elements.">
         <PeriodicGrid
-          minCell={38}
+          minCell={fitsTablet ? 34 : 38}
           maxCell={74}
           gap={4}
           showAxes

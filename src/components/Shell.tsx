@@ -100,9 +100,11 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
               href="#/daily"
               className={`flex h-11 items-center gap-2 rounded-control px-2 text-[15px] transition-colors duration-150 ease-out hover:bg-surface-2 md:h-9 md:px-3 ${streak ? 'text-ink' : 'text-ink-3'}`}
               aria-label={`Daily streak: ${streak} days`}
+              title={`Daily streak: ${streak} ${streak === 1 ? 'day' : 'days'}`}
             >
               <Flame size={18} strokeWidth={1.5} className={streak ? 'text-ink-2' : 'text-ink-3'} />
               <span className="mono">{streak}</span>
+              <span className="hidden text-[13px] text-ink-3 xl:inline">day streak</span>
             </a>
             {/* Below 375px (and at 400% zoom) there is no room; the goal is on Home anyway (WCAG 1.4.10). On phones the settings
                 icon sits on the page gutter (its 44px target reaches into the padding), which leaves room for the goal from 375px.
@@ -115,6 +117,7 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
               href="#/progress"
               className="flex h-11 min-w-11 items-center justify-center gap-2 rounded-control px-1 transition-colors duration-150 ease-out hover:bg-surface-2 sm:pr-3 md:h-9"
               aria-label={`Level ${lvl.level}, ${xp.toLocaleString('en-US')} XP, ${Math.round(lvl.progress * 100)} percent to next level`}
+              title={`Level ${lvl.level} · ${xp.toLocaleString('en-US')} XP`}
             >
               <Ring value={lvl.progress} size={28} stroke={2.5}>
                 <span className="mono text-[11px] leading-none text-ink">{lvl.level}</span>

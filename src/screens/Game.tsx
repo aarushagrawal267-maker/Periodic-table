@@ -518,15 +518,12 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
             On phones it keeps the 16px page gutter like every other screen; a table too wide for it scrolls inside it. */}
         <div aria-hidden className="flex-1" />
         <div className="relative mx-auto w-full max-w-7xl">
-          {/* From sm the zoom keys sit above the board, left, clear of the centred combo badge. Phones keep them in the tray row. */}
-          <div className="hidden sm:flex">
-            <ZoomControl />
-          </div>
           <ComboBadge combo={state.combo} mult={mult} />
           <PeriodicGrid
             numbers={config.view ?? config.targets}
             renderCell={renderCell}
-            minCell={bigBoard || !wide ? 34 : 38}
+            // Phones: 28px lets a small board (the first twenty, a lesson) fit the width with no swipe; big boards still scroll.
+            minCell={!wide ? 28 : bigBoard ? 34 : 38}
             maxCell={72}
             zoom={boardZoom}
             showAxes
@@ -618,11 +615,10 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
                 <Lightbulb size={18} strokeWidth={1.5} />
               </button>
             </div>
+            {/* The zoom keys sit with the count on every width: beside the tiles from sm, on the line above them on phones. */}
             <div className="flex items-center gap-1">
               <span className="meta">{state.queue.length} left</span>
-              <div className="sm:hidden">
-                <ZoomControl compact />
-              </div>
+              <ZoomControl compact />
             </div>
           </div>
         </div>

@@ -161,8 +161,15 @@ export function PeriodicGrid({
                     }}
                     aria-hidden
                   >
-                    {/* The range is printed only where it fits on one line at 9px or more; otherwise the dashed place stands alone. */}
-                    {layout.cell - 4 >= m.label.length * 0.6 * Math.max(9, Math.round(layout.cell * 0.16)) && m.label}
+                    {/* The range is printed on one line where it fits at 9px or more, else on two ("89–" over "103"), so both markers read alike. */}
+                    {layout.cell - 4 >= m.label.length * 0.6 * Math.max(9, Math.round(layout.cell * 0.16)) ? (
+                      m.label
+                    ) : layout.cell >= 24 ? (
+                      <span className="flex flex-col leading-none">
+                        <span>{m.label.split('–')[0]}–</span>
+                        <span>{m.label.split('–')[1]}</span>
+                      </span>
+                    ) : null}
                   </div>
                 );
               })}
@@ -185,7 +192,8 @@ export function PeriodicGrid({
           <motion.div
             key="swipe"
             aria-hidden
-            className={`pointer-events-none absolute right-4 z-20 -translate-y-1/2 ${bandTop === null ? 'top-1/2' : ''}`}
+            // With no empty band (a board without the f-block), the chip sits just above the table, clear of tiles and labels.
+            className={`pointer-events-none absolute right-4 z-20 ${bandTop === null ? 'top-0 -translate-y-full pb-1' : '-translate-y-1/2'}`}
             style={bandTop === null ? undefined : { top: bandTop }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

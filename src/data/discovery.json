@@ -20,7 +20,7 @@
   "stableIsotopes": 2
  },
  "6": {
-  "discoveredBy": "Known since ancient times",
+  "discoveredBy": "Unknown",
   "stableIsotopes": 2
  },
  "7": {
@@ -60,7 +60,7 @@
   "stableIsotopes": 1
  },
  "16": {
-  "discoveredBy": "Known since ancient times",
+  "discoveredBy": "Unknown",
   "stableIsotopes": 4
  },
  "17": {
@@ -100,7 +100,7 @@
   "stableIsotopes": 1
  },
  "26": {
-  "discoveredBy": "Known since ancient times",
+  "discoveredBy": "Unknown",
   "stableIsotopes": 4
  },
  "27": {
@@ -112,7 +112,7 @@
   "stableIsotopes": 5
  },
  "29": {
-  "discoveredBy": "Known since ancient times",
+  "discoveredBy": "Unknown",
   "stableIsotopes": 2
  },
  "30": {
@@ -184,7 +184,7 @@
   "stableIsotopes": 6
  },
  "47": {
-  "discoveredBy": "Known since ancient times",
+  "discoveredBy": "Unknown",
   "stableIsotopes": 2
  },
  "48": {
@@ -196,11 +196,11 @@
   "stableIsotopes": 1
  },
  "50": {
-  "discoveredBy": "Known since ancient times",
+  "discoveredBy": "Unknown",
   "stableIsotopes": 10
  },
  "51": {
-  "discoveredBy": "Known since ancient times",
+  "discoveredBy": "Unknown",
   "stableIsotopes": 2
  },
  "52": {
@@ -312,11 +312,11 @@
   "stableIsotopes": 5
  },
  "79": {
-  "discoveredBy": "Known since ancient times",
+  "discoveredBy": "Unknown",
   "stableIsotopes": 1
  },
  "80": {
-  "discoveredBy": "Known since ancient times",
+  "discoveredBy": "Unknown",
   "stableIsotopes": 7
  },
  "81": {
@@ -324,7 +324,7 @@
   "stableIsotopes": 2
  },
  "82": {
-  "discoveredBy": "Known since ancient times",
+  "discoveredBy": "Unknown",
   "stableIsotopes": 4
  },
  "83": {

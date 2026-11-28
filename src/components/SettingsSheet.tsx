@@ -78,7 +78,7 @@ export function SettingsSheet() {
           <Toggle label="Sound effects" on={s.sound} set={(v) => s.set({ sound: v })} />
           <Toggle label="Vibration" hint="On supported phones" on={s.haptics} set={(v) => s.set({ haptics: v })} />
           <Toggle label="Reduce motion" on={s.reduceMotion} set={(v) => s.set({ reduceMotion: v })} />
-          <Toggle label="Colour-blind palette" hint="Okabe–Ito colours for categories" on={s.colorblind} set={(v) => s.set({ colorblind: v })} />
+          <Toggle label="Colour-blind palette" hint="Category colours that are easier to tell apart" on={s.colorblind} set={(v) => s.set({ colorblind: v })} />
         </section>
 
         <section className="mt-8">

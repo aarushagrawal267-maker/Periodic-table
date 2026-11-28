@@ -30,9 +30,9 @@ test('an unconfigured build makes no Firebase requests', async ({ page, consoleE
 
   // The account screen exists, but says accounts are off.
   await page.goto('./#/account');
-  await expect(page.getByRole('heading', { level: 1, name: 'Accounts are not set up yet' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'No account needed' })).toBeVisible();
   await expect(page).toHaveTitle('Your account · Periodica');
-  await expect(page.getByText('Your progress is saved in this browser, on this device. You can keep playing as you are.')).toBeVisible();
+  await expect(page.getByText(/Your progress is saved in this browser, on this device, and nothing is sent anywhere/)).toBeVisible();
   await page.waitForLoadState('networkidle');
 
   expect(offending).toEqual([]);
@@ -46,7 +46,7 @@ test('the account screen is reachable on phones and keeps the header and tab bar
     if (FIREBASE_HOSTS.test(req.url()) || /firebase-sdk/.test(req.url())) offending.push(req.url());
   });
   await page.goto('./#/account');
-  await expect(page.getByRole('heading', { level: 1, name: 'Accounts are not set up yet' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'No account needed' })).toBeVisible();
   await expect(page.getByRole('banner').getByRole('link', { name: 'Sign in' })).toHaveCount(0);
   await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible();
   await page.getByRole('link', { name: 'Back to home' }).click();

@@ -29,7 +29,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'quiz-ace', name: 'Quiz ace', desc: 'Score 10 out of 10 in a quiz', icon: 'ListChecks', tier: 'silver', check: (_p, r) => !!r && r.kind === 'quiz' && r.correct === 10 },
   { id: 'chapter-1', name: 'First lesson', desc: 'Finish a chapter of the learning path', icon: 'GraduationCap', tier: 'bronze', check: (p) => CHAPTERS.some((c) => p.chapters[c.id]) },
   { id: 'chapter-all', name: 'Graduate', desc: 'Finish every chapter of the learning path', icon: 'GraduationCap', tier: 'gold', check: (p) => CHAPTERS.every((c) => p.chapters[c.id]) },
-  { id: 'real-world', name: 'Everyday chemist', desc: 'Get every answer right in an In real life round', icon: 'House', tier: 'silver', check: (_p, r) => !!r && r.kind === 'life' && r.mistakes === 0 },
+  { id: 'real-world', name: 'Everyday chemist', desc: 'Get every answer right in a round of In real life', icon: 'House', tier: 'silver', check: (_p, r) => !!r && r.kind === 'life' && r.mistakes === 0 },
   { id: 'goal', name: 'Little and often', desc: 'Reach your daily goal', icon: 'Target', tier: 'bronze', check: (p) => p.today.xp >= DAILY_GOAL_XP },
   { id: 'explorer', name: 'Field notes', desc: 'Open 25 different element cards', icon: 'Telescope', tier: 'bronze', check: (p) => p.explored.length >= 25 },
   { id: 'encyclopedia', name: 'Encyclopedia', desc: 'Open every element card', icon: 'Library', tier: 'gold', check: (p) => p.explored.length >= ELEMENTS.length },

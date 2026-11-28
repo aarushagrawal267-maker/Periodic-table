@@ -7,7 +7,7 @@ test.describe('home and navigation', { tag: '@phone' }, () => {
     await page.goto('./');
 
     // A new visitor gets one clear first step: the first 20 elements, a lesson at a time.
-    await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements\./ })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements,/ })).toBeVisible();
     await expect(page.getByRole('progressbar', { name: 'Your first 20 elements' })).toHaveAttribute('aria-valuenow', '0');
     await expect(page.getByRole('link', { name: 'Start the first lesson' })).toHaveAttribute('href', '#/learn/lightest-ten');
     await expect(page.getByRole('link', { name: 'Try a quick game' })).toHaveAttribute('href', '#/match');
@@ -55,7 +55,7 @@ test('an unknown lesson or puzzle link shows an ordinary page, with the navigati
   await expect(page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Learn' })).toHaveAttribute('aria-current', 'page');
 
   await page.goto('./#/play/no-such-region');
-  await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements\./ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements,/ })).toBeVisible();
   await expect(page.getByRole('main')).toHaveCount(1);
   await expect(page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
   await expect(page).toHaveTitle(/^Periodic table game and quiz/);
@@ -72,7 +72,7 @@ test('going back with Settings open closes it and focuses the new screen heading
   await page.goBack();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   // Not left on the Settings button in the header, where the sheet hands focus back as it closes.
-  await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements\./ })).toBeFocused();
+  await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements,/ })).toBeFocused();
 });
 
 test('at tablet widths the header fits: no sideways scroll and Settings stays on screen', async ({ page }) => {
@@ -85,7 +85,7 @@ test('at tablet widths the header fits: no sideways scroll and Settings stays on
   for (const width of [768, 900, 1024]) {
     await page.setViewportSize({ width, height: 900 });
     await page.reload();
-    await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements\./ })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /^Learn the first 20 elements,/ })).toBeVisible();
     const fit = await page.evaluate(() => ({
       scroll: document.documentElement.scrollWidth,
       viewport: document.documentElement.clientWidth,

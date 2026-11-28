@@ -139,7 +139,7 @@ function build(kind: Question['kind'], e: Element, known: Element[], all: Elemen
       if (!e.fact) return null;
       // Mask the name and words built on it (sulfide, zirconia, actinides), and the symbol only in its exact case.
       const stem = e.name.length >= 6 ? `${e.name.slice(0, Math.max(4, e.name.length - 3))}\\w*` : `${e.name}\\b`;
-      const clue = e.fact.replace(new RegExp(`\\b${stem}`, 'gi'), '▢▢▢').replace(new RegExp(`\\b${e.symbol}\\b`, 'g'), '▢▢▢');
+      const clue = e.fact.replace(new RegExp(`\\b${stem}`, 'gi'), '_____').replace(new RegExp(`\\b${e.symbol}\\b`, 'g'), '_____');
       return { id, kind, element: e.number, prompt: clue, ...opts(e.name, distractors(e, known, all).map((x) => x.name)) };
     }
   }

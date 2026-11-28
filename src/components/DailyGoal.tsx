@@ -25,8 +25,9 @@ export function GoalRingBadge() {
       <Ring value={met ? 1 : value} size={20} stroke={2.5} color={met ? 'var(--good)' : undefined}>
         {met && <Check size={12} strokeWidth={2.5} className="text-good" />}
       </Ring>
-      <span aria-hidden className="mono text-[13px] text-ink-2">
-        {xp}/{goal}
+      <span aria-hidden className="mono whitespace-nowrap text-[13px] text-ink-2">
+        {met ? `${xp} XP` : `${xp}/${goal}`}
+        <span className="hidden font-sans text-ink-3 xl:inline"> today</span>
       </span>
     </div>
   );

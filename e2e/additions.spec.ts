@@ -80,11 +80,12 @@ test('puzzle: shuffle deals a new tray, P pauses, zoom keeps placed elements', a
   const w1 = (await slot.boundingBox())!.width;
   await page.getByRole('button', { name: 'Zoom in' }).click();
   await page.getByRole('button', { name: 'Zoom in' }).click();
-  await expect(page.getByRole('button', { name: /Zoom 130 percent/ })).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Board zoom, 130 percent' })).toBeVisible();
   await expect.poll(async () => (await slot.boundingBox())!.width).toBeGreaterThan(w1);
   expect(await board.placedCount()).toBe(1); // zooming never resets the round
-  await page.getByRole('button', { name: /Reset to 100 percent/ }).click();
-  await expect(page.getByRole('button', { name: /Zoom 100 percent/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Zoom out' }).click();
+  await page.getByRole('button', { name: 'Zoom out' }).click();
+  await expect(page.getByRole('group', { name: 'Board zoom, 100 percent' })).toBeVisible();
 
   // Keyboard: P pauses (nothing interactive focused), Escape resumes.
   await page.locator('h1').first().click();
@@ -115,7 +116,7 @@ test('element card shows who discovered it, metallic character and stable isotop
   await page.goto('./#/explore/Sn');
   const tin = page.getByRole('dialog', { name: 'Tin details' });
   await expect(tin.getByText('Discovered by')).toBeVisible();
-  await expect(tin.getByText('Known since ancient times')).toBeVisible();
+  await expect(tin.getByText('Unknown', { exact: true })).toBeVisible();
   await expect(tin.getByText('Metallic character')).toBeVisible();
   await expect(tin.getByText('Stable isotopes')).toBeVisible();
 

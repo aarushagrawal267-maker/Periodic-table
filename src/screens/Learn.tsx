@@ -79,7 +79,7 @@ function TableStory() {
           </p>
         </div>
         <figure className="border-t border-line p-4 sm:p-6">
-          <MiniTable className="w-full" label="The full periodic table, coloured by element category" />
+          <MiniTable className="w-full" symbols label="The full periodic table, coloured by element category" />
           <figcaption className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[13px] leading-5 text-ink-2">
             {CATEGORIES.map((c) => (
               <span key={c.id} className="inline-flex items-center gap-2">
@@ -164,7 +164,7 @@ function ChapterRow({ chapter: c, index, stars, current }: { chapter: Chapter; i
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] font-medium leading-6">{c.title}</span>
-          <span className="line-clamp-2 text-sm leading-5 text-ink-2 sm:line-clamp-1">{c.blurb}</span>
+          <span className="block text-sm leading-5 text-ink-2">{c.blurb}</span>
         </span>
         {/* On phones the state column exists only on rows that have a state, so the other summaries get the width. */}
         <span className={`${stars || current ? 'flex w-14' : 'hidden sm:flex'} shrink-0 justify-end sm:w-auto`}>
@@ -514,7 +514,7 @@ function ReviewEmpty({ next }: { next?: Chapter }) {
       <p className="mt-3 max-w-sm text-balance text-ink-2">Nothing to review right now. Come back tomorrow, or start the next chapter.</p>
       {next ? (
         <a href={`#/learn/${next.id}`} className="btn btn-primary btn-lg mt-8 w-full max-w-xs">
-          <span className="truncate">{next.title}</span>
+          <span className="truncate">Start: {next.title}</span>
           <ArrowRight size={18} strokeWidth={1.5} aria-hidden className="shrink-0" />
         </a>
       ) : null}
