@@ -1,14 +1,14 @@
 import { motion } from 'motion/react';
 import { ArrowRight, BarChart3, BookOpen, CalendarDays, ChevronRight, ClipboardCheck, GraduationCap, Hand, Layers, RefreshCw, ShieldCheck, Star, Trophy } from 'lucide-react';
-import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { goalLabel, useDailyGoal } from '../components/DailyGoal';
 import { ElementChip, ElementTile } from '../components/ElementTile';
 import { MiniTable } from '../components/MiniTable';
-import { PeriodicGrid } from '../components/PeriodicGrid';
+import { HeroTable } from '../components/HeroTable';
 import { SectionHeader } from '../components/SectionHeader';
 import { TrailSquares } from '../components/Results';
 import { Ring } from '../components/Stats';
-import { DUR, STAGGER, rise, tween } from '../components/motion';
+import { rise } from '../components/motion';
 import { DAILY_SIZE, dailyNumber, todayKey } from '../lib/daily';
 import { formatDate } from '../lib/date';
 import { ELEMENTS, byNumber, bySymbol, catVar, categoryLabel, formatNumber, type Element } from '../lib/elements';
@@ -55,6 +55,10 @@ export function Home() {
   const lessonHref = `#/learn/${(firstChapter ?? nextChapter).id}`;
   const achievements = Object.keys(p.achievements).length;
 
+  const metFn = useCallback((n: number) => isMet(p.mastery, n), [p.mastery]);
+  const todayStack = (
+    <TodayList layout="stack" due={due} lessonHref={lessonHref} level={{ level: lvl.level, learning, mastered, achievements }} />
+  );
   const today = (
     <TodayList
       layout="strip"
@@ -67,26 +71,31 @@ export function Home() {
 
   return (
     <div className="overflow-x-clip">
-      {/* Hero: one first step for a new student, today's round for a returning one. The table is the visual. */}
-      <section aria-labelledby="home-title" className={`${PAGE} grid gap-8 pt-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16 lg:items-center lg:pt-16`}>
-        <motion.div {...rise}>
+      {/*
+        Hero: the whole wall chart is the first thing you see. A compact text row (headline left; the line and the actions right)
+        sits above the table, so at 1280x900 both fit the first screen. The hero is as wide as the table at its largest (54px cells).
+      */}
+      <section aria-labelledby="home-title" className="mx-auto max-w-[1088px] px-4 pt-8 sm:px-6">
+        <motion.div {...rise} className="grid gap-x-12 gap-y-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-end">
           {starter ? (
             <>
               <h1 id="home-title" className="t-display max-w-xl">
                 Learn the first 20 elements, three minutes at a time
               </h1>
-              <p className="mt-4 max-w-lg text-lg leading-7 text-ink-2">
-                {returning
-                  ? 'Pick up where you left off. Periodica remembers what you find hard and brings it back until it sticks.'
-                  : 'Short lessons with memory tricks, then quick games to make them stick. Start with hydrogen to calcium: the elements in air, water, salt and you.'}
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a href={`#/learn/${firstChapter.id}`} className="btn btn-primary btn-lg">
-                  {firstChapter === FIRST_CHAPTERS[0] && !p.mastery[1] ? 'Start the first lesson' : `Continue: ${firstChapter.title}`}
-                </a>
-                <a href="#/match" className="btn btn-secondary btn-lg">
-                  Try a quick game
-                </a>
+              <div>
+                <p className="max-w-lg text-base leading-6 text-ink-2 sm:text-lg sm:leading-7">
+                  {returning
+                    ? 'Pick up where you left off. Periodica remembers what you find hard and brings it back until it sticks.'
+                    : 'Short lessons with memory tricks, then quick games to make them stick. Start with hydrogen to calcium: the elements in air, water, salt and you.'}
+                </p>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <a href={`#/learn/${firstChapter.id}`} className="btn btn-primary btn-lg">
+                    {firstChapter === FIRST_CHAPTERS[0] && !p.mastery[1] ? 'Start the first lesson' : `Continue: ${firstChapter.title}`}
+                  </a>
+                  <a href="#/match" className="btn btn-secondary btn-lg">
+                    Try a quick game
+                  </a>
+                </div>
               </div>
             </>
           ) : (
@@ -94,30 +103,50 @@ export function Home() {
               <h1 id="home-title" className="t-display">
                 Next: {next.name}
               </h1>
-              <p className="mt-4 max-w-lg text-lg leading-7 text-ink-2">Pick up where you left off. Periodica remembers what you find hard and brings it back until it sticks.</p>
-              <a href={`#/play/${next.id}`} className="btn btn-primary btn-lg mt-8 w-full sm:w-auto">
-                Play {next.name}
-              </a>
+              <div>
+                <p className="max-w-lg text-base leading-6 text-ink-2 sm:text-lg sm:leading-7">Pick up where you left off. Periodica remembers what you find hard and brings it back until it sticks.</p>
+                <a href={`#/play/${next.id}`} className="btn btn-primary btn-lg mt-6 w-full sm:w-auto">
+                  Play {next.name}
+                </a>
+              </div>
             </>
           )}
         </motion.div>
 
-        <motion.div initial={rise.initial} animate={rise.animate} transition={tween(DUR.enter, STAGGER)}>
+        {/* The table prints itself with its own sweep (hero.css), so it takes no motion entrance here. */}
+        <div className="mt-8">
           {starter ? (
-            <FirstTwenty done={firstDone} mastery={p.mastery} />
+            <HeroTable caption="All 118 elements, in the colours of their families" />
           ) : (
             <>
-              <TableMap mastery={p.mastery} met={learning + mastered} />
+              <HeroTable
+                met={metFn}
+                caption={
+                  <>
+                    In colour: the <span className="num text-ink">{learning + mastered}</span> of 118 you have met
+                  </>
+                }
+              />
               <LevelStrip level={lvl.level} progress={lvl.progress} toNext={lvl.toNext} learning={learning} mastered={mastered} achievements={achievements} />
             </>
           )}
-        </motion.div>
+        </div>
       </section>
 
-      {/* Today: the goal, a review if one is due, the next lesson and the daily, as one strip below the hero. */}
+      {/*
+        Today: the goal, a review if one is due, the next lesson and the daily. A new student's first 20 sit beside it,
+        so their progress is the first thing under the table; a returning student gets one strip.
+      */}
       <section aria-labelledby="today-title" className={`${PAGE} mt-12 md:mt-16`}>
         <SectionHeader id="today-title" title="Today" aside={<span className="meta">{formatDate()}</span>} />
-        {today}
+        {starter ? (
+          <div className="grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:items-start">
+            <FirstTwenty done={firstDone} mastery={p.mastery} />
+            {todayStack}
+          </div>
+        ) : (
+          today
+        )}
       </section>
 
       {/* Regions */}
@@ -422,12 +451,8 @@ function FirstTwenty({ done, mastery }: { done: number; mastery: Record<number, 
             </div>
           )}
         </div>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <span className="text-sm text-ink-2">Hydrogen to calcium</span>
-          <a href="#/explore" className="-my-3 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-ink transition-colors hover:text-ink-2">
-            Explore the full periodic table <ArrowRight size={16} strokeWidth={1.5} aria-hidden />
-          </a>
-        </div>
+        {/* The link to Explore sits under the hero table, just above this card. */}
+        <p className="mt-4 text-sm text-ink-2">Hydrogen to calcium</p>
       </div>
     </div>
   );
@@ -463,46 +488,6 @@ function FragmentCell({ el, size, on }: { el: Element; size: number; on: boolean
         </span>
       )}
     </div>
-  );
-}
-
-/**
- * The whole table as your map: elements you have met in their category colours, the rest in plain ink.
- * Below 28px a cell cannot hold readable text, so the phone map is plain printed squares, no symbols or markers.
- */
-function TableMap({ mastery, met }: { mastery: Record<number, Mastery>; met: number }) {
-  const [cell, setCell] = useState(0);
-  const compact = cell > 0 && cell < 28;
-  return (
-    <a href="#/explore" className="card card-link block p-4 sm:p-5">
-      <div aria-hidden>
-        <PeriodicGrid
-          minCell={12}
-          maxCell={36}
-          gap={2}
-          showMarkers={!compact}
-          onLayout={setCell}
-          renderCell={(el, rect) => (
-            <ElementTile
-              element={el}
-              size={rect.size}
-              showName={false}
-              showNumber={false}
-              showSymbol={rect.size >= 28}
-              color={isMet(mastery, el.number) ? undefined : 'var(--ink-3)'}
-            />
-          )}
-        />
-      </div>
-      <span className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <span className="text-sm text-ink-2">
-          In colour: the <span className="num text-ink">{met}</span> of 118 you have met
-        </span>
-        <span className="inline-flex items-center gap-2 text-sm font-medium text-ink">
-          Explore the full periodic table <ArrowRight size={16} strokeWidth={1.5} aria-hidden />
-        </span>
-      </span>
-    </a>
   );
 }
 

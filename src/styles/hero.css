@@ -1,0 +1,146 @@
+/*
+ * Home hero: the living wall chart (docs/DESIGN.md, moment 1).
+ * Plain CSS on the shared tokens, so light, dark and the colour-blind palette all follow.
+ */
+
+/*
+ * Tint of a lit tile. Tile text keeps 4.5:1 on it in every palette (measured: the yellow transition metals
+ * are the closest, 6.6:1 dark, about 5:1 light at 20%).
+ */
+.hero-table {
+  --hero-lit: 24%;
+}
+[data-theme='light'] .hero-table {
+  --hero-lit: 20%;
+}
+
+/* Each tile is a button that fills its cell. The ring is drawn on the tile itself, so it follows the lift. */
+.hero-cell {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.hero-cell .tile {
+  transition:
+    transform var(--dur-press) var(--ease-out),
+    background-color var(--dur-press) var(--ease-out),
+    border-color var(--dur-press) var(--ease-out),
+    color var(--dur-press) var(--ease-out),
+    box-shadow var(--dur-press) var(--ease-out);
+}
+
+/*
+ * Lights up: the category edge goes to full strength and the tint deepens a step; the tile lifts a few pixels.
+ * Hover only where there is a real pointer, so a tapped tile on a phone does not stay lifted.
+ */
+.hero-cell:focus-visible {
+  z-index: 1;
+}
+.hero-cell:focus-visible .tile {
+  --tile-edge: 100%;
+  --tile-tint: var(--hero-lit);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+@media (hover: hover) {
+  .hero-cell:hover {
+    z-index: 1;
+  }
+  .hero-cell:hover .tile {
+    --tile-edge: 100%;
+    --tile-tint: var(--hero-lit);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  .hero-soft:hover .tile {
+    --tile-tint: 16%;
+    color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+  }
+}
+.hero-cell:active .tile {
+  transform: translateY(-1px);
+}
+.hero-cell:focus-visible {
+  outline: none;
+}
+.hero-cell:focus-visible .tile {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+/* Reduce motion: colour only, nothing moves. */
+.hero-still .hero-cell:hover .tile,
+.hero-still .hero-cell:focus-visible .tile,
+.hero-still .hero-cell:active .tile {
+  transform: none;
+}
+
+/*
+ * Not met yet (a returning student's map): the same square printed softly, its hue in a faint tint and edge,
+ * the text in muted ink (4.5:1 on every surface). Under the pointer it shows its full colour.
+ */
+.hero-soft .tile {
+  --tile-tint: 5%;
+  --tile-edge: 22%;
+  color: var(--ink-3);
+}
+.hero-soft:focus-visible .tile {
+  --tile-tint: 16%;
+  --tile-edge: 100%;
+  color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+}
+
+/* The print: a sweep from the top-left corner, once, whole table in under 800ms. Fill backwards only, so hover keeps its transform afterwards. */
+@keyframes hero-print {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hero-print {
+  animation: hero-print var(--dur-enter) var(--ease-out) backwards;
+  animation-delay: var(--d, 0ms);
+}
+/* The dashed f-block markers (drawn by PeriodicGrid) print with their neighbours in group 3, periods 6 and 7. */
+.hero-printing .border-dashed {
+  animation: hero-print var(--dur-enter) var(--ease-out) backwards;
+  animation-delay: 100ms;
+}
+
+/* The key changes with a short fade. */
+@keyframes hero-key-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.hero-key-in {
+  animation: hero-key-in var(--dur-menu) var(--ease-out) both;
+}
+.hero-still .hero-print,
+.hero-still .hero-key-in {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-print,
+  .hero-key-in {
+    animation: none;
+  }
+  .hero-cell:hover .tile,
+  .hero-cell:focus-visible .tile,
+  .hero-cell:active .tile {
+    transform: none;
+  }
+}
