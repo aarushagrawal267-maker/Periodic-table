@@ -1,11 +1,10 @@
 import { ArrowRight, Star, Timer } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { DifficultyPicker } from '../components/DifficultyPicker';
-import { ElementChip, tileRadius } from '../components/ElementTile';
+import { LifeArt, MatchArt, QuizArt, TimedArt } from '../components/ModeArt';
 import { SectionHeader } from '../components/SectionHeader';
 import { MiniTable } from '../components/MiniTable';
 import { CHALLENGE_LEVELS, challengeCleared } from '../lib/challenge';
-import { bySymbol } from '../lib/elements';
 import { REGIONS, regionById, type Region } from '../lib/regions';
 import { go } from '../lib/router';
 import { useProgress } from '../store/progress';
@@ -13,7 +12,8 @@ import { DIFFICULTIES, useSettings } from '../store/settings';
 import { Game } from './Game';
 import { Home } from './Home';
 
-const el = (sym: string) => bySymbol.get(sym.toLowerCase())!;
+// Home shows the same illustrations in its practice cards.
+export { MatchArt, QuizArt };
 
 /** A one-sentence caption ends without a period; longer copy keeps its punctuation. */
 const caption = (s: string) => (/\.\s/.test(s) ? s : s.replace(/\.$/, ''));
@@ -141,14 +141,8 @@ function ChallengeCard() {
   const cleared = CHALLENGE_LEVELS.filter((l) => challengeCleared(best, l.id)).length;
   return (
     <a href="#/challenge" className="card card-link mt-3 flex items-center gap-3 p-4 sm:gap-6 sm:p-6 md:mt-4">
-      <div className="grid w-24 shrink-0 grid-cols-6 items-end gap-1 self-stretch sm:w-28" aria-hidden>
-        {CHALLENGE_LEVELS.map((l, i) => (
-          <span
-            key={l.id}
-            className="rounded-[3px]"
-            style={{ height: `${30 + (i / (CHALLENGE_LEVELS.length - 1)) * 70}%`, background: i < cleared ? 'var(--accent)' : 'var(--line-strong)' }}
-          />
-        ))}
+      <div className="min-h-20 w-24 shrink-0 self-stretch rounded-control bg-surface-2 sm:w-32 md:w-48 lg:w-56" aria-hidden>
+        <TimedArt cleared={cleared} />
       </div>
       <div className="min-w-0 flex-1">
         <h2 className="flex items-center gap-2 text-base font-medium leading-6">
@@ -165,7 +159,7 @@ function ChallengeCard() {
 function ModeRow({ href, title, text, art }: { href: string; title: string; text: string; art: ReactNode }) {
   return (
     <a href={href} className="card card-link flex items-center gap-3 p-4 sm:gap-4 md:flex-col md:items-stretch md:gap-0">
-      <div className="grid min-h-20 w-24 shrink-0 place-items-center self-stretch rounded-control bg-surface-2 sm:w-28 md:h-28 md:w-full md:self-auto" aria-hidden>
+      <div className="min-h-20 w-24 shrink-0 self-stretch rounded-control bg-surface-2 sm:w-28 md:h-28 md:w-full md:self-auto" aria-hidden>
         {art}
       </div>
       <div className="min-w-0 flex-1 md:mt-4">
@@ -173,45 +167,6 @@ function ModeRow({ href, title, text, art }: { href: string; title: string; text
         <p className="mt-1 text-sm leading-5 text-ink-2">{text}</p>
       </div>
     </a>
-  );
-}
-
-/** A symbol and the name it pairs with, as the two cards of a match. */
-export function MatchArt() {
-  return (
-    <span className="flex items-center gap-2">
-      <ElementChip element={el('Fe')} size={36} />
-      <span className="grid h-9 place-items-center rounded-tag border border-line-strong bg-surface px-2 text-xs font-medium text-ink-2">Iron</span>
-    </span>
-  );
-}
-
-/** The elements inside a phone battery, fireworks, a banana and bones. */
-function LifeArt() {
-  return (
-    <span className="grid grid-cols-2 gap-1">
-      {['Li', 'Sr', 'K', 'Ca'].map((s) => (
-        <ElementChip key={s} element={el(s)} size={28} />
-      ))}
-    </span>
-  );
-}
-
-/** A blank square on the chart and the four answer keys. */
-export function QuizArt() {
-  return (
-    <span className="flex items-center gap-2">
-      <span className="slot grid h-9 w-9 place-items-center text-sm text-ink-3" style={{ borderRadius: tileRadius(36) }}>
-        ?
-      </span>
-      <span className="grid grid-cols-2 gap-1">
-        {[1, 2, 3, 4].map((n) => (
-          <span key={n} className="kbd">
-            {n}
-          </span>
-        ))}
-      </span>
-    </span>
   );
 }
 
