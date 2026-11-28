@@ -98,6 +98,8 @@
    */
   --cell-ink-mix: 66%;
   --heat-ink-mix: 50%;
+  /* Tint of a tile coloured by a property lens (Explore): a heat map has to read at a glance. */
+  --heat-tint: 18%;
   /* Tile tint and border strength, per theme. */
   --tile-tint: 16%;
   --tile-edge: 42%;
@@ -163,7 +165,9 @@
   --cell-empty: rgb(31 27 22 / 0.04);
   --slot-line: rgb(31 27 22 / 0.5);
   --cell-ink-mix: 56%;
-  --heat-ink-mix: 46%;
+  --heat-ink-mix: 40%;
+  /* Paper on a projector washes pale tints out, so the heat map prints stronger in light. */
+  --heat-tint: 28%;
   --tile-tint: 14%;
   --tile-edge: 50%;
   --mini-tint: 40%;

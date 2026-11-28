@@ -218,7 +218,7 @@ export function Explore({ symbol }: { symbol?: string }) {
                 }}
                 className="group block h-full w-full transition-opacity duration-200 ease-out focus-visible:z-10"
                 // Heat-map colours start at a deep blue, so tile text leans further towards --ink there.
-                style={{ borderRadius: tileRadius(rect.size), opacity: d ? 0.14 : 1, filter: d ? 'grayscale(1)' : undefined, ...(L.value ? { '--cell-ink-mix': 'var(--heat-ink-mix)' } : {}) } as CSSProperties}
+                style={{ borderRadius: tileRadius(rect.size), opacity: d ? 0.14 : 1, filter: d ? 'grayscale(1)' : undefined, ...(L.value ? { '--cell-ink-mix': 'var(--heat-ink-mix)', '--tile-tint': 'var(--heat-tint)' } : {}) } as CSSProperties}
                 aria-label={`${e.symbol}, ${e.name}, ${e.number}${L.value ? `, ${L.label} ${valueText(L, e)}` : ''}`}
               >
                 <ElementTile
