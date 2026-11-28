@@ -62,7 +62,7 @@ export function Sheet({ open, onClose, label, children, wide }: Props) {
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
           <motion.div
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/50 light:bg-[rgb(31_27_22/0.36)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

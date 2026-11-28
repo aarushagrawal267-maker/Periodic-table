@@ -54,8 +54,9 @@ export function GoogleButton({
         'text-[15px] font-medium leading-5',
         'transition-[background-color,border-color,color,transform] duration-150 ease-out',
         off
-          ? 'cursor-not-allowed border-[#8E918F1F] bg-[#13131461] text-[#E3E3E361]'
-          : 'border-[#8E918F] bg-[#131314] text-[#E3E3E3] hover:bg-[color-mix(in_srgb,#131314_92%,#fff)] active:scale-[0.98]',
+          ? 'cursor-not-allowed border-[#8E918F1F] bg-[#13131461] text-[#E3E3E361] light:border-[#1F1F1F1F] light:bg-[#FFFFFF61] light:text-[#1F1F1F61]'
+          : // Google's own button colours: the dark variant in the dark theme, the light variant (white, #747775 edge) in the light theme.
+            'border-[#8E918F] bg-[#131314] text-[#E3E3E3] hover:bg-[color-mix(in_srgb,#131314_92%,#fff)] light:border-[#747775] light:bg-white light:text-[#1F1F1F] light:hover:bg-[color-mix(in_srgb,#fff_92%,#1F1F1F)] active:scale-[0.98]',
       ].join(' ')}
     >
       <span className={off ? 'opacity-[0.38]' : undefined}>
