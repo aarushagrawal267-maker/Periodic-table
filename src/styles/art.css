@@ -1,0 +1,178 @@
+/*
+ * Game-mode illustrations (src/components/ModeArt.tsx). Flat printed material only: element squares in their
+ * category tint with a category edge, quiet card stock, hairlines, the accent for the clock's sweep and --good for
+ * the right answer. Every colour is a variable, so light, dark and the colour-blind palette all follow.
+ */
+
+/* The illustration fills the box it sits in, and that box's shape picks the composition. */
+.mode-art {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  container-type: size;
+  pointer-events: none;
+  user-select: none;
+}
+.mode-art > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.mode-art-square {
+  display: none;
+}
+/* A box narrower than 8:5 (the phone column on Play) gets the square scene. */
+@container (max-aspect-ratio: 8 / 5) {
+  .mode-art-wide {
+    display: none;
+  }
+  .mode-art-square {
+    display: block;
+  }
+}
+
+/* ------------------------------------------------------------------ type */
+
+.mode-art text {
+  font-family: var(--font-sans);
+  font-weight: 500;
+}
+.mode-art .art-num {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+.art-ink {
+  fill: var(--ink);
+}
+.art-ink-2 {
+  fill: var(--ink-2);
+}
+
+/* --------------------------------------------------------- printed tiles */
+
+.art-tile {
+  fill: color-mix(in oklab, var(--c) var(--tile-tint), var(--surface));
+  stroke: color-mix(in oklab, var(--c) var(--tile-edge), transparent);
+  stroke-width: 1;
+}
+/* A climbed step of the Timed ladder: as strong as a mini table square, so a 10px square reads at a glance. */
+.art-tile-strong {
+  fill: color-mix(in oklab, var(--c) var(--mini-tint), var(--surface));
+  stroke: color-mix(in oklab, var(--c) var(--tile-edge), transparent);
+  stroke-width: 1;
+}
+/* A step not yet climbed: the square's edge only, in its category colour. */
+.art-tile-empty {
+  fill: color-mix(in oklab, var(--c) 6%, var(--surface));
+  stroke: color-mix(in oklab, var(--c) var(--tile-edge), transparent);
+  stroke-width: 1;
+}
+.art-tile-ink {
+  fill: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
+}
+/* A found pair in Match: the card takes the element's printed colour. */
+.art-card-found {
+  fill: color-mix(in oklab, var(--c) var(--tile-tint), var(--surface));
+  stroke: color-mix(in oklab, var(--c) var(--tile-edge), transparent);
+  stroke-width: 1;
+}
+
+/* ------------------------------------------------------------ card stock */
+
+.art-paper {
+  fill: var(--surface);
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+.art-slot {
+  fill: var(--cell-empty);
+  stroke: var(--slot-line);
+  stroke-width: 1;
+  stroke-dasharray: 2.5 2;
+}
+.art-key {
+  fill: var(--surface-2);
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+.art-answer-right {
+  fill: color-mix(in oklab, var(--good) 12%, var(--surface));
+  stroke: var(--good);
+  stroke-width: 1.5;
+}
+.art-good-line {
+  fill: none;
+  stroke: var(--good);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.art-badge {
+  fill: var(--surface);
+  stroke: var(--good);
+  stroke-width: 1.5;
+}
+
+/* ------------------------------------------------------- drawn objects */
+
+.art-device {
+  fill: var(--surface);
+  stroke: var(--ink-2);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.art-screen {
+  fill: var(--surface-2);
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+.art-line {
+  stroke: var(--ink-3);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+.art-part {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1.25;
+}
+.art-part-fill {
+  fill: var(--ink-3);
+}
+.art-leader {
+  stroke: var(--ink-2);
+  stroke-width: 1;
+}
+.art-pin {
+  fill: var(--ink);
+}
+
+/* The stopwatch. */
+.art-tick {
+  stroke: var(--ink-3);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+.art-track {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 4;
+}
+.art-sweep {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.art-hand {
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.art-hub {
+  fill: var(--ink);
+}
