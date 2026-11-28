@@ -30,15 +30,15 @@ export const ElementTile = memo(function ElementTile({
   return (
     <div
       className={`tile flex h-full w-full select-none flex-col items-center justify-center overflow-hidden ${className}`}
-      style={{ '--c': color ?? catVar(e.category), borderRadius: Math.max(6, size * 0.16), ...style } as CSSProperties}
+      style={{ '--c': color ?? catVar(e.category), borderRadius: Math.max(6, size * 0.16), paddingTop: showNumber && !tiny && showName ? size * 0.14 : undefined, ...style } as CSSProperties}
     >
       {showNumber && !tiny && (
-        <span className="absolute left-[9%] top-[6%] font-medium tabular-nums opacity-80" style={{ fontSize: Math.max(8, size * 0.17) }}>
+        <span className="absolute left-[9%] top-[6%] font-medium tabular-nums opacity-80" style={{ fontSize: Math.max(8, size * 0.15) }}>
           {e.number}
         </span>
       )}
       {showSymbol && (
-        <span className="font-display font-semibold leading-none" style={{ fontSize: size * (tiny ? 0.42 : showName ? 0.36 : 0.4), marginTop: showName ? -size * 0.04 : 0 }}>
+        <span className="font-display font-semibold leading-none" style={{ fontSize: size * (tiny ? 0.42 : showName ? 0.36 : 0.4), marginTop: 0 }}>
           {e.symbol}
         </span>
       )}

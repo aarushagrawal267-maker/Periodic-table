@@ -123,7 +123,9 @@ function ElementDetail({ e }: { e: Element }) {
 
       <nav className="flex items-center justify-between px-4 py-4 sm:px-6" aria-label="Neighbouring elements">
         <NeighbourButton n={e.number === 1 ? 118 : e.number - 1} dir="prev" onClick={openDetail} />
-        <span className="hidden text-xs text-ink-3 sm:block">Use ← → to browse</span>
+        <span className="hidden items-center gap-1 text-xs text-ink-3 sm:flex">
+          Use <kbd className="rounded border border-line bg-surface-2 px-1.5 font-sans text-[11px]">←</kbd> <kbd className="rounded border border-line bg-surface-2 px-1.5 font-sans text-[11px]">→</kbd> to browse
+        </span>
         <NeighbourButton n={e.number === 118 ? 1 : e.number + 1} dir="next" onClick={openDetail} />
       </nav>
       <p className="px-6 pb-6 text-[11px] text-ink-3 sm:px-8">Property data: PubChem (NCBI). Values for superheavy elements are predictions or estimates.</p>
@@ -185,7 +187,7 @@ function AtomModel({ e }: { e: Element }) {
         })}
       </svg>
       <figcaption className="mt-2 text-center text-xs text-ink-3">
-        Shells <span className="font-mono text-ink-2">{sh.join(' · ')}</span>
+        Shells <span className="whitespace-nowrap font-mono text-ink-2">{sh.join(' · ')}</span>
       </figcaption>
     </figure>
   );

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useSettings } from '../store/settings';
 
-/** The confetti is the table's own category colours. */
-const CATS = ['alkali-metal', 'alkaline-earth-metal', 'transition-metal', 'post-transition-metal', 'metalloid', 'nonmetal', 'halogen', 'noble-gas'];
+/** Copper, gold-star and chalk: the accent plus the rating colour, nothing more. */
+const VARS = ['--accent', '--gold', '--ink-2'];
 
 /** Lightweight canvas confetti burst. Skipped entirely when reduced motion is on. */
 export function Confetti({ fire }: { fire: number }) {
@@ -12,7 +12,7 @@ export function Confetti({ fire }: { fire: number }) {
   useEffect(() => {
     if (!fire || reduce) return;
     const css = getComputedStyle(document.documentElement);
-    const COLORS = CATS.map((c) => css.getPropertyValue(`--cat-${c}`).trim() || '#888');
+    const COLORS = VARS.map((v) => css.getPropertyValue(v).trim() || '#888');
     const canvas = ref.current!;
     const ctx = canvas.getContext('2d')!;
     const dpr = Math.min(2, window.devicePixelRatio || 1);

@@ -111,7 +111,7 @@ export function Home() {
             </div>
           </a>
 
-          <a href="#/progress" className="card card-hover group flex flex-col justify-between p-6">
+          <a href="#/progress" className="card card-hover group flex flex-col justify-between gap-6 p-6">
             <div className="flex items-center gap-4">
               <Plate size={72} corner="Lv" label={titleForLevel(lvl.level)}>
                 {lvl.level}
@@ -121,7 +121,7 @@ export function Home() {
                 <div className="mt-1 text-sm tabular-nums text-ink-3">{lvl.toNext.toLocaleString('en-US')} XP to next</div>
               </div>
             </div>
-            <div className="mt-6">
+            <div>
               <div className="flex justify-between text-sm">
                 <span className="text-ink-2">Elements mastered</span>
                 <span className="font-medium tabular-nums">{mastered}/118</span>
@@ -153,7 +153,7 @@ export function Home() {
             All modes <ArrowRight size={14} strokeWidth={1.75} />
           </a>
         </div>
-        <div className="no-scrollbar -mx-4 mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6">
+        <div className="no-scrollbar -mx-4 mt-6 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:scroll-px-0 sm:px-0">
           {REGIONS.map((r) => {
             const bestStars = Math.max(0, ...Object.entries(p.best).filter(([k]) => k.startsWith(r.id + ':')).map(([, v]) => v.stars));
             return (

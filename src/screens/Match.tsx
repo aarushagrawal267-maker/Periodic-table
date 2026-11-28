@@ -59,7 +59,7 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
       });
       sfx.hit(f.size - 1);
       haptic(12);
-      setAnnounce(`Match! ${byNumber(a.element).name} is ${byNumber(a.element).symbol}.`);
+      setAnnounce(`Match: ${byNumber(a.element).name} is ${byNumber(a.element).symbol}.`);
       if (f.size === pairs.length) setEndedAt(Date.now());
     } else {
       busy.current = true;

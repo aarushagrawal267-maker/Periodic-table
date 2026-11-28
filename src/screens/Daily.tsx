@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ArrowLeft, CalendarDays, Clock, Flame, Play, Target } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Play } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { MiniTable } from '../components/MiniTable';
 import { ShareButton } from '../components/Results';
@@ -63,9 +63,9 @@ export function Daily() {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.06 }} className="card mx-auto mt-10 max-w-xl p-6">
           <MiniTable highlight={result ? new Set(targets) : new Set()} className="w-full" color={(x) => (!result && targets.includes(x) ? 'var(--accent)' : undefined)} label="Today's elements on the table" />
           <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-            <Stat icon={Target} label="Elements" value={String(DAILY_SIZE)} />
-            <Stat icon={Flame} label="Streak" value={`${streak} day${streak === 1 ? '' : 's'}`} />
-            <Stat icon={Clock} label="Next in" value={<Countdown />} />
+            <Stat label="Elements" value={String(DAILY_SIZE)} />
+            <Stat label="Streak" value={`${streak} day${streak === 1 ? '' : 's'}`} />
+            <Stat label="Next in" value={<Countdown />} />
           </div>
         </motion.div>
 
@@ -105,11 +105,10 @@ export function Daily() {
   );
 }
 
-function Stat({ icon: I, label, value }: { icon: typeof Flame; label: string; value: React.ReactNode }) {
+function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-line p-3">
-      <I size={16} strokeWidth={1.75} className="mx-auto text-ink-3" />
-      <div className="font-display mt-2 text-lg font-medium tabular-nums">{value}</div>
+      <div className="font-display whitespace-nowrap text-base font-medium tabular-nums sm:text-lg">{value}</div>
       <div className="text-xs text-ink-3">{label}</div>
     </div>
   );

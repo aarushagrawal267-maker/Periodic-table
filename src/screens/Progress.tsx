@@ -42,7 +42,7 @@ export function ProgressScreen() {
               ['Rounds', p.stats.rounds],
               ['Accuracy', attempts ? `${acc}%` : '—'],
               ['Best combo', p.stats.bestCombo],
-              ['Best streak', `${p.daily.bestStreak}d`],
+              ['Best streak', `${p.daily.bestStreak} day${p.daily.bestStreak === 1 ? '' : 's'}`],
               ['Time played', formatTime(p.stats.playMs)],
             ].map(([k, v]) => (
               <div key={k} className="rounded-xl border border-line px-4 py-3">

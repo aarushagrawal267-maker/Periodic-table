@@ -94,16 +94,16 @@ function ChapterNode({ chapter: c, index, stars, current }: { chapter: Chapter; 
           })}
           {c.numbers.length > 10 && <span className="px-1 text-[11px] text-ink-3">+{c.numbers.length - 10}</span>}
         </div>
-        <div className="mt-4 flex items-center gap-4 border-t border-line pt-3 text-xs text-ink-3">
-          <span className="flex items-center gap-1">
+        <div className="mt-4 flex items-center gap-3 border-t border-line pt-3 text-xs text-ink-3">
+          <span className="flex items-center gap-1 whitespace-nowrap">
             <Clock size={14} strokeWidth={1.75} /> ~{Math.max(2, Math.round(c.numbers.length / 4))} min
           </span>
           {c.mnemonic && (
-            <span className="flex items-center gap-1">
-              <Lightbulb size={14} strokeWidth={1.75} /> Memory trick
+            <span className="flex items-center gap-1 whitespace-nowrap" aria-label="Includes a memory trick">
+              <Lightbulb size={14} strokeWidth={1.75} aria-hidden /> <span className="hidden sm:inline">Memory trick</span>
             </span>
           )}
-          <span className="ml-auto flex items-center gap-1 font-medium text-ink-2 transition-colors group-hover:text-accent-ink">
+          <span className="ml-auto flex items-center gap-1 whitespace-nowrap font-medium text-ink-2 transition-colors group-hover:text-accent-ink">
             {done ? 'Replay' : current ? 'Start' : 'Open'} <ArrowRight size={14} strokeWidth={1.75} />
           </span>
         </div>
