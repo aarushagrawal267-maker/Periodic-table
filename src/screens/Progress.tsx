@@ -1,6 +1,7 @@
 import { formatDate } from '../lib/date';
 import { ArrowRight, Lock, Star } from 'lucide-react';
-import type { CSSProperties, ReactNode } from 'react';
+import { useReducedMotion } from 'motion/react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { SectionHeader } from '../components/SectionHeader';
 import { ElementChip, ElementTile, tileRadius } from '../components/ElementTile';
 import { Icon, TIER_COLOR } from '../components/Icon';
@@ -8,12 +9,14 @@ import { PeriodicGrid } from '../components/PeriodicGrid';
 import { useGridRoving } from '../components/useGridRoving';
 import { ACHIEVEMENTS } from '../lib/achievements';
 import { CHAPTERS } from '../lib/chapters';
-import { ELEMENTS, byNumber } from '../lib/elements';
+import { ELEMENTS, byNumber, catVar } from '../lib/elements';
+import { familyCounts, fillStep, improvedSince, readSeen, stepWords, sweepDelay, writeSeen } from '../lib/masteryMap';
 import { REGIONS } from '../lib/regions';
 import { formatTime, levelFromXp, titleForLevel } from '../lib/scoring';
-import { DIFFICULTIES } from '../store/settings';
+import { DIFFICULTIES, useSettings } from '../store/settings';
 import { masteredCount, useProgress } from '../store/progress';
 import { useUi } from '../store/ui';
+import '../styles/progress.css';
 
 const fmt = (n: number) => n.toLocaleString('en-US');
 /** Strip the period from one-line data captions (copy rule: captions end without one). */
@@ -27,8 +30,17 @@ const caption = (s: string) => s.replace(/\.$/, '');
 const RECORD_COLS =
   'grid grid-cols-3 items-center gap-x-2 gap-y-1 px-2 sm:grid-cols-[minmax(0,1fr)_repeat(3,3.5rem)] sm:gap-2 sm:px-3 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] lg:gap-6';
 
-/** Learning steps 1 to 3 print the tile lighter; step 4 (mastered) is the full printed tile. Values are tint % and edge %. */
-const STEP_INK: Record<number, [number, number]> = { 1: [4, 18], 2: [7, 26], 3: [10, 34] };
+/** This device's localStorage, or nothing where it is blocked. Only the map's UI-only "last seen" snapshot uses it. */
+function deviceStore() {
+  try {
+    return window.localStorage;
+  } catch {
+    return undefined;
+  }
+}
+
+/** How many symbols the "moved up" line names before it sums up the rest. */
+const UP_NAMED = 8;
 
 export function ProgressScreen() {
   const p = useProgress();
@@ -42,6 +54,19 @@ export function ProgressScreen() {
   const roving = useGridRoving();
   const unlocked = ACHIEVEMENTS.filter((a) => p.achievements[a.id]).length;
   const streak = p.daily.bestStreak;
+
+  // The map's motion: the opening sweep and the "moved up" ring. Both are off with the app setting or the OS setting.
+  const reduceSetting = useSettings((s) => s.reduceMotion);
+  const animate = !(useReducedMotion() || reduceSetting);
+  // What moved up since the map was last shown, read once as the page opens. The snapshot is UI-only (not progress, never synced).
+  const [improved] = useState(() => new Set(improvedSince(readSeen(deviceStore()), p.mastery)));
+  useEffect(() => writeSeen(deviceStore(), p.mastery), [p.mastery]);
+  const upList = [...improved];
+
+  // The next lesson's elements that are not started yet are outlined in their family colour: where the colouring starts.
+  const nextChapter = CHAPTERS.find((c) => !p.chapters[c.id]);
+  const nextUp = new Set((nextChapter?.numbers ?? []).filter((n) => fillStep(p.mastery[n]?.s) === 0));
+  const families = familyCounts(p.mastery);
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12">
@@ -87,31 +112,57 @@ export function ProgressScreen() {
           <SectionHeader
             id="mastery-map"
             title="Mastery map"
-            sub="Each right answer prints an element a step darker, and a slip takes it a step back. Four steps and it is mastered."
+            sub="Each right answer colours an element in a step, and a slip takes it a step back. Four steps and it is mastered."
           />
-          {/* Phones: two equal columns, so the three entries line up instead of wrapping ragged. From sm one line. */}
+          {/* Phones: two equal columns, so the entries line up instead of wrapping ragged. From sm one line. */}
           <ul className="mb-4 grid shrink-0 grid-cols-2 gap-x-4 gap-y-2 text-sm text-ink-2 sm:flex sm:flex-wrap sm:gap-x-5" aria-label="Key">
-            <KeyItem swatch={<span className="h-4 w-4 rounded-[4px] border border-dashed border-ink-3" />} label="Not started" count={ELEMENTS.length - learning - mastered} />
-            <KeyItem swatch={<span className="h-4 w-4 rounded-[4px] border" style={{ background: 'color-mix(in oklab, var(--ink-2) 7%, var(--surface))', borderColor: 'color-mix(in oklab, var(--ink-2) 26%, transparent)' }} />} label="Learning" count={learning} />
+            <KeyItem swatch={<Swatch step={0} />} label="Not started" count={ELEMENTS.length - learning - mastered} />
             <KeyItem
               swatch={
-                <span className="relative h-4 w-4 rounded-[4px] border" style={{ background: 'color-mix(in oklab, var(--ink-2) var(--tile-tint), var(--surface))', borderColor: 'color-mix(in oklab, var(--ink-2) var(--tile-edge), transparent)' }}>
-                  <span className="absolute right-0.5 top-0.5 h-1 w-1 rounded-full bg-accent" />
+                <span className="flex gap-0.5">
+                  <Swatch step={1} />
+                  <Swatch step={2} />
+                  <Swatch step={3} />
                 </span>
               }
-              label="Mastered"
-              count={mastered}
+              label="Learning"
+              count={learning}
             />
+            <KeyItem swatch={<Swatch step={4} />} label="Mastered" count={mastered} />
           </ul>
         </div>
         {fresh && (
-          <a href="#/learn" className="card card-link mb-4 flex items-center gap-4 p-4 sm:p-5">
+          <a href={`#/learn/${nextChapter?.id ?? ''}`} className="card card-link mb-4 flex items-center gap-4 p-4 sm:p-5">
             <span className="min-w-0 flex-1">
               <span className="block font-medium">Your map is empty</span>
-              <span className="mt-1 block text-sm text-ink-2">Finish the first lesson, and hydrogen to neon start to appear here.</span>
+              <span className="mt-1 block text-sm text-ink-2">Start the first lesson: hydrogen to neon, outlined below, colour in as you get them right</span>
             </span>
             <ArrowRight aria-hidden size={18} strokeWidth={1.5} className="shrink-0 text-ink-3" />
           </a>
+        )}
+        {!fresh && (upList.length > 0 || nextUp.size > 0) && (
+          <div className="mb-4 grid gap-1 text-sm text-ink-2">
+            {upList.length > 0 && (
+              <p>
+                Since your last visit, {upList.length === 1 ? '1 element' : `${fmt(upList.length)} elements`} moved up:{' '}
+                <span className="text-ink">
+                  {upList
+                    .slice(0, UP_NAMED)
+                    .map((n) => byNumber(n).symbol)
+                    .join(', ')}
+                </span>
+                {upList.length > UP_NAMED && ` and ${fmt(upList.length - UP_NAMED)} more`}
+              </p>
+            )}
+            {nextChapter && nextUp.size > 0 && (
+              <p>
+                Outlined: {nextUp.size === 1 ? 'the element' : `the ${fmt(nextUp.size)} elements`} still to start in your next lesson,{' '}
+                <a href={`#/learn/${nextChapter.id}`} className="text-ink underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-ink-2">
+                  {nextChapter.title}
+                </a>
+              </p>
+            )}
+          </div>
         )}
         <div className="card p-4 sm:p-5" data-roving role="group" aria-label="Mastery map. Use the arrow keys to move between elements.">
           <PeriodicGrid
@@ -119,30 +170,59 @@ export function ProgressScreen() {
             maxCell={64}
             showAxes
             renderCell={(e, rect) => {
-              const s = p.mastery[e.number]?.s ?? 0;
-              const step = STEP_INK[s];
-              const style: CSSProperties | undefined =
-                s === 0
-                  ? { borderStyle: 'dashed', background: 'var(--cell-empty)', borderColor: 'var(--line-strong)', color: 'var(--ink-3)' }
-                  : step
-                    ? { background: `color-mix(in oklab, var(--c) ${step[0]}%, var(--surface))`, borderColor: `color-mix(in oklab, var(--c) ${step[1]}%, transparent)` }
-                    : undefined;
+              const step = fillStep(p.mastery[e.number]?.s);
+              const radius = tileRadius(rect.size);
+              const next = step === 0 && nextUp.has(e.number);
+              const up = improved.has(e.number);
               return (
                 <button
                   {...roving.cellProps(e)}
                   onFocus={() => roving.setActive(e.number)}
                   onClick={() => openDetail(e.number)}
-                  className="group relative block h-full w-full focus-visible:z-10"
-                  style={{ borderRadius: tileRadius(rect.size) }}
-                  aria-label={`${e.symbol}, ${e.name}, ${e.number}: ${s >= 4 ? 'mastered' : s ? `learning, ${s} of 4` : 'not started yet'}`}
+                  className="pm-cell group focus-visible:z-10"
+                  data-step={step}
+                  data-next={next || undefined}
+                  style={{ borderRadius: radius, '--c': catVar(e.category), '--fill': step / 4, '--d': `${sweepDelay(e)}ms`, '--r': `${radius}px` } as CSSProperties}
+                  aria-label={`${e.symbol}, ${e.name}, ${e.number}: ${stepWords(step)}${up ? ', moved up since your last visit' : ''}${next ? ', in your next lesson' : ''}`}
                 >
-                  <ElementTile element={e} size={rect.size} showName={false} quietNumber className="transition-colors duration-150 ease-out group-hover:border-ink-2!" style={style} />
-                  {s >= 4 && <span aria-hidden className="absolute right-[10%] top-[10%] h-1.5 w-1.5 rounded-full bg-accent" />}
+                  {step > 0 && (
+                    <span aria-hidden className="pm-clip">
+                      <span className={`pm-fill${animate ? ' pm-sweep' : ''}`} />
+                    </span>
+                  )}
+                  <ElementTile element={e} size={rect.size} showName={false} quietNumber className="transition-colors duration-150 ease-out group-hover:border-ink-2!" />
+                  {step >= 4 && <Star aria-hidden className="pm-star" size={Math.max(8, Math.round(rect.size * 0.2))} strokeWidth={2} />}
+                  {up && animate && <span aria-hidden className="pm-up" />}
                 </button>
               );
             }}
           />
         </div>
+
+        {/* The same colouring, counted per family: a quiet row each, with a thin bar in the family colour. */}
+        <h3 className="label mt-6">By family</h3>
+        {/* Phones: two columns, a long name wraps and the bars stay level along each row. */}
+        <ul className="card mt-2 grid grid-cols-2 gap-x-4 gap-y-4 p-4 sm:gap-x-8 sm:p-5 lg:grid-cols-5">
+          {families.map((f) => (
+            <li key={f.category} className="flex min-w-0 flex-col justify-end" style={{ '--c': catVar(f.category) } as CSSProperties}>
+              <p className="text-[13px] leading-5 text-ink sm:text-sm">
+                {f.name}
+                <span className="sr-only">
+                  : {f.mastered} of {f.total} mastered{f.learning ? `, ${f.learning} learning` : ''}
+                </span>
+              </p>
+              <div aria-hidden className="mt-1 flex items-center gap-2">
+                <div className="pm-bar min-w-0 flex-1">
+                  <span className="pm-bar-learning" style={{ transform: `scaleX(${(f.mastered + f.learning) / f.total})` }} />
+                  <span className="pm-bar-mastered" style={{ transform: `scaleX(${f.mastered / f.total})` }} />
+                </div>
+                <span className="meta shrink-0">
+                  {f.mastered}/{f.total}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* min-w-0 lets the columns shrink at 320px instead of pushing the page sideways (WCAG 1.4.10). */}
@@ -243,6 +323,20 @@ function KeyItem({ swatch, label, count }: { swatch: ReactNode; label: string; c
       {label}
       <span className="meta">{fmt(count)}</span>
     </li>
+  );
+}
+
+/** A key swatch: the map's fill steps on a neutral tile (the map itself uses each family's colour). */
+function Swatch({ step }: { step: number }) {
+  return (
+    <span className="pm-swatch" data-step={step} style={{ '--fill': step / 4 } as CSSProperties}>
+      {step > 0 && (
+        <span className="pm-clip">
+          <span className="pm-fill" />
+        </span>
+      )}
+      {step >= 4 && <Star className="pm-star" size={10} strokeWidth={2} />}
+    </span>
   );
 }
 
