@@ -75,12 +75,14 @@ The audit was run on the original UI (the `screenshots/` folder and the code at 
 ## 2. Direction
 
 - **Product.** Periodica teaches students aged 12 to 18 the periodic table in three-minute lessons and quick games, placing elements on the table, flashcards, a quiz, match pairs, real-life objects and one daily challenge, free and offline.
-- **Character.** Curious, exact, a little playful.
-- **World.** The school chemistry room: the printed periodic table on the wall, each element a square of category colour with its atomic number in the corner, black ink on white paper, cobalt glass on the shelf.
-- **Moments.** (1) The table itself: element tiles printed in their category colours, wherever the table or a tile appears (game board, Explore, mini tables, flashcards, chips). It is the only place many hues live. (2) The round result: three gold stars, the score set large, and the trail of what you placed.
+- **Character.** Curious, exact, playful.
+- **World.** The school chemistry room: the printed periodic table on the wall, each element a square of category colour with its atomic number in the corner, black ink on warm paper by day, the same chart at night, cobalt glass on the shelf.
+- **Moments.** (1) The table itself: element tiles printed in their category colours, wherever the table or a tile appears (the living table in the Home hero, game board, Explore, the Progress map, mini tables, flashcards, chips). It is the only place many hues live. (2) The snap: a tile placed correctly bursts in its own category colour. (3) The round result: three gold stars, the score set large, the trail of what you placed, confetti made of tiny element squares on a three-star round or a cleared Timed challenge level, and a trophy for the master finish.
 - **Signature.** The corner number. Every element shown carries its atomic number in its top-left corner in small mono figures, exactly as the wall chart prints it: tiles, element chips, the review list, the detail card, the app icon. Nowhere else.
 
-This is an app, so app rules apply: near-neutral surfaces, the moments carry the colour. The template check (unslop `signs.md`, "Template look") failed on a pure grey page with white text, so the ramp is unslop's Warm ramp: the paper the chart is printed on. Periodica has one theme, dark: the same warm ramp at night (unslop tokens, Warm, dark column). There is no light theme and no theme setting. The accent is cobalt ink.
+This is an app, so app rules apply: near-neutral surfaces, the moments carry the colour. The template check (unslop `signs.md`, "Template look") failed on a pure grey page with white text, so the ramp is unslop's Warm ramp: the paper the chart is printed on. Periodica has two themes from that one ramp: **light**, the chart's paper by day, made for classroom projectors that wash out dark pages, and **dark**, the same ramp at night. Settings offers System, Light and Dark; the choice is a per-device view preference (like the board zoom), saved on the device and never synced, and it is applied before the first paint by the script in `index.html`. The accent is cobalt ink, and it fills the primary action.
+
+The mark is the periodic table's own silhouette as a few flat squares in category colours, tall at both ends and low in the middle, next to the wordmark "Periodica". It replaces the old "Pa" square, which read as protactinium.
 
 ---
 
@@ -96,7 +98,7 @@ One warm ramp, the chart's paper (unslop tokens, Warm). Saturation stays so low 
 | Raised: active row, input, secondary button | `--surface-2` / `bg-surface-2` (`bg-raised`) | #262421 | #efe9df |
 | Hairline | `--line` / `border-line` | ink at 8% | ink at 8% |
 | Strong hairline, empty track | `--line-strong` | ink at 16% | ink at 16% |
-| Control edge: a control that must be found at rest (switch track and knob when off, `.field` border, chosen `.seg-item` ring) | `--line-control` / `border-line-control` | #7d776d | #8a8175 |
+| Control edge: a control that must be found at rest (switch track and knob when off, `.field` border, chosen `.seg-item` ring) | `--line-control` / `border-line-control` | #7d776d | #7f766a |
 | Empty square in a mini table | `--mini-empty` | ink at 10% | ink at 8% |
 
 `--line-control` is the one exception to quiet hairlines: it is 3:1 or better against bg, surface and surface-2 in both themes (WCAG 1.4.11), and only goes on the edges that tell a student where a control is or which option is chosen.
@@ -111,11 +113,11 @@ One warm ramp, the chart's paper (unslop tokens, Warm). Saturation stays so low 
 
 ### One accent: cobalt
 
-`--accent` / `text-accent` / `bg-accent`: dark #6ea3ff (text on it `--on-accent` #0e0e10), light #1f5bd6 (white text, 6:1). Cobalt is element 27 and the blue of school lab glass.
+`--accent` / `text-accent` / `bg-accent`: dark #5b94ff (text on it `--on-accent` #12110f, 6.4:1), light #1f5bd6 (white text, 6:1). Cobalt is element 27 and the blue of school lab glass.
 
-The accent covers a few percent of a screen and only marks: the current selection (`.is-selected`, the active tab marker, chosen radio), progress (`.meter`, `Ring`), and the one key figure (the XP gained in a result). It is never a background wash, a border on every card, or a label colour.
+The accent covers a few percent of a screen and only marks: the primary action, the current selection (`.is-selected`, the active nav marker, chosen radio), progress (`.meter`, `Ring`), and the one key figure (the XP gained in a result). It is never a background wash, a border on every card, or a label colour.
 
-**Primary action is not the accent.** `.btn-primary` is filled with the ramp's primary text colour: off-white with dark text on dark, near-black with white text on light. One per screen.
+**The primary action is the accent.** `.btn-primary` (`--primary` = `--accent`) is filled cobalt with `--on-accent` text, so the one thing to do next on every screen reads in the same confident colour. One per screen. Hover leans towards ink, which keeps the text contrast in both themes.
 
 ### Semantic colours (meaning only)
 
@@ -196,10 +198,11 @@ One curve, `cubic-bezier(0.22, 1, 0.36, 1)`: CSS `var(--ease-out)` and Tailwind 
 | Stagger | | `STAGGER` 50ms, at most six items |
 
 - Use `tween(duration, delay)` or the `rise` preset. Never `type: 'spring'`, never overshoot, never `repeat: Infinity`.
+- The moments may move a little more, once, and only in category colours: the hero table prints itself in a short staggered sweep (under a second, CSS delays per tile, not one motion component per tile), a correct drop bursts in the element's colour, the combo badge pulses once each time it climbs at high combos, and a three-star round, a cleared Timed challenge level and the master finish throw confetti of tiny element squares (about two seconds) with a trophy for the master finish. None of it loops, all of it is decorative (`aria-hidden`, no pointer events), and with reduced motion none of it moves: no sweep, burst, pulse, shake or confetti, and the trophy simply appears.
 - Hover is a colour or surface change (`.card-link`). Press is `scale(0.98)`. Rise on enter is 8px. One entrance per screen.
 - Transition named properties only (`transition-colors`, `transition-[transform,opacity]`), never `transition-all`. Never animate width, height, top, left: progress fills use `transform: scaleX()` (`.meter-fill`).
 - Feedback that explains is kept: the wrong-drop shake (`.animate-shake`, 4px), the red slot flash (`.flash-bad`), the correct-drop ring (`ripple`), the swipe hint nudge (3px, twice), number tweens (`AnimatedNumber`), the result stars appearing in turn.
-- Removed: aurora drift, shine sweeps, pulse rings, floating cards, spinning electrons, hover lifts and scales, confetti.
+- Removed: aurora drift, shine sweeps, pulse rings, floating cards, spinning electrons, hover scales on cards. (Confetti came back as a result moment, made of element squares, and hero tiles lift a few pixels on hover or focus; see above.)
 - Reduced motion: the setting adds `.reduce-motion` and the OS setting is honoured in CSS; motion/react follows `MotionConfig reducedMotion={setting ? 'always' : 'user'}`, so the OS preference always applies and the app setting can only add reduction.
 - Toasts appear at the top, and at the bottom while the results screen, an element card or settings is open, so they never cover a dialog's headline.
 
@@ -255,7 +258,7 @@ Screens build from these. Classes are in `src/styles/index.css` (`@layer compone
 - `.icon-btn`: square icon-only button (back, close, mute, settings). Always with `aria-label`.
 
 **Controls**
-- `.seg` + `.seg-item`: segmented control (difficulty, theme, lenses). Selected item via `aria-checked` / `aria-selected` / `aria-pressed` / `aria-current`: the surface step plus a `--line-control` ring, so the choice reads at 3:1.
+- `.seg` + `.seg-item`: segmented control (difficulty, theme, lenses). The Theme control in Settings is one: System, Light, Dark. Selected item via `aria-checked` / `aria-selected` / `aria-pressed` / `aria-current`: the surface step plus a `--line-control` ring, so the choice reads at 3:1.
 - `Switch` (`src/components/Switch.tsx`): the only on/off control. Off: surface-2 track, `--line-control` edge and knob. On: accent track, `--on-accent` knob. Put it inside a `<label>` so the whole row is the target.
 - `.field`: text input, 44 tall, `--line-control` border, accent on focus.
 - `.chip`: quiet tag (uses, filters, meta), `rounded-tag`.
