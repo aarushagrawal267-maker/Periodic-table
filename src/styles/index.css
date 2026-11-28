@@ -13,43 +13,44 @@
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
   --color-accent: var(--accent);
-  --color-accent-2: var(--accent-2);
-  --color-accent-3: var(--accent-3);
+  --color-accent-ink: var(--accent-ink);
+  --color-on-accent: var(--on-accent);
   --color-good: var(--good);
   --color-bad: var(--bad);
   --color-gold: var(--gold);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @custom-variant light (&:where([data-theme='light'], [data-theme='light'] *));
 
 :root {
   color-scheme: dark;
-  --bg: #07070d;
-  --bg-2: #0d0d18;
-  --surface: rgb(255 255 255 / 0.04);
-  --surface-2: rgb(255 255 255 / 0.07);
-  --surface-solid: #11111d;
-  --line: rgb(255 255 255 / 0.08);
-  --line-strong: rgb(255 255 255 / 0.16);
-  --ink: #f4f4fa;
-  --ink-2: #a9a9c2;
+  /* Slate ramp: a blackboard, not a colour. */
+  --bg: #121417;
+  --bg-2: #0e1013;
+  --surface: #181b1f;
+  --surface-2: #20242a;
+  --surface-solid: #181b1f;
+  --line: rgb(236 238 241 / 0.08);
+  --line-strong: rgb(236 238 241 / 0.16);
+  --ink: #eceef1;
+  --ink-2: #a3a9b2;
   /* ink-3 is used for small captions: keep it at 4.5:1 or better on --bg and cards. */
-  --ink-3: #7f7f9c;
-  --accent: #8b7cff;
-  --accent-2: #4fd1ff;
-  --accent-3: #5cf2b0;
-  --good: #3ee08f;
-  --bad: #ff5470;
-  --gold: #ffc94a;
-  --cell-empty: rgb(255 255 255 / 0.035);
+  --ink-3: #8a919b;
+  /* Copper: the one accent, from the metal on every lab bench. */
+  --accent: #e08a5c;
+  --accent-ink: #e8976b;
+  --on-accent: #16120f;
+  --good: #4cc38a;
+  --bad: #e5484d;
+  /* Gold-star sticker: ratings and achievements only. */
+  --gold: #e0b04a;
+  --cell-empty: rgb(236 238 241 / 0.035);
   --cell-ink-mix: 72%;
-  --on-grad: #07070d;
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
-  --shadow-md: 0 12px 32px -14px rgb(0 0 0 / 0.75);
-  --shadow-lg: 0 30px 80px -20px rgb(0 0 0 / 0.7), 0 0 0 1px var(--line);
-  --grad: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 55%, var(--accent-3) 100%);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.4), 0 0 0 1px var(--line);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
   --cat-alkali-metal: #ff5d73;
   --cat-alkaline-earth-metal: #ff9f43;
@@ -65,29 +66,28 @@
 
 [data-theme='light'] {
   color-scheme: light;
-  --bg: #f5f5fa;
-  --bg-2: #ebebf4;
-  --surface: rgb(255 255 255 / 0.75);
-  --surface-2: rgb(255 255 255 / 0.95);
+  --bg: #f6f7f8;
+  --bg-2: #eef0f2;
+  --surface: #ffffff;
+  --surface-2: #eef0f2;
   --surface-solid: #ffffff;
-  --line: rgb(20 20 50 / 0.09);
-  --line-strong: rgb(20 20 50 / 0.18);
-  --ink: #0d0d1c;
-  --ink-2: #4b4b66;
-  --ink-3: #6b6b85;
-  /* Darker than the dark-theme accents so accent text and white-on-gradient both pass 4.5:1. */
-  --accent: #6a56ff;
-  --accent-2: #0a74b8;
-  --accent-3: #08805a;
-  --good: #087a45;
-  --bad: #d42a45;
-  --gold: #d99a00;
-  --cell-empty: rgb(20 20 50 / 0.045);
+  --line: rgb(22 25 29 / 0.09);
+  --line-strong: rgb(22 25 29 / 0.18);
+  --ink: #16191d;
+  --ink-2: #4a525c;
+  --ink-3: #646c77;
+  /* Darker copper so white text on it and copper text on white both pass 4.5:1. */
+  --accent: #a4512a;
+  --accent-ink: #9a4a24;
+  --on-accent: #ffffff;
+  --good: #16803f;
+  --bad: #c9262f;
+  --gold: #b57d0f;
+  --cell-empty: rgb(22 25 29 / 0.045);
   --cell-ink-mix: 62%;
-  --on-grad: #ffffff;
-  --shadow-sm: 0 1px 2px rgb(30 30 80 / 0.08);
-  --shadow-md: 0 14px 34px -18px rgb(30 30 80 / 0.28);
-  --shadow-lg: 0 30px 70px -25px rgb(30 30 80 / 0.35), 0 0 0 1px var(--line);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.08), 0 0 0 1px var(--line);
 
   --cat-alkali-metal: #e5334f;
   --cat-alkaline-earth-metal: #e57a10;
@@ -133,150 +133,81 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--accent) 40%, transparent);
+  background: color-mix(in oklab, var(--accent) 30%, transparent);
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-2);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
-}
-
-.text-grad {
-  background: var(--grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.glass {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  backdrop-filter: blur(18px) saturate(1.4);
-  -webkit-backdrop-filter: blur(18px) saturate(1.4);
 }
 
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 24px;
+  border-radius: 16px;
 }
 [data-theme='light'] .card {
-  box-shadow: var(--shadow-sm), 0 8px 24px -16px rgb(30 30 80 / 0.18);
+  box-shadow: var(--shadow-sm);
 }
 
 .solid {
   background: var(--surface-solid);
 }
 
-/* Faint noise to keep large dark areas from banding. */
-.grain::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 100;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-[data-theme='light'] .grain::after {
-  opacity: 0.025;
-}
-
-.aurora {
-  position: fixed;
-  inset: -20%;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(40% 35% at 18% 12%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%),
-    radial-gradient(35% 30% at 85% 8%, color-mix(in oklab, var(--accent-2) 16%, transparent), transparent 70%),
-    radial-gradient(45% 40% at 70% 95%, color-mix(in oklab, var(--accent-3) 10%, transparent), transparent 70%);
-  filter: blur(20px);
-  animation: drift 28s ease-in-out infinite alternate;
-}
-[data-theme='light'] .aurora {
-  opacity: 0.6;
-}
-@keyframes drift {
-  to {
-    transform: translate3d(3%, 2%, 0) rotate(4deg) scale(1.05);
-  }
-}
-
-.grid-lines {
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black, transparent);
-}
-
-/* Element tile — the visual atom of the whole app. */
+/* Element tile: a square from a printed wall chart. Flat category tint, hairline in the same hue. */
 .tile {
   --c: var(--accent);
   position: relative;
-  background:
-    linear-gradient(160deg, color-mix(in oklab, var(--c) 26%, transparent), color-mix(in oklab, var(--c) 8%, transparent) 70%),
-    var(--surface-solid);
+  background: color-mix(in oklab, var(--c) 16%, var(--surface-solid));
   border: 1px solid color-mix(in oklab, var(--c) 45%, transparent);
   color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
-}
-.tile::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(120% 80% at 30% 0%, rgb(255 255 255 / 0.12), transparent 55%);
-  pointer-events: none;
 }
 [data-theme='light'] .tile {
-  background:
-    linear-gradient(160deg, color-mix(in oklab, var(--c) 20%, white), color-mix(in oklab, var(--c) 6%, white) 70%);
+  background: color-mix(in oklab, var(--c) 13%, white);
   border-color: color-mix(in oklab, var(--c) 50%, transparent);
 }
 
-.slot {
-  background:
-    radial-gradient(120% 90% at 50% 0%, rgb(255 255 255 / 0.035), transparent 70%),
-    var(--cell-empty);
-  border: 1px dashed var(--line-strong);
-  box-shadow: inset 0 1px 6px rgb(0 0 0 / 0.25);
+/* The signature tile used outside the table: levels, steps, achievements. Neutral, same anatomy. */
+.plate {
+  position: relative;
+  background: var(--surface-solid);
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
 }
-[data-theme='light'] .slot {
-  box-shadow: inset 0 1px 4px rgb(30 30 80 / 0.06);
+
+.slot {
+  background: var(--cell-empty);
+  border: 1px dashed var(--line-strong);
 }
 /* A tile is selected: every empty slot invites a tap. */
 .slot-armed:hover {
   border-style: solid;
-  border-color: color-mix(in oklab, var(--accent-2) 70%, transparent);
-  background: color-mix(in oklab, var(--accent-2) 12%, var(--cell-empty));
+  border-color: color-mix(in oklab, var(--accent) 70%, transparent);
+  background: color-mix(in oklab, var(--accent) 10%, var(--cell-empty));
 }
 
 .btn-primary {
   position: relative;
-  background: var(--grad);
-  color: var(--on-grad);
-  font-weight: 650;
-  box-shadow: 0 10px 30px -10px color-mix(in oklab, var(--accent-2) 70%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.4), inset 0 -2px 0 rgb(0 0 0 / 0.12);
-  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s, filter 0.2s;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 500;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14);
+  transition:
+    background-color 0.15s var(--ease),
+    transform 0.15s var(--ease);
 }
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  filter: saturate(1.1) brightness(1.04);
-  box-shadow: 0 16px 40px -12px color-mix(in oklab, var(--accent-2) 80%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.4), inset 0 -2px 0 rgb(0 0 0 / 0.12);
+  background: color-mix(in oklab, var(--accent) 90%, black);
 }
 .btn-primary:active:not(:disabled) {
-  transform: translateY(1px) scale(0.98);
-  box-shadow: 0 6px 18px -10px color-mix(in oklab, var(--accent-2) 70%, transparent), inset 0 1px 0 rgb(255 255 255 / 0.3);
+  transform: scale(0.98);
 }
-/* Disabled: a calm neutral slab instead of a washed-out gradient. */
+/* Disabled: a calm neutral slab. */
 .btn-primary:disabled {
   opacity: 1;
   background: var(--surface-2);
@@ -284,39 +215,33 @@ body {
   box-shadow: inset 0 0 0 1px var(--line-strong);
   cursor: not-allowed;
 }
-.btn-primary:disabled::after {
-  display: none;
-}
 
 .btn-ghost {
   background: var(--surface);
   border: 1px solid var(--line);
   color: var(--ink);
-  transition: background 0.2s, border-color 0.2s, transform 0.2s var(--ease-spring);
+  transition:
+    background-color 0.15s var(--ease),
+    border-color 0.15s var(--ease),
+    transform 0.15s var(--ease);
 }
 .btn-ghost:hover:not(:disabled) {
   background: var(--surface-2);
   border-color: var(--line-strong);
 }
 .btn-ghost:active:not(:disabled) {
-  transform: scale(0.97);
-}
-[data-theme='light'] .btn-ghost {
-  box-shadow: var(--shadow-sm);
+  transform: scale(0.98);
 }
 
-/* Interactive card: lifts a little and catches light on hover. */
+/* Interactive card: a quiet surface step on hover, no lift. */
 .card-hover {
-  transition: transform 0.35s var(--ease-out-expo), background 0.25s, border-color 0.25s, box-shadow 0.35s var(--ease-out-expo);
+  transition:
+    background-color 0.15s var(--ease),
+    border-color 0.15s var(--ease);
 }
 .card-hover:hover {
-  transform: translateY(-3px);
   background: var(--surface-2);
   border-color: var(--line-strong);
-  box-shadow: var(--shadow-md);
-}
-.card-hover:active {
-  transform: translateY(-1px) scale(0.995);
 }
 
 /* Category-tinted text that stays readable in both themes. Set --c on the element. */
@@ -328,82 +253,30 @@ body {
   color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
 }
 
-.shine {
-  position: relative;
-  overflow: hidden;
-}
-.shine::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgb(255 255 255 / 0.18) 50%, transparent 60%);
-  transform: translateX(-100%);
-  animation: shine 3.6s ease-in-out infinite;
-}
-@keyframes shine {
-  60%,
-  100% {
-    transform: translateX(100%);
-  }
-}
-
 @keyframes shake {
-  10%,
-  90% {
-    transform: translateX(-2px);
-  }
   20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
   80% {
     transform: translateX(4px);
   }
-  30%,
-  50%,
-  70% {
-    transform: translateX(-6px);
-  }
-  40%,
-  60% {
-    transform: translateX(6px);
-  }
 }
 .animate-shake {
-  animation: shake 0.45s both;
+  animation: shake 0.36s var(--ease) both;
 }
 
 @keyframes flash-bad {
   0% {
-    box-shadow: 0 0 0 0 var(--bad), inset 0 0 0 2px var(--bad);
+    box-shadow: inset 0 0 0 2px var(--bad);
   }
   100% {
-    box-shadow: 0 0 0 10px transparent, inset 0 0 0 2px transparent;
+    box-shadow: inset 0 0 0 2px transparent;
   }
 }
 .flash-bad {
-  animation: flash-bad 0.6s ease-out;
-}
-
-@keyframes ripple {
-  from {
-    transform: scale(0.6);
-    opacity: 0.9;
-  }
-  to {
-    transform: scale(2.4);
-    opacity: 0;
-  }
-}
-
-@keyframes pulse-ring {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent-2) 60%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 0 6px transparent;
-  }
-}
-.pulse-ring {
-  animation: pulse-ring 1.6s ease-in-out infinite;
+  animation: flash-bad 0.6s var(--ease);
 }
 
 .no-scrollbar {
@@ -430,17 +303,19 @@ body {
   transition-duration: 0.001ms !important;
 }
 
-.reduce-motion .card-hover:hover,
-.reduce-motion .card-hover:active,
-.reduce-motion .btn-primary:hover,
-.reduce-motion .btn-primary:active {
+.reduce-motion .btn-primary:active,
+.reduce-motion .btn-ghost:active {
   transform: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .aurora,
-  .shine::after,
-  .pulse-ring {
-    animation: none;
+/* One ring on a correct placement: says "this landed", then gets out of the way. */
+@keyframes ripple {
+  from {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
   }
 }

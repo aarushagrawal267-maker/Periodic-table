@@ -100,26 +100,26 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-5 pb-8 pt-4">
       <header className="flex items-center gap-3">
-        <button onClick={() => go('/play')} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave">
-          <ArrowLeft size={18} />
+        <button onClick={() => go('/play')} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-[10px]" aria-label="Leave">
+          <ArrowLeft size={18} strokeWidth={1.75} />
         </button>
         <div className="flex flex-1 gap-1" aria-label={`Object ${index + 1} of ${LIFE_LENGTH}`}>
           {questions.map((_, i) => (
-            <span key={i} className="h-1.5 flex-1 rounded-full" style={{ background: perfect[i] === undefined ? (i === index ? 'var(--ink-2)' : 'var(--line-strong)') : perfect[i] ? 'var(--good)' : 'var(--gold)' }} />
+            <span key={i} className="h-1.5 flex-1 rounded-full" style={{ background: perfect[i] === undefined ? (i === index ? 'var(--ink-2)' : 'var(--line-strong)') : perfect[i] ? 'var(--good)' : 'var(--bad)' }} />
           ))}
         </div>
-        <div className="font-display w-16 text-right text-lg font-semibold">
+        <div className="font-display w-16 text-right text-lg font-medium tabular-nums">
           <AnimatedNumber value={score} />
         </div>
       </header>
 
       <AnimatePresence mode="wait">
-        <motion.main key={index} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ type: 'spring', damping: 24, stiffness: 260 }} className="flex flex-1 flex-col justify-center py-6">
-          <p className="text-center text-xs font-semibold uppercase tracking-wider text-accent-2">In real life</p>
-          <motion.div className="mx-auto mt-4 grid h-32 w-32 place-items-center rounded-[36px] text-7xl" style={{ background: 'radial-gradient(circle at 30% 20%, var(--surface-2), var(--surface))', border: '1px solid var(--line)', boxShadow: 'var(--shadow-md), inset 0 1px 0 rgb(255 255 255 / 0.06)' }} initial={{ scale: 0.6, rotate: -8 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', damping: 10, stiffness: 180 }} aria-hidden>
-            {q.thing.emoji}
-          </motion.div>
-          <h1 className="font-display mt-5 text-center text-3xl font-semibold">{q.thing.name}</h1>
+        <motion.main key={index} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className="flex flex-1 flex-col justify-center py-6">
+          <p className="text-center text-sm text-ink-3">In real life</p>
+          <div className="mx-auto mt-4 grid h-28 w-28 place-items-center rounded-2xl border border-line-strong bg-surface text-ink-2" aria-hidden>
+            <q.thing.icon size={48} strokeWidth={1.25} />
+          </div>
+          <h1 className="font-display mt-5 text-center text-3xl font-medium">{q.thing.name}</h1>
           <p className="mt-1 text-center text-ink-2">
             Which {need === 1 ? 'element is' : `${need} elements are`} the key {need === 1 ? 'ingredient' : 'ingredients'}?
           </p>
@@ -135,16 +135,17 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
                   onClick={() => toggle(e.number)}
                   aria-pressed={on}
                   aria-label={`${e.name}${checked ? (right ? ', correct' : on ? ', not in it' : '') : ''}`}
-                  whileTap={{ scale: 0.94 }}
-                  animate={state === 'wrong' ? { x: [0, -6, 6, -4, 4, 0] } : state === 'right' ? { scale: [1, 1.08, 1] } : { scale: on ? 1.04 : 1 }}
-                  className="relative aspect-square rounded-2xl"
+                  whileTap={{ scale: 0.97 }}
+                  animate={state === 'wrong' ? { x: [0, -4, 4, -4, 4, 0] } : { x: 0 }}
+                  transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative aspect-square rounded-xl"
                   style={{
                     opacity: state === 'dim' ? 0.35 : 1,
-                    outline: state === 'on' ? '2px solid var(--accent-2)' : state === 'right' ? '2px solid var(--good)' : state === 'missed' ? '2px dashed var(--good)' : state === 'wrong' ? '2px solid var(--bad)' : 'none',
+                    outline: state === 'on' ? '2px solid var(--accent)' : state === 'right' ? '2px solid var(--good)' : state === 'missed' ? '2px dashed var(--good)' : state === 'wrong' ? '2px solid var(--bad)' : 'none',
                     outlineOffset: 3,
                   }}
                 >
-                  <ElementTile element={e} size={88} showNumber={false} color={difficulty === 'learner' ? undefined : 'var(--accent-2)'} />
+                  <ElementTile element={e} size={88} showNumber={false} color={difficulty === 'learner' ? undefined : 'var(--ink-3)'} />
                   {checked && (right || on) && (
                     <span className={`absolute -right-1.5 -top-1.5 grid h-6 w-6 place-items-center rounded-full border-2 border-bg ${right ? 'bg-good' : 'bg-bad'} text-bg`}>{right ? <Check size={13} strokeWidth={3} /> : <X size={13} strokeWidth={3} />}</span>
                   )}
@@ -155,20 +156,20 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
 
           <div className="mt-6 min-h-24" aria-live="polite">
             {checked ? (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-line bg-surface p-4">
-                <div className="mb-2 text-sm font-semibold" style={{ color: perfect[index] ? 'var(--good)' : 'var(--gold)' }}>
-                  {perfect[index] ? 'Spot on!' : 'Close! Here is what is inside:'}
+              <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className="rounded-xl border border-line bg-surface p-4">
+                <div className="mb-2 text-sm font-medium" style={{ color: perfect[index] ? 'var(--good)' : 'var(--ink-2)' }}>
+                  {perfect[index] ? 'All correct' : 'Not quite. Here is what is inside'}
                 </div>
                 <ul className="space-y-2">
                   {q.thing.contains.map(([s, why]) => {
                     const e = el(s);
                     return (
                       <li key={s} className="flex items-start gap-3 text-sm">
-                        <button onClick={() => openDetail(e.number)} className="cat-chip shrink-0 rounded-md px-1.5 py-0.5 text-xs font-bold transition-transform hover:scale-110" style={{ '--c': catVar(e.category) } as CSSProperties} aria-label={`Open ${e.name}`}>
+                        <button onClick={() => openDetail(e.number)} className="cat-chip shrink-0 rounded-md px-1.5 py-0.5 text-xs font-medium" style={{ '--c': catVar(e.category) } as CSSProperties} aria-label={`Open ${e.name}`}>
                           {e.symbol}
                         </button>
                         <span className="text-ink-2">
-                          <b className="text-ink">{e.name}.</b> {why}
+                          <span className="font-medium text-ink">{e.name}.</span> {why}
                         </span>
                       </li>
                     );
@@ -184,11 +185,11 @@ function LifeRound({ onReplay }: { onReplay: () => void }) {
 
           <div className="mt-4">
             {checked ? (
-              <button onClick={next} className="btn-primary flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base">
-                {index + 1 < questions.length ? 'Next object' : 'See results'} <ArrowRight size={18} />
+              <button onClick={next} className="btn-primary flex h-12 w-full items-center justify-center gap-2 rounded-[10px] text-base">
+                {index + 1 < questions.length ? 'Next object' : 'See results'} <ArrowRight size={18} strokeWidth={1.75} />
               </button>
             ) : (
-              <button onClick={check} disabled={picked.size !== need} className="btn-primary flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base disabled:opacity-40 disabled:shadow-none">
+              <button onClick={check} disabled={picked.size !== need} className="btn-primary flex h-12 w-full items-center justify-center gap-2 rounded-[10px] text-base disabled:opacity-40 disabled:shadow-none">
                 Check
               </button>
             )}

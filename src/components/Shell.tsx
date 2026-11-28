@@ -19,13 +19,11 @@ const NAV = [
 
 export function Logo({ size = 32 }: { size?: number }) {
   return (
-    <a href="#/" className="flex items-center gap-2.5" aria-label="Periodica home">
-      <div className="relative grid place-items-center rounded-[10px] p-[1.5px]" style={{ width: size, height: size, background: 'var(--grad)' }}>
-        <div className="font-display grid h-full w-full place-items-center rounded-[9px] bg-bg text-[13px] font-bold">
-          <span className="text-grad">Pa</span>
-        </div>
+    <a href="#/" className="flex items-center gap-2" aria-label="Periodica home">
+      <div className="font-display grid place-items-center rounded-lg border border-line-strong bg-surface-solid text-sm font-medium" style={{ width: size, height: size }} aria-hidden>
+        Pa
       </div>
-      <span className="font-display text-lg font-semibold tracking-tight">Periodica</span>
+      <span className="font-display text-lg font-medium">Periodica</span>
     </a>
   );
 }
@@ -42,33 +40,33 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
 
   return (
     <div className="relative z-10 flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-40 border-b border-line bg-bg/70 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-line bg-bg">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6">
           <Logo />
           <nav className="ml-4 hidden items-center gap-1 md:flex" aria-label="Main">
             {NAV.map((n) => {
               const on = active === n.name;
               return (
-                <a key={n.path} href={`#${n.path}`} aria-current={on ? 'page' : undefined} className={`relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${on ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}>
-                  {on && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-surface-2" transition={{ type: 'spring', damping: 30, stiffness: 400 }} />}
+                <a key={n.path} href={`#${n.path}`} aria-current={on ? 'page' : undefined} className={`relative rounded-lg px-3 py-2 text-sm font-medium transition-colors ${on ? 'text-ink' : 'text-ink-2 hover:text-ink'}`}>
+                  {on && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-lg bg-surface-2" transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} />}
                   <span className="relative">{n.label}</span>
                 </a>
               );
             })}
           </nav>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
-            <a href="#/daily" className="btn-ghost flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold" aria-label={`Daily streak: ${streak} days`}>
-              <Flame size={17} className={streak ? 'fill-[#ff9f43] text-[#ff9f43]' : 'text-ink-3'} />
+            <a href="#/daily" className="btn-ghost flex h-9 items-center gap-2 rounded-[10px] px-3 text-sm font-medium" aria-label={`Daily streak: ${streak} days`}>
+              <Flame size={16} strokeWidth={1.75} className={streak ? 'text-accent-ink' : 'text-ink-3'} />
               <span className="tabular-nums">{streak}</span>
             </a>
-            <a href="#/progress" className="btn-ghost flex h-10 items-center gap-2 rounded-full pl-1 pr-3 text-sm font-semibold" aria-label={`Level ${lvl.level}, ${Math.round(lvl.progress * 100)} percent to next level`}>
-              <Ring value={lvl.progress} size={32} stroke={3}>
-                <span className="text-[11px] font-bold">{lvl.level}</span>
+            <a href="#/progress" className="btn-ghost flex h-9 items-center gap-2 rounded-[10px] pl-1 pr-3 text-sm font-medium" aria-label={`Level ${lvl.level}, ${Math.round(lvl.progress * 100)} percent to next level`}>
+              <Ring value={lvl.progress} size={28} stroke={3}>
+                <span className="text-[11px] font-medium">{lvl.level}</span>
               </Ring>
               <span className="hidden tabular-nums sm:inline">{xp.toLocaleString('en-US')} XP</span>
             </a>
-            <button onClick={() => setSettings(true)} className="btn-ghost grid h-10 w-10 place-items-center rounded-full" aria-label="Settings">
-              <Settings size={18} />
+            <button onClick={() => setSettings(true)} className="btn-ghost grid h-9 w-9 place-items-center rounded-[10px]" aria-label="Settings">
+              <Settings size={16} strokeWidth={1.75} />
             </button>
           </div>
         </div>
@@ -77,10 +75,10 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
       <div className="flex-1 pb-24 md:pb-0">{children}</div>
 
       <footer className="hidden border-t border-line py-8 text-center text-xs text-ink-3 md:block">
-        Periodica · Property data from PubChem (NCBI) · Made for curious minds
+        Periodica · Property data from PubChem (NCBI)
       </footer>
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg/80 px-2 pt-2 backdrop-blur-xl md:hidden" aria-label="Main">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line bg-bg px-2 pt-2 md:hidden" aria-label="Main">
         <ul className="mx-auto flex max-w-md justify-between">
           {NAV.filter((n) => n.mobile).map((n) => {
             const on = active === n.name;
@@ -88,8 +86,8 @@ export function Shell({ children, immersive, route }: { children: ReactNode; imm
             return (
               <li key={n.path} className="flex-1">
                 <a href={`#${n.path}`} aria-current={on ? 'page' : undefined} className="relative flex flex-col items-center gap-1 py-1.5 text-[11px] font-medium">
-                  {on && <motion.span layoutId="tab-pill" className="absolute -top-2 h-[3px] w-8 rounded-full" style={{ background: 'var(--grad)' }} />}
-                  <I size={22} className={on ? 'text-ink' : 'text-ink-3'} strokeWidth={on ? 2.2 : 1.8} />
+                  {on && <motion.span layoutId="tab-pill" className="absolute -top-2 h-[3px] w-8 rounded-full" style={{ background: 'var(--accent)' }} />}
+                  <I size={20} className={on ? 'text-ink' : 'text-ink-3'} strokeWidth={1.75} />
                   <span className={on ? 'text-ink' : 'text-ink-3'}>{n.label}</span>
                 </a>
               </li>

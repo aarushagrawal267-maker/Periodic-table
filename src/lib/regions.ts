@@ -16,7 +16,7 @@ export const REGIONS: Region[] = [
   {
     id: 'first-20',
     name: 'The First Twenty',
-    tagline: 'Hydrogen to calcium — the elements every chemist knows by heart.',
+    tagline: 'Hydrogen to calcium: the elements every chemist knows by heart.',
     short: '1–20',
     accent: 'var(--cat-nonmetal)',
     numbers: pick((e) => e.number <= 20),
@@ -48,7 +48,7 @@ export const REGIONS: Region[] = [
   {
     id: 'd-heavy',
     name: 'Transition Metals II',
-    tagline: 'Periods 6 and 7 of the d-block — precious metals and superheavies.',
+    tagline: 'Periods 6 and 7 of the d-block: precious metals and superheavies.',
     short: 'd-block II',
     accent: 'var(--cat-post-transition-metal)',
     numbers: pick((e) => e.block === 'd' && e.period >= 6),
@@ -66,7 +66,7 @@ export const REGIONS: Region[] = [
     name: 'The Full Table',
     tagline: 'All 118 elements. The ultimate test.',
     short: 'All 118',
-    accent: 'var(--accent-2)',
+    accent: 'var(--ink-3)',
     numbers: ELEMENTS.map((e) => e.number),
   },
 ];

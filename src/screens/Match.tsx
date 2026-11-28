@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Flame } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ElementTile } from '../components/ElementTile';
 import { Results } from '../components/Results';
@@ -59,7 +59,7 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
       });
       sfx.hit(f.size - 1);
       haptic(12);
-      setAnnounce(`Match! ${byNumber(a.element).name} is ${byNumber(a.element).symbol}.`);
+      setAnnounce(`Match: ${byNumber(a.element).name} is ${byNumber(a.element).symbol}.`);
       if (f.size === pairs.length) setEndedAt(Date.now());
     } else {
       busy.current = true;
@@ -104,27 +104,27 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-4 pb-8 pt-4 sm:px-5">
       <header className="flex items-center gap-3">
-        <button onClick={() => go('/play')} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-full" aria-label="Leave">
-          <ArrowLeft size={18} />
+        <button onClick={() => go('/play')} className="btn-ghost grid h-10 w-10 shrink-0 place-items-center rounded-[10px]" aria-label="Leave">
+          <ArrowLeft size={18} strokeWidth={1.75} />
         </button>
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-lg font-semibold">Match Pairs</h1>
+          <h1 className="font-display text-lg font-medium">Match Pairs</h1>
           <p className="text-xs text-ink-3">Pair each symbol with its name</p>
         </div>
         <div className="flex gap-4 text-right">
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Pairs</div>
-            <div className="font-display font-semibold tabular-nums">
+            <div className="text-xs text-ink-3">Pairs</div>
+            <div className="font-display font-medium tabular-nums">
               {found.size}/{pairs.length}
             </div>
           </div>
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Moves</div>
-            <div className="font-display font-semibold tabular-nums">{moves}</div>
+            <div className="text-xs text-ink-3">Moves</div>
+            <div className="font-display font-medium tabular-nums">{moves}</div>
           </div>
           <div className="hidden sm:block">
-            <div className="text-[10px] font-medium uppercase tracking-wider text-ink-3">Time</div>
-            <div className="font-display font-semibold">
+            <div className="text-xs text-ink-3">Time</div>
+            <div className="font-display font-medium tabular-nums">
               <Elapsed start={startedAt} end={endedAt} running={!!startedAt && !endedAt} />
             </div>
           </div>
@@ -144,30 +144,29 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
                 onClick={() => flip(card.id)}
                 className="relative aspect-[4/5] w-full"
                 style={{ perspective: 800 } as CSSProperties}
-                initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: i * 0.03, type: 'spring', damping: 18 }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i, 6) * 0.04, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                 aria-label={faceUp ? `${card.face === 'symbol' ? e.symbol : e.name}${isFound ? ', matched' : ''}` : `Card ${i + 1}, face down`}
                 disabled={isFound}
               >
-                <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{ rotateY: faceUp ? 180 : 0 }} transition={{ type: 'spring', damping: 18, stiffness: 220 }}>
-                  <div className="absolute inset-0 grid place-items-center rounded-2xl border border-line [backface-visibility:hidden]" style={{ background: 'linear-gradient(145deg, color-mix(in oklab, var(--accent) 22%, var(--surface-solid)), color-mix(in oklab, var(--accent-2) 14%, var(--surface-solid)))' }}>
-                    <span className="font-display text-grad text-2xl font-bold opacity-80">?</span>
+                <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{ rotateY: faceUp ? 180 : 0 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>
+                  <div className="absolute inset-0 grid place-items-center rounded-xl border border-line-strong bg-surface-2 [backface-visibility:hidden]">
+                    <span className="font-display text-2xl font-medium text-ink-3">?</span>
                   </div>
                   <div
-                    className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border p-2 text-center [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                    className="absolute inset-0 flex flex-col items-center justify-center rounded-xl border p-2 text-center [backface-visibility:hidden] [transform:rotateY(180deg)]"
                     style={{
                       background: isFound ? `color-mix(in oklab, ${c} 18%, var(--surface-solid))` : 'var(--surface-solid)',
                       borderColor: isFound ? c : 'var(--line-strong)',
-                      boxShadow: isFound ? `0 10px 30px -12px ${c}` : undefined,
                     }}
                   >
                     {card.face === 'symbol' ? (
                       <div className="aspect-square w-3/4">
-                        <ElementTile element={e} size={72} showName={false} showNumber={difficulty === 'learner'} color={isFound || difficulty === 'learner' ? undefined : 'var(--accent-2)'} />
+                        <ElementTile element={e} size={72} showName={false} showNumber={difficulty === 'learner'} color={isFound || difficulty === 'learner' ? undefined : 'var(--ink-3)'} />
                       </div>
                     ) : (
-                      <span className="font-display text-base font-semibold leading-tight sm:text-lg" style={{ color: isFound ? c : undefined }}>
+                      <span className={`font-display text-base font-medium leading-tight sm:text-lg ${isFound ? 'cat-ink' : ''}`} style={{ '--c': c } as CSSProperties}>
                         {e.name}
                       </span>
                     )}
@@ -177,7 +176,15 @@ function MatchRound({ onReplay }: { onReplay: () => void }) {
             );
           })}
         </div>
-        <p className="mt-6 text-center text-sm text-ink-3">{streak >= 2 ? `🔥 ${streak} in a row!` : 'Flip two cards. Find the symbol that goes with each name.'}</p>
+        <p className="mt-6 flex items-center justify-center gap-2 text-center text-sm text-ink-3">
+          {streak >= 2 ? (
+            <>
+              <Flame size={16} strokeWidth={1.75} className="text-accent-ink" /> <span className="tabular-nums">{streak}</span> in a row
+            </>
+          ) : (
+            'Flip two cards. Find the symbol that goes with each name'
+          )}
+        </p>
       </main>
       <div className="sr-only" aria-live="polite">
         {announce}

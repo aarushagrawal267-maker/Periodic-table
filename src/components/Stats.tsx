@@ -38,19 +38,12 @@ export function Elapsed({ start, end, running }: { start: number; end: number; r
 }
 
 /** Circular progress ring. */
-export function Ring({ value, size = 56, stroke = 6, children, color = 'url(#ring-grad)' }: { value: number; size?: number; stroke?: number; children?: React.ReactNode; color?: string }) {
+export function Ring({ value, size = 56, stroke = 6, children, color = 'var(--accent)' }: { value: number; size?: number; stroke?: number; children?: React.ReactNode; color?: string }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   return (
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <defs>
-          <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="var(--accent)" />
-            <stop offset="0.6" stopColor="var(--accent-2)" />
-            <stop offset="1" stopColor="var(--accent-3)" />
-          </linearGradient>
-        </defs>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--line)" strokeWidth={stroke} />
         <circle
           cx={size / 2}
@@ -62,7 +55,7 @@ export function Ring({ value, size = 56, stroke = 6, children, color = 'url(#rin
           strokeLinecap="round"
           strokeDasharray={c}
           strokeDashoffset={c * (1 - Math.min(1, Math.max(0, value)))}
-          style={{ transition: 'stroke-dashoffset 1s var(--ease-out-expo)' }}
+          style={{ transition: 'stroke-dashoffset 1s var(--ease)' }}
         />
       </svg>
       <div className="absolute inset-0 grid place-items-center">{children}</div>

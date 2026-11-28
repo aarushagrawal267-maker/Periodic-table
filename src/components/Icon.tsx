@@ -43,7 +43,7 @@ const ICONS: Record<string, LucideIcon> = {
 
 export function Icon({ name, size = 20, className }: { name: string; size?: number; className?: string }) {
   const C = ICONS[name] ?? Sparkles;
-  return <C size={size} className={className} aria-hidden />;
+  return <C size={size} strokeWidth={1.75} className={className} aria-hidden />;
 }
 
-export const TIER_COLOR = { bronze: '#e0975a', silver: '#c9d3e6', gold: 'var(--gold)' } as const;
+export const TIER_COLOR = { bronze: '#e0975a', silver: '#9aa3ae', gold: 'var(--gold)' } as const;

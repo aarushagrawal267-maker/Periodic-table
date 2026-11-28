@@ -21,17 +21,17 @@ export function SettingsSheet() {
   return (
     <Sheet open={open} onClose={() => setOpen(false)} label="Settings">
       <div className="p-6 pt-8 sm:p-8">
-        <h2 className="font-display text-2xl font-semibold">Settings</h2>
+        <h2 className="font-display text-2xl font-medium">Settings</h2>
 
         <section className="mt-6">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Appearance</h3>
+          <h3 className="mb-2 text-sm text-ink-3">Appearance</h3>
           <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Theme">
             {themes.map((t) => {
               const I = t.icon;
               const on = s.theme === t.id;
               return (
-                <button key={t.id} role="radio" aria-checked={on} onClick={() => s.set({ theme: t.id })} className={`flex flex-col items-center gap-1.5 rounded-2xl border py-3 text-sm font-medium transition-colors ${on ? 'border-accent-2 bg-accent-2/10' : 'border-line bg-surface hover:bg-surface-2'}`}>
-                  <I size={18} />
+                <button key={t.id} role="radio" aria-checked={on} onClick={() => s.set({ theme: t.id })} className={`flex flex-col items-center gap-1.5 rounded-[10px] border py-3 text-sm font-medium transition-colors ${on ? 'border-accent bg-surface-2' : 'border-line bg-surface hover:bg-surface-2'}`}>
+                  <I size={18} strokeWidth={1.75} />
                   {t.label}
                 </button>
               );
@@ -40,13 +40,13 @@ export function SettingsSheet() {
         </section>
 
         <section className="mt-6">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Default difficulty</h3>
+          <h3 className="mb-2 text-sm text-ink-3">Default difficulty</h3>
           <div className="space-y-2" role="radiogroup" aria-label="Default difficulty">
             {DIFFICULTIES.map((d) => {
               const on = s.difficulty === d.id;
               return (
-                <button key={d.id} role="radio" aria-checked={on} onClick={() => s.set({ difficulty: d.id })} className={`flex w-full items-start gap-3 rounded-2xl border p-3.5 text-left transition-colors ${on ? 'border-accent-2 bg-accent-2/10' : 'border-line bg-surface hover:bg-surface-2'}`}>
-                  <span className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border-2 ${on ? 'border-accent-2' : 'border-line-strong'}`}>{on && <span className="h-1.5 w-1.5 rounded-full bg-accent-2" />}</span>
+                <button key={d.id} role="radio" aria-checked={on} onClick={() => s.set({ difficulty: d.id })} className={`flex w-full items-start gap-3 rounded-[10px] border p-3 text-left transition-colors ${on ? 'border-accent bg-surface-2' : 'border-line bg-surface hover:bg-surface-2'}`}>
+                  <span className={`mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full border-2 ${on ? 'border-accent' : 'border-line-strong'}`}>{on && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}</span>
                   <span>
                     <span className="block font-medium">{d.name}</span>
                     <span className="block text-sm text-ink-2">{d.desc}</span>
@@ -57,7 +57,7 @@ export function SettingsSheet() {
           </div>
         </section>
 
-        <section className="mt-6 divide-y divide-line rounded-2xl border border-line bg-surface">
+        <section className="mt-6 divide-y divide-line rounded-xl border border-line bg-surface">
           <Toggle label="Sound effects" on={s.sound} set={(v) => s.set({ sound: v })} />
           <Toggle label="Vibration" hint="On supported phones" on={s.haptics} set={(v) => s.set({ haptics: v })} />
           <Toggle label="Reduce motion" on={s.reduceMotion} set={(v) => s.set({ reduceMotion: v })} />
@@ -65,15 +65,15 @@ export function SettingsSheet() {
         </section>
 
         <section className="mt-6">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Your data</h3>
+          <h3 className="mb-2 text-sm text-ink-3">Your data</h3>
           <p className="text-sm text-ink-2">Progress is saved on this device only. Nothing is sent anywhere.</p>
           {confirm ? (
             <div className="mt-3 flex gap-2">
-              <button className="btn-ghost h-11 flex-1 rounded-xl text-sm font-medium" onClick={() => setConfirm(false)}>
+              <button className="btn-ghost h-11 flex-1 rounded-[10px] text-sm font-medium" onClick={() => setConfirm(false)}>
                 Cancel
               </button>
               <button
-                className="h-11 flex-1 rounded-xl bg-bad/15 text-sm font-semibold text-bad"
+                className="h-11 flex-1 rounded-[10px] bg-bad/15 text-sm font-medium text-bad"
                 onClick={() => {
                   reset();
                   setConfirm(false);
@@ -83,8 +83,8 @@ export function SettingsSheet() {
               </button>
             </div>
           ) : (
-            <button className="mt-3 h-11 rounded-xl px-4 text-sm font-medium text-bad hover:bg-bad/10" onClick={() => setConfirm(true)}>
-              Reset progress…
+            <button className="mt-3 h-11 rounded-[10px] px-4 text-sm font-medium text-bad hover:bg-bad/10" onClick={() => setConfirm(true)}>
+              Reset progress
             </button>
           )}
         </section>
@@ -100,8 +100,8 @@ function Toggle({ label, hint, on, set }: { label: string; hint?: string; on: bo
         <span className="block text-[15px] font-medium">{label}</span>
         {hint && <span className="block text-xs text-ink-3">{hint}</span>}
       </span>
-      <button role="switch" aria-checked={on} aria-label={label} onClick={() => set(!on)} className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${on ? 'bg-accent-2' : 'bg-line-strong'}`}>
-        <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-6' : 'translate-x-1'}`} />
+      <button role="switch" aria-checked={on} aria-label={label} onClick={() => set(!on)} className={`relative h-6 w-10 shrink-0 rounded-full transition-colors ${on ? 'bg-accent' : 'bg-line-strong'}`}>
+        <span className={`absolute left-0 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${on ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
       </button>
     </label>
   );

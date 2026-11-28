@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { ArrowRight, Home, RotateCcw, Share2, Star, Trophy } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { byNumber, catVar } from '../lib/elements';
 import { formatTime, levelFromXp, titleForLevel } from '../lib/scoring';
 import { dailyNumber } from '../lib/daily';
@@ -21,7 +21,7 @@ interface Props {
   onExit: () => void;
 }
 
-const HEADLINES = ['Good try!', 'Nicely done', 'Great run', 'Flawless'];
+const HEADLINES = ['Keep going', 'Nicely done', 'Great run', 'Flawless'];
 
 export function Results({ summary: s, outcome: o, title, total, onReplay, onNext, nextLabel, onExit }: Props) {
   const xp = useProgress((p) => p.xp);
@@ -38,12 +38,12 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
   const headline = s.completed ? HEADLINES[s.stars] : HEADLINES[0];
 
   return (
-    <motion.div className="fixed inset-0 z-50 overflow-y-auto bg-bg/85 backdrop-blur-xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <motion.div className="fixed inset-0 z-50 overflow-y-auto bg-bg" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {s.stars === 3 && <Confetti fire={1} />}
       <div className="mx-auto flex min-h-full max-w-xl flex-col justify-center px-5 py-10" role="dialog" aria-modal="true" aria-labelledby="results-title">
-        <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', damping: 22, delay: 0.05 }} className="text-center">
+        <motion.div initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className="text-center">
           <p className="text-sm font-medium text-ink-3">{s.kind === 'daily' && s.dailyKey ? `Daily Challenge #${dailyNumber(s.dailyKey)}` : title}</p>
-          <h2 id="results-title" className="font-display mt-1 text-4xl font-semibold sm:text-5xl">
+          <h2 id="results-title" className="font-display mt-1 text-4xl font-medium sm:text-5xl">
             {headline}
           </h2>
           <p className="mt-2 text-ink-2">{encouragement(s)}</p>
@@ -51,25 +51,25 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
             {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
-                initial={reduce ? false : { scale: 0, rotate: -90 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', damping: 10, stiffness: 200, delay: 0.3 + i * 0.18 }}
+                initial={reduce ? false : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1], delay: 0.2 + i * 0.06 }}
               >
-                <Star size={i === 1 ? 54 : 42} className={i < s.stars ? 'fill-gold text-gold' : 'text-line-strong'} style={i < s.stars ? { filter: 'drop-shadow(0 0 18px color-mix(in oklab, var(--gold) 60%, transparent))' } : undefined} />
+                <Star size={40} strokeWidth={1.5} className={i < s.stars ? 'fill-gold text-gold' : 'text-line-strong'} />
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        <motion.div className="card mt-8 overflow-hidden" initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', damping: 22, delay: 0.2 }}>
+        <motion.div className="card mt-8 overflow-hidden" initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.06 }}>
           <div className="relative p-6 text-center">
             {o.newBest && (
-              <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-1 text-xs font-semibold text-gold">
-                <Trophy size={12} /> New best
+              <span className="absolute right-4 top-4 inline-flex items-center gap-1 text-xs text-ink-2">
+                <Trophy size={14} strokeWidth={1.75} className="text-gold" /> New best
               </span>
             )}
-            <div className="text-xs font-medium uppercase tracking-wider text-ink-3">Score</div>
-            <div className="font-display text-grad mt-1 text-6xl font-bold">
+            <div className="text-sm text-ink-3">Score</div>
+            <div className="font-display mt-1 text-6xl font-medium tabular-nums">
               <AnimatedNumber value={s.score} duration={1200} />
             </div>
             {o.previousBest !== null && !o.newBest && <div className="mt-1 text-xs text-ink-3">Best {o.previousBest.toLocaleString('en-US')}</div>}
@@ -82,8 +82,8 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
               ['Best combo', `${s.maxCombo}`],
             ].map(([k, v]) => (
               <div key={k} className="solid px-4 py-3.5 text-center">
-                <dt className="text-[11px] uppercase tracking-wider text-ink-3">{k}</dt>
-                <dd className="font-display mt-0.5 text-xl font-semibold tabular-nums">{v}</dd>
+                <dt className="text-xs text-ink-3">{k}</dt>
+                <dd className="font-display mt-0.5 text-xl font-medium tabular-nums">{v}</dd>
               </div>
             ))}
           </dl>
@@ -91,21 +91,21 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium">
                 {levelledUp ? (
-                  <span className="text-grad font-semibold">Level up! Level {lvl.level}</span>
+                  <span className="font-medium text-accent-ink">Level up to {lvl.level}</span>
                 ) : (
                   <>
                     Level {lvl.level} <span className="text-ink-3">· {titleForLevel(lvl.level)}</span>
                   </>
                 )}
               </span>
-              <span className="font-semibold text-accent-3">+{o.xpGained} XP</span>
+              <span className="font-medium tabular-nums text-accent-ink">+{o.xpGained} XP</span>
             </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-line">
-              <motion.div className="h-full rounded-full" style={{ background: 'var(--grad)' }} initial={{ width: `${(levelledUp ? 0 : before.progress) * 100}%` }} animate={{ width: `${lvl.progress * 100}%` }} transition={{ duration: 1.2, delay: 0.6, ease: [0.16, 1, 0.3, 1] }} />
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line">
+              <motion.div className="h-full rounded-full" style={{ background: 'var(--accent)' }} initial={{ width: `${(levelledUp ? 0 : before.progress) * 100}%` }} animate={{ width: `${lvl.progress * 100}%` }} transition={{ duration: 1.2, delay: 0.6, ease: [0.22, 1, 0.36, 1] }} />
             </div>
             {o.masteryUp.length > 0 && (
               <p className="mt-3 text-sm text-ink-2">
-                <span className="font-semibold text-accent-3">{o.masteryUp.length}</span> new element{o.masteryUp.length > 1 ? 's' : ''} mastered:{' '}
+                <span className="font-medium tabular-nums text-ink">{o.masteryUp.length}</span> new element{o.masteryUp.length > 1 ? 's' : ''} mastered:{' '}
                 {o.masteryUp.map((n) => byNumber(n).symbol).join(', ')}
               </p>
             )}
@@ -115,12 +115,12 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
         {s.kind === 'daily' && <Trail trail={s.trail} />}
 
         {slipped.length > 0 && (
-          <motion.div className="mt-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-3">Worth another look</h3>
+          <motion.div className="mt-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.3 }}>
+            <h3 className="mb-2 text-sm text-ink-3">Worth another look</h3>
             <div className="flex flex-wrap gap-2">
               {slipped.map((e) => (
-                <button key={e.number} onClick={() => openDetail(e.number)} className="btn-ghost flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3 text-sm">
-                  <span className="grid h-7 w-7 place-items-center rounded-full text-xs font-bold" style={{ background: `color-mix(in oklab, ${catVar(e.category)} 22%, transparent)`, color: catVar(e.category) }}>
+                <button key={e.number} onClick={() => openDetail(e.number)} className="btn-ghost flex items-center gap-2 rounded-[10px] py-1 pl-1 pr-3 text-sm">
+                  <span className="tile font-display grid h-7 w-7 place-items-center rounded-md text-xs font-medium" style={{ '--c': catVar(e.category) } as CSSProperties}>
                     {e.symbol}
                   </span>
                   {e.name}
@@ -130,21 +130,21 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
           </motion.div>
         )}
 
-        <motion.div className="mt-8 flex flex-col gap-3 sm:flex-row" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.45 }}>
+        <motion.div className="mt-8 flex flex-col gap-3 sm:flex-row" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.3 }}>
           {s.kind === 'daily' ? (
             <ShareButton summary={s} total={total} />
           ) : onNext && s.completed ? (
-            <button onClick={onNext} className="btn-primary flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl text-base">
-              {nextLabel ?? 'Next'} <ArrowRight size={18} />
+            <button onClick={onNext} className="btn-primary flex h-12 flex-1 items-center justify-center gap-2 rounded-[10px] text-base">
+              {nextLabel ?? 'Next'} <ArrowRight size={18} strokeWidth={1.75} />
             </button>
           ) : null}
           {onReplay && (
-            <button onClick={onReplay} className={`${s.kind !== 'daily' && !(onNext && s.completed) ? 'btn-primary' : 'btn-ghost'} flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl text-base font-medium`}>
-              <RotateCcw size={18} /> Play again
+            <button onClick={onReplay} className={`${s.kind !== 'daily' && !(onNext && s.completed) ? 'btn-primary' : 'btn-ghost'} flex h-12 flex-1 items-center justify-center gap-2 rounded-[10px] text-base font-medium`}>
+              <RotateCcw size={18} strokeWidth={1.75} /> Play again
             </button>
           )}
-          <button onClick={onExit} className="btn-ghost flex h-14 items-center justify-center gap-2 rounded-2xl px-6 text-base font-medium" aria-label="Back to home">
-            <Home size={18} />
+          <button onClick={onExit} className="btn-ghost flex h-12 items-center justify-center gap-2 rounded-[10px] px-6 text-base font-medium" aria-label="Back to home">
+            <Home size={18} strokeWidth={1.75} />
             <span className="sm:hidden">Home</span>
           </button>
         </motion.div>
@@ -154,10 +154,10 @@ export function Results({ summary: s, outcome: o, title, total, onReplay, onNext
 }
 
 function encouragement(s: RoundSummary) {
-  if (!s.completed) return 'Every mistake is a fact you now know. Try again — it gets easier fast.';
+  if (!s.completed) return 'Every mistake is a fact you now know. Try again, it gets easier fast.';
   if (s.stars === 3) return 'You clearly know these. Time to try something harder?';
   if (s.stars === 2) return 'Solid work. A couple more rounds and these will be locked in.';
-  return 'You finished — that is how it starts. The ones you missed are listed below.';
+  return 'You finished, and that is how it starts. The ones you missed are listed below.';
 }
 
 const TRAIL = { hit: '🟩', miss: '🟥', hint: '🟨' } as const;
@@ -168,9 +168,9 @@ function Trail({ trail }: { trail: RoundSummary['trail'] }) {
       {trail.map((t, i) => (
         <motion.span
           key={i}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.6 + i * 0.05, type: 'spring', damping: 12 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 + Math.min(i, 6) * 0.04, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           className="h-6 w-6 rounded-md"
           style={{ background: t === 'hit' ? 'var(--good)' : t === 'hint' ? 'var(--gold)' : 'var(--bad)' }}
         />
@@ -181,7 +181,7 @@ function Trail({ trail }: { trail: RoundSummary['trail'] }) {
 
 export function shareText(s: RoundSummary, total: number) {
   const n = s.dailyKey ? dailyNumber(s.dailyKey) : 0;
-  return `Periodica Daily #${n} ⚗️\n${s.correct}/${total} · ${formatTime(s.timeMs)} · ${s.score.toLocaleString('en-US')} pts\n${s.trail.map((t) => TRAIL[t]).join('')}\n${location.origin}${location.pathname}#/daily`;
+  return `Periodica Daily #${n}\n${s.correct}/${total} · ${formatTime(s.timeMs)} · ${s.score.toLocaleString('en-US')} pts\n${s.trail.map((t) => TRAIL[t]).join('')}\n${location.origin}${location.pathname}#/daily`;
 }
 
 export function ShareButton({ summary, total }: { summary: RoundSummary; total: number }) {
@@ -200,8 +200,8 @@ export function ShareButton({ summary, total }: { summary: RoundSummary; total: 
     }
   };
   return (
-    <button onClick={share} className="btn-primary flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl text-base">
-      <Share2 size={18} /> {copied ? 'Copied to clipboard' : 'Share result'}
+    <button onClick={share} className="btn-primary flex h-12 flex-1 items-center justify-center gap-2 rounded-[10px] text-base">
+      <Share2 size={18} strokeWidth={1.75} /> {copied ? 'Copied to clipboard' : 'Share result'}
     </button>
   );
 }

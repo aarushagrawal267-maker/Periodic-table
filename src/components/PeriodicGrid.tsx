@@ -128,7 +128,7 @@ export function PeriodicGrid({
 
 function Axes({ layout }: { layout: NonNullable<ReturnType<typeof computeLayout>> }) {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 text-[10px] font-medium text-ink-3 tabular-nums">
+    <div aria-hidden className="pointer-events-none absolute inset-0 text-[11px] font-medium text-ink-3 tabular-nums">
       {[...layout.cols.values()]
         .filter((c) => c.active)
         .map((c) => {

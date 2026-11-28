@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useSettings } from '../store/settings';
 
-const COLORS = ['#8b7cff', '#4fd1ff', '#5cf2b0', '#ffc94a', '#ff5d73', '#e879f9'];
+/** Copper, gold-star and chalk: the accent plus the rating colour, nothing more. */
+const VARS = ['--accent', '--gold', '--ink-2'];
 
 /** Lightweight canvas confetti burst. Skipped entirely when reduced motion is on. */
 export function Confetti({ fire }: { fire: number }) {
@@ -10,6 +11,8 @@ export function Confetti({ fire }: { fire: number }) {
 
   useEffect(() => {
     if (!fire || reduce) return;
+    const css = getComputedStyle(document.documentElement);
+    const COLORS = VARS.map((v) => css.getPropertyValue(v).trim() || '#888');
     const canvas = ref.current!;
     const ctx = canvas.getContext('2d')!;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
