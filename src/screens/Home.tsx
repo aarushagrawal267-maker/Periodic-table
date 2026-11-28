@@ -250,7 +250,7 @@ function TodayList({ layout, due, lessonHref, nextChapter, level }: { layout: 's
 
   const cols = { 2: 'lg:grid-cols-2', 3: 'lg:grid-cols-3', 4: 'lg:grid-cols-4' }[rows.length] ?? 'lg:grid-cols-4';
   return (
-    <ul className={`card grid overflow-hidden divide-y divide-line ${layout === 'strip' ? `${cols} lg:divide-x lg:divide-y-0` : ''}`}>
+    <ul className={`card grid overflow-hidden divide-y divide-line ${layout === 'strip' ? `today-strip ${cols} lg:divide-x lg:divide-y-0` : ''}`}>
       {rows.map((r, i) => (
         <li key={i} className="flex min-w-0">
           {r}
@@ -272,9 +272,10 @@ function Row({ href, icon, title, children, meta, extra }: { href?: string; icon
         {children && <span className="mt-1 block text-sm text-ink-2">{children}</span>}
         {extra}
         {/* On phones the meta drops under the text, so the title keeps the full width. */}
-        {meta && <span className="meta mt-2 block sm:hidden">{meta}</span>}
+        {/* In the four-up strip each column is narrow too, so the meta drops under the text there as well. */}
+        {meta && <span className="meta mt-2 block sm:hidden lg:[.today-strip_&]:block">{meta}</span>}
       </span>
-      {meta && <span className="meta hidden shrink-0 leading-[22px] sm:block">{meta}</span>}
+      {meta && <span className="meta hidden shrink-0 leading-[22px] sm:block lg:[.today-strip_&]:hidden">{meta}</span>}
       {href && <ChevronRight aria-hidden size={16} strokeWidth={1.5} className="mt-[3px] shrink-0 text-ink-3" />}
     </>
   );
@@ -314,11 +315,12 @@ function ReviewRow({ due }: { due: number[] }) {
       title={`${due.length} ${due.length === 1 ? 'element' : 'elements'} ready for a quick review`}
       extra={
         <span aria-hidden className="mt-2 flex flex-wrap items-center gap-1">
-          {/* Five chips and the "+N" fit one line at every width, from a 320px phone to the four-column strip. */}
-          {due.slice(0, 5).map((n) => (
-            <ElementChip key={n} element={byNumber(n)} size={28} />
+          {/* Five chips and the "+N" fit one line from a 320px phone up; a column of the four-up strip holds four. */}
+          {due.slice(0, 5).map((n, i) => (
+            <ElementChip key={n} element={byNumber(n)} size={28} className={i === 4 ? 'lg:[.today-strip_&]:hidden' : ''} />
           ))}
-          {due.length > 5 && <span className="meta px-1">+{due.length - 5}</span>}
+          {due.length > 5 && <span className="meta px-1 lg:[.today-strip_&]:hidden">+{due.length - 5}</span>}
+          {due.length > 4 && <span className="meta hidden px-1 lg:[.today-strip_&]:inline">+{due.length - 4}</span>}
         </span>
       }
     />
@@ -342,8 +344,10 @@ function DailyRow({ bonus }: { bonus: boolean }) {
       extra={
         <>
           {done && <TrailSquares trail={today!.trail} animate={false} className="mt-3 justify-start!" />}
-          <span className="meta mt-2 block">
-            {streak ? `${streak}-day streak` : 'No streak yet'} <span className="whitespace-nowrap">· next in <Countdown /></span>
+          {/* Two parts that wrap as wholes: a narrow column never starts a line with a stray separator. */}
+          <span className="meta mt-2 flex flex-wrap gap-x-3">
+            <span>{streak ? `${streak}-day streak` : 'No streak yet'}</span>
+            <span className="whitespace-nowrap">Next in <Countdown /></span>
           </span>
         </>
       }

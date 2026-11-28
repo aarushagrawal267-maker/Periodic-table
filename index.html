@@ -12,7 +12,9 @@
     <script>
       // Theme before the first paint (System, Light or Dark in Settings; saved on this device only), so a light page never flashes dark.
       try {
-        var t = (JSON.parse(localStorage.getItem('periodica-settings') || '{}').state || {}).theme;
+        // Only a v3+ store can hold today's theme: v1 and v2 had an old choice that the store's migration drops (src/store/settings.ts).
+        var s = JSON.parse(localStorage.getItem('periodica-settings') || '{}');
+        var t = s.version >= 3 && s.state ? s.state.theme : undefined;
         var light = t === 'light' || (t !== 'dark' && matchMedia('(prefers-color-scheme: light)').matches);
         if (light) {
           document.documentElement.dataset.theme = 'light';

@@ -12,6 +12,7 @@ import { CHAPTERS } from '../lib/chapters';
 import { ELEMENTS, byNumber, catVar } from '../lib/elements';
 import { familyCounts, fillStep, improvedSince, readSeen, stepWords, sweepDelay, writeSeen } from '../lib/masteryMap';
 import { REGIONS } from '../lib/regions';
+import { readMeta } from '../lib/syncMeta';
 import { formatTime, levelFromXp, titleForLevel } from '../lib/scoring';
 import { DIFFICULTIES, useSettings } from '../store/settings';
 import { masteredCount, useProgress } from '../store/progress';
@@ -39,6 +40,16 @@ function deviceStore() {
   }
 }
 
+/** Whose map the "moved up" snapshot belongs to: changes when the device changes hands (sign in or out) or progress is reset. */
+function seenOwner() {
+  try {
+    const m = readMeta();
+    return `${m.gen}:${m.epoch}`;
+  } catch {
+    return '';
+  }
+}
+
 /** How many symbols the "moved up" line names before it sums up the rest. */
 const UP_NAMED = 8;
 
@@ -59,8 +70,8 @@ export function ProgressScreen() {
   const reduceSetting = useSettings((s) => s.reduceMotion);
   const animate = !(useReducedMotion() || reduceSetting);
   // What moved up since the map was last shown, read once as the page opens. The snapshot is UI-only (not progress, never synced).
-  const [improved] = useState(() => new Set(improvedSince(readSeen(deviceStore()), p.mastery)));
-  useEffect(() => writeSeen(deviceStore(), p.mastery), [p.mastery]);
+  const [improved] = useState(() => new Set(improvedSince(readSeen(deviceStore(), seenOwner()), p.mastery)));
+  useEffect(() => writeSeen(deviceStore(), p.mastery, seenOwner()), [p.mastery]);
   const upList = [...improved];
 
   // The next lesson's elements that are not started yet are outlined in their family colour: where the colouring starts.

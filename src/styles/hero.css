@@ -60,6 +60,8 @@
   }
   .hero-soft:hover .tile {
     --tile-tint: 16%;
+    background: color-mix(in oklab, var(--c) var(--tile-tint), var(--surface));
+    border-color: color-mix(in oklab, var(--c) var(--tile-edge), transparent);
     color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
   }
 }
@@ -81,17 +83,20 @@
 }
 
 /*
- * Not met yet (a returning student's map): the same square printed softly, its hue in a faint tint and edge,
- * the text in muted ink (4.5:1 on every surface). Under the pointer it shows its full colour.
+ * Not met yet (a returning student's map): an empty printed square, neutral fill and hairline, the symbol in muted
+ * ink (4.5:1 on every surface). Under the pointer or focus it shows its full colour.
  */
 .hero-soft .tile {
-  --tile-tint: 5%;
-  --tile-edge: 22%;
+  /* Neutral, not a faint hue: on paper or a projector a pale tint read as "met" too. Met tiles keep their colour. */
+  background: var(--cell-empty);
+  border-color: var(--line-strong);
   color: var(--ink-3);
 }
 .hero-soft:focus-visible .tile {
   --tile-tint: 16%;
   --tile-edge: 100%;
+  background: color-mix(in oklab, var(--c) var(--tile-tint), var(--surface));
+  border-color: color-mix(in oklab, var(--c) var(--tile-edge), transparent);
   color: color-mix(in oklab, var(--c) var(--cell-ink-mix), var(--ink));
 }
 

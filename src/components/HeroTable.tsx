@@ -16,6 +16,8 @@ let printed = false;
 const GAP = 4;
 /** The key needs room for a tile and two lines of text beside it. */
 const KEY_MIN_CELL = 34;
+/** The width from which the whole table fits without scrolling (see the comment where it is read). */
+const WIDE_QUERY = '(min-width: 656px)';
 
 /** A tiny store for the element under the pointer or focus, so a hover re-renders the key and not 118 cells. */
 function createPointed() {
@@ -39,7 +41,7 @@ function createPointed() {
 type Pointed = ReturnType<typeof createPointed>;
 
 const subscribeWide = (cb: () => void) => {
-  const mq = window.matchMedia('(min-width: 640px)');
+  const mq = window.matchMedia(WIDE_QUERY);
   mq.addEventListener('change', cb);
   return () => mq.removeEventListener('change', cb);
 };
@@ -67,8 +69,9 @@ export function HeroTable({ met, caption }: Props) {
   useEffect(() => {
     printed = true;
   }, []);
-  // Phones keep tiles of 44px (a full tap target) and scroll sideways; from 640px the table fits the width.
-  const wide = useSyncExternalStore(subscribeWide, () => window.matchMedia('(min-width: 640px)').matches, () => false);
+  // Phones keep tiles of 44px (a full tap target) and scroll sideways. From 656px the table fits the width with 30px
+  // cells: 18 x 30 + 17 gaps of 4 = 608px, plus 48px of page padding.
+  const wide = useSyncExternalStore(subscribeWide, () => window.matchMedia(WIDE_QUERY).matches, () => false);
   const pointed = useMemo(createPointed, []);
   const [cell, setCell] = useState(0);
 
@@ -101,7 +104,7 @@ export function HeroTable({ met, caption }: Props) {
   return (
     <div>
       <div
-        className={`hero-table relative -mx-4 sm:mx-0${reduceMotion ? ' hero-still' : ''}${print ? ' hero-printing' : ''}`}
+        className={`hero-table relative -mx-4 sm:-mx-2${reduceMotion ? ' hero-still' : ''}${print ? ' hero-printing' : ''}`}
         data-roving
         role="group"
         aria-label="Periodic table. Use the arrow keys to move between elements, and Enter to open one."
@@ -115,7 +118,9 @@ export function HeroTable({ met, caption }: Props) {
           maxCell={54}
           gap={GAP}
           onLayout={setCell}
-          className="px-4 pb-2 pt-1 sm:px-0"
+          // 8px of room on every side inside the scroll box, so a lifted tile and its focus ring are never clipped;
+          // the wrapper reaches 8px past the page edge, so the tiles still line up with the text.
+          className="px-4 pb-2 pt-2 sm:px-2"
           renderCell={renderCell}
           // Phones have no pointer to follow and scroll the table sideways, so the key would sit half off screen: they get a line under the table instead.
           overlay={wide && cell >= KEY_MIN_CELL ? <HeroKey pointed={pointed} cell={cell} progress={!!met} met={met} /> : null}

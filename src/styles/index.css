@@ -706,31 +706,6 @@
     animation: shake 0.36s var(--ease-out) both;
   }
 
-  /* A wrong drop: the slot edge turns red once and fades. */
-  @keyframes flash-bad {
-    0% {
-      box-shadow: inset 0 0 0 2px var(--bad);
-    }
-    100% {
-      box-shadow: inset 0 0 0 2px transparent;
-    }
-  }
-  .flash-bad {
-    animation: flash-bad 0.6s var(--ease-out);
-  }
-
-  /* A correct drop: one ring that opens and fades (used by the game board). */
-  @keyframes ripple {
-    from {
-      transform: scale(0.8);
-      opacity: 0.8;
-    }
-    to {
-      transform: scale(1.6);
-      opacity: 0;
-    }
-  }
-
   /* ------------------------------------------------------------- utilities */
 
   .no-scrollbar {

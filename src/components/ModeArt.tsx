@@ -39,16 +39,18 @@ function Art({ name, wide, square }: { name: string; wide: ReactNode; square: Re
  */
 function Tile({ e, x, y, s, num = 0, sym = 0, symbol, showNumber = true, empty = false, strong = false }: { e: Element; x: number; y: number; s: number; num?: number; sym?: number; symbol?: string; showNumber?: boolean; empty?: boolean; strong?: boolean }) {
   const r = Math.max(2, Math.round(s * 0.17));
+  // In a small square the corner number would sit on the symbol's cap height: lift one, lower the other.
+  const small = s < 40;
   return (
     <g style={tint(e)}>
       <rect className={empty ? 'art-tile-empty' : strong ? 'art-tile-strong' : 'art-tile'} x={x + 0.5} y={y + 0.5} width={s - 1} height={s - 1} rx={r} />
       {num > 0 && showNumber && (
-        <text className="art-num art-tile-ink" x={x + s * 0.12} y={y + s * 0.1} fontSize={num} dominantBaseline="hanging">
+        <text className="art-num art-tile-ink" x={x + s * 0.12} y={y + s * (small ? 0.08 : 0.1)} fontSize={num} dominantBaseline="hanging">
           {e.number}
         </text>
       )}
       {sym > 0 && (
-        <text className="art-sym art-tile-ink" x={x + s / 2} y={y + s * (num > 0 && showNumber ? 0.62 : 0.52)} fontSize={sym} textAnchor="middle" dominantBaseline="central">
+        <text className="art-sym art-tile-ink" x={x + s / 2} y={y + s * (num > 0 && showNumber ? (small ? 0.68 : 0.62) : 0.52)} fontSize={sym} textAnchor="middle" dominantBaseline="central">
           {symbol ?? e.symbol}
         </text>
       )}

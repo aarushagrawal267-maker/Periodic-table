@@ -399,9 +399,10 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
               {!calm && <SnapBurst key={`burst-${state.event!.id}`} category={e.category} size={rect.size} radius={tileRadius(rect.size)} n={e.number} />}
               <motion.span
                 key={state.event!.id}
-                className="num pointer-events-none absolute left-1/2 top-0 z-20 -translate-x-1/2 whitespace-nowrap rounded-tag bg-surface px-1 text-sm font-medium text-good"
-                initial={{ y: -4, opacity: 1 }}
-                animate={{ y: -24, opacity: 0 }}
+                // Under the snap (z-10 below its z-20), starting above the cell, so the ring is never hidden behind the label.
+                className="num pointer-events-none absolute left-1/2 top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-tag bg-surface px-1 text-sm font-medium text-good"
+                initial={{ y: -12, opacity: 1 }}
+                animate={{ y: -30, opacity: 0 }}
                 transition={{ duration: 0.8, ease: EASE, opacity: { duration: 0.8, delay: 0.3, ease: EASE } }}
               >
                 +{state.event!.points}
@@ -462,12 +463,12 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
   const minCell = !wide ? 28 : bigBoard ? 34 : 38;
   const sheetWidth = useMemo(() => {
     if (!wrapWidth) return undefined;
-    const pad = (wide ? SHEET_PAD_X.wide : SHEET_PAD_X.phone) * 2 + 2;
+    const pad = sheetPadX(wide, bigBoard) * 2 + 2;
     const inner = wrapWidth - pad;
     const t = computeLayout(gridNumbers, (inner - GRID_AXIS) * boardZoom, { min: minCell * boardZoom, max: MAX_CELL * boardZoom, gap: 4 });
     const needed = GRID_AXIS + t.width / Math.min(boardZoom, 1) + 6;
     return needed < inner ? Math.ceil(needed + pad) : undefined;
-  }, [wrapWidth, wide, gridNumbers, boardZoom, minCell]);
+  }, [wrapWidth, wide, bigBoard, gridNumbers, boardZoom, minCell]);
 
   return (
     <div className="relative flex min-h-dvh flex-col">
@@ -560,7 +561,7 @@ export function Game({ config, onExit, onReplay, onNext, nextLabel, exitLabel, o
               zoom={boardZoom}
               showAxes
               // Room inside the sheet for the combo badge above and for a snap to open at the edges.
-              className={SHEET_PAD_CLASS}
+              className={bigBoard ? SHEET_PAD_CLASS_BIG : SHEET_PAD_CLASS}
             />
           </div>
           {/* On phones the guide sits under the table it talks about; from sm it sits under the tray. */}
@@ -899,9 +900,12 @@ function TrayTile({ e, difficulty, selected, size = 80, className = '' }: { e: E
 /** PeriodicGrid's axis band (group and period numbers), in px. */
 const GRID_AXIS = 18;
 const MAX_CELL = 72;
-/** Horizontal room between the sheet's edge and the table, per side (must match SHEET_PAD_CLASS). */
+/** Horizontal room between the sheet's edge and the table, per side (must match SHEET_PAD_CLASS and SHEET_PAD_CLASS_BIG). */
 const SHEET_PAD_X = { phone: 8, wide: 20 } as const;
 const SHEET_PAD_CLASS = 'px-2 pb-4 pt-8 sm:px-5 sm:pb-6 sm:pt-10';
+/** A big board (the full table, the daily, the later timed levels) keeps 8px at every width, so 118 cells fit a tablet as they did before the sheet. */
+const SHEET_PAD_CLASS_BIG = 'px-2 pb-4 pt-8 sm:pb-6 sm:pt-10';
+const sheetPadX = (wide: boolean, big: boolean) => (wide && !big ? SHEET_PAD_X.wide : SHEET_PAD_X.phone);
 
 /** Width of an element, kept up to date. */
 function useWidth(ref: RefObject<HTMLElement | null>) {

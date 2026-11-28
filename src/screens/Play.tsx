@@ -1,4 +1,4 @@
-import { ArrowRight, Star, Timer } from 'lucide-react';
+import { ArrowRight, Star } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { DifficultyPicker } from '../components/DifficultyPicker';
 import { LifeArt, MatchArt, QuizArt, TimedArt } from '../components/ModeArt';
@@ -11,9 +11,6 @@ import { useProgress } from '../store/progress';
 import { DIFFICULTIES, useSettings } from '../store/settings';
 import { Game } from './Game';
 import { Home } from './Home';
-
-// Home shows the same illustrations in its practice cards.
-export { MatchArt, QuizArt };
 
 /** A one-sentence caption ends without a period; longer copy keeps its punctuation. */
 const caption = (s: string) => (/\.\s/.test(s) ? s : s.replace(/\.$/, ''));
@@ -145,9 +142,7 @@ function ChallengeCard() {
         <TimedArt cleared={cleared} />
       </div>
       <div className="min-w-0 flex-1">
-        <h2 className="flex items-center gap-2 text-base font-medium leading-6">
-          <Timer size={16} strokeWidth={1.5} aria-hidden /> Timed challenge
-        </h2>
+        <h2 className="text-base font-medium leading-6">Timed challenge</h2>
         <p className="mt-1 text-sm leading-5 text-ink-2">Six levels against the clock, from 10 elements up to all 118. Pause whenever you need to.</p>
         <p className="meta mt-3">{cleared}/6 levels cleared</p>
       </div>

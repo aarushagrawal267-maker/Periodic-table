@@ -65,6 +65,7 @@ export const useSettings = create<SettingsState>()(
       storage: createJSONStorage(() => guardedStorage),
       // v3 dropped the old (v1, v2) theme choice when Periodica was dark only. v4 brings a theme back as a new,
       // device-only choice that starts at 'system', so a choice saved before v3 is still dropped rather than revived.
+      // index.html reads the saved theme before the first paint and trusts it only from v3 on: keep the two in step.
       migrate: (persisted, version) => {
         const rest = { ...((persisted ?? {}) as Record<string, unknown>) };
         if (version < 3) delete rest.theme;

@@ -70,13 +70,19 @@ export function snapshot(mastery: Record<number, Mastery>): Seen {
 
 type KeyStore = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
-/** The last snapshot, or null when there is none or it cannot be read. */
-export function readSeen(store: KeyStore | undefined): Seen | null {
+/**
+ * The last snapshot, or null when there is none, it cannot be read, or it belongs to someone else.
+ * `owner` tags whose map it was (Progress passes the device's ownership generation and reset epoch, which change
+ * whenever the device changes hands or progress is reset): a snapshot saved under another tag is ignored, so one
+ * student's map is never compared with another's on a shared device.
+ */
+export function readSeen(store: KeyStore | undefined, owner = ''): Seen | null {
   try {
     const raw = store?.getItem(SEEN_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as { v?: number; s?: unknown };
+    const parsed = JSON.parse(raw) as { v?: number; o?: unknown; s?: unknown };
     if (parsed?.v !== 1 || !parsed.s || typeof parsed.s !== 'object') return null;
+    if ((typeof parsed.o === 'string' ? parsed.o : '') !== owner) return null;
     const out: Seen = {};
     for (const [k, v] of Object.entries(parsed.s as Record<string, unknown>)) {
       const n = Number(k);
@@ -89,11 +95,11 @@ export function readSeen(store: KeyStore | undefined): Seen | null {
 }
 
 /** Saves what the map shows now. An empty map leaves nothing behind on the device. */
-export function writeSeen(store: KeyStore | undefined, mastery: Record<number, Mastery>) {
+export function writeSeen(store: KeyStore | undefined, mastery: Record<number, Mastery>, owner = '') {
   try {
     const s = snapshot(mastery);
     if (Object.keys(s).length === 0) store?.removeItem(SEEN_KEY);
-    else store?.setItem(SEEN_KEY, JSON.stringify({ v: 1, s }));
+    else store?.setItem(SEEN_KEY, JSON.stringify({ v: 1, o: owner, s }));
   } catch {
     // Storage blocked or full: the map simply shows no "moved up" marks.
   }

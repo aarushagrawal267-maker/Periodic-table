@@ -66,7 +66,7 @@ export function SettingsSheet() {
               );
             })}
           </div>
-          <p className="mt-2 text-[13px] leading-5 text-ink-2">Light is easiest to read on a classroom projector. Saved on this device only</p>
+          <p className="mt-2 text-[13px] leading-5 text-ink-2">Light reads best on a classroom projector, and the choice is saved on this device only</p>
         </section>
 
         <section className="mt-8">

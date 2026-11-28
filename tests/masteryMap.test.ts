@@ -51,7 +51,7 @@ describe('mastery map', () => {
   test('the snapshot round-trips through storage under its own UI-only key, and an empty map leaves nothing', () => {
     const store = memoryStore();
     writeSeen(store, { 1: m(5), 2: m(0), 8: m(2) });
-    expect(JSON.parse(store.data.get(SEEN_KEY)!)).toEqual({ v: 1, s: { 1: 4, 8: 2 } });
+    expect(JSON.parse(store.data.get(SEEN_KEY)!)).toEqual({ v: 1, o: '', s: { 1: 4, 8: 2 } });
     expect(readSeen(store)).toEqual({ 1: 4, 8: 2 });
     expect(snapshot({ 2: m(0) })).toEqual({});
     writeSeen(store, {});
@@ -67,5 +67,22 @@ describe('mastery map', () => {
     const throwing = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); }, removeItem: () => {} };
     expect(readSeen(throwing)).toBeNull();
     expect(() => writeSeen(throwing, { 1: m(1) })).not.toThrow();
+  });
+});
+
+describe('the moved-up snapshot belongs to one owner', () => {
+  const mem = () => {
+    const d = new Map<string, string>();
+    return { getItem: (k: string) => d.get(k) ?? null, setItem: (k: string, v: string) => void d.set(k, v), removeItem: (k: string) => void d.delete(k) };
+  };
+  const m = (s: number) => ({ s }) as unknown as Parameters<typeof snapshot>[0][number];
+
+  test('a snapshot saved for one owner is ignored for another (a sign out, a new student, a reset)', () => {
+    const store = mem();
+    writeSeen(store, { 1: m(2), 3: m(1) }, 'gen-a:0');
+    expect(readSeen(store, 'gen-a:0')).toEqual({ 1: 2, 3: 1 });
+    expect(readSeen(store, 'gen-b:0')).toBeNull();
+    expect(readSeen(store, 'gen-a:1')).toBeNull();
+    expect(readSeen(store)).toBeNull();
   });
 });

@@ -152,11 +152,12 @@ export function MasterTrophy({ still }: { still: boolean }) {
           <path d="M26 76h44a2 2 0 0 1 2 2v4H24v-4a2 2 0 0 1 2-2z" />
         </g>
         {/* Element 118 on the cup: number in the top-left corner, symbol in the middle. */}
-        <rect x="34" y="18" width="28" height="28" rx="4" fill="var(--surface)" stroke="var(--star-line)" strokeWidth="1.5" />
-        <text x="37.5" y="26" fontFamily="var(--font-mono)" fontSize="6.5" fill="var(--ink-2)">
+        {/* The corner number at 9px, the smallest size any figure in the app is printed at. */}
+        <rect x="32" y="16" width="32" height="32" rx="4" fill="var(--surface)" stroke="var(--star-line)" strokeWidth="1.5" />
+        <text x="35" y="26" fontFamily="var(--font-mono)" fontSize="9" fill="var(--ink-2)">
           118
         </text>
-        <text x="48" y="40.5" textAnchor="middle" fontFamily="var(--font-sans)" fontSize="12" fontWeight="500" fill="var(--ink)">
+        <text x="48" y="43" textAnchor="middle" fontFamily="var(--font-sans)" fontSize="13" fontWeight="500" fill="var(--ink)">
           Og
         </text>
       </svg>

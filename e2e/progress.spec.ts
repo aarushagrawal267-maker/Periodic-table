@@ -1,18 +1,27 @@
 import { expect, test, type Page } from './support';
 
 /** A student who mastered hydrogen, is halfway on lithium and has started helium. */
-async function seed(page: Page, opts: { seen?: Record<number, number>; reduceMotion?: boolean } = {}) {
+async function seed(page: Page, opts: { seen?: Record<number, number>; seenOwner?: string; reduceMotion?: boolean } = {}) {
   // Before the app loads (once per tab, so a reload shows what the app itself saved).
-  await page.addInitScript(({ seen, reduceMotion }) => {
+  await page.addInitScript(({ reduceMotion }) => {
     if (sessionStorage.getItem('seeded')) return;
     sessionStorage.setItem('seeded', '1');
     const mastery = { 1: { s: 4, c: 4, w: 0, t: 1 }, 2: { s: 1, c: 1, w: 0, t: 1 }, 3: { s: 2, c: 2, w: 0, t: 1 } };
     localStorage.setItem('periodica-progress', JSON.stringify({ version: 2, state: { mastery } }));
-    if (seen) localStorage.setItem('periodica-map-seen', JSON.stringify({ v: 1, s: seen }));
     if (reduceMotion) localStorage.setItem('periodica-settings', JSON.stringify({ version: 4, state: { reduceMotion: true } }));
   }, opts);
   await page.goto('./#/progress');
   await expect(page.getByRole('heading', { level: 1, name: 'Your progress' })).toBeVisible();
+  if (opts.seen) {
+    // The snapshot of an earlier visit, tagged with this device's owner (ownership generation and reset epoch),
+    // unless the test names another owner.
+    await page.evaluate(({ seen, seenOwner }) => {
+      const meta = JSON.parse(localStorage.getItem('periodica-sync')!);
+      localStorage.setItem('periodica-map-seen', JSON.stringify({ v: 1, o: seenOwner ?? `${meta.gen}:${meta.epoch}`, s: seen }));
+    }, opts);
+    await page.reload();
+    await expect(page.getByRole('heading', { level: 1, name: 'Your progress' })).toBeVisible();
+  }
 }
 
 const map = (page: Page) => page.getByRole('group', { name: /^Mastery map/ });
@@ -58,11 +67,17 @@ test('progress: elements that moved up since the last visit are named once, and 
   await expect(map(page).getByRole('button', { name: 'Li, Lithium, 3: learning, 2 of 4' })).toBeVisible();
 
   const stored = await page.evaluate(() => ({ seen: localStorage.getItem('periodica-map-seen'), progress: localStorage.getItem('periodica-progress') }));
-  expect(JSON.parse(stored.seen!)).toEqual({ v: 1, s: { 1: 4, 2: 1, 3: 2 } });
+  expect(JSON.parse(stored.seen!)).toMatchObject({ v: 1, s: { 1: 4, 2: 1, 3: 2 } });
   expect(stored.progress).not.toContain('seen');
 
   await page.reload();
   await expect(page.getByRole('heading', { level: 1, name: 'Your progress' })).toBeVisible();
+  await expect(map(page).getByRole('button', { name: 'H, Hydrogen, 1: mastered' })).toBeVisible();
+  await expect(page.getByText(/Since your last visit/)).toHaveCount(0);
+});
+
+test('progress: a snapshot left by someone else on this device (another account, before a reset) marks nothing', async ({ page }) => {
+  await seed(page, { seen: { 1: 3, 3: 2 }, seenOwner: 'another-owner:0' });
   await expect(map(page).getByRole('button', { name: 'H, Hydrogen, 1: mastered' })).toBeVisible();
   await expect(page.getByText(/Since your last visit/)).toHaveCount(0);
 });
